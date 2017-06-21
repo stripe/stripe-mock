@@ -234,6 +234,10 @@ func generateResponseData(schema JSONSchema, requestPath string,
 					return nil, err
 				}
 
+				// TODO: don't hardcode this. Go through each property in the
+				// defined schema and generate values for the ones that we
+				// recognize. This should allow us to be a little more tolerant
+				// of changes that happen in the future.
 				return map[string]interface{}{
 					"data":        []interface{}{innerData},
 					"has_more":    false,
