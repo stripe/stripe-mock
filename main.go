@@ -97,7 +97,14 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resource, ok := s.spec.Definitions[ref]
+	definition, err := definitionFromJSONPointer(ref)
+	if err != nil {
+		log.Printf("Error extracting definition: %v", err)
+		writeInternalError(w)
+		return
+	}
+
+	resource, ok := s.spec.Definitions[definition]
 	if !ok {
 		log.Printf("Expected definitions to include %v", ref)
 		writeInternalError(w)
@@ -131,6 +138,31 @@ func countAPIMethods(spec *OpenAPISpec) int {
 		count += len(verbs)
 	}
 	return count
+}
+
+// definitionFromJSONPointer extracts the name of a JSON schema definition from
+// a JSON pointer, so "#/definitions/charge" would become just "charge". This
+// is a simplified workaround to avoid bringing in JSON schema infrastructure
+// because we can guarantee that the spec we're producing will take a certain
+// shape. If this gets too hacky, it will be better to put a more legitimate
+// JSON schema parser in place.
+func definitionFromJSONPointer(pointer string) (string, error) {
+	log.Printf("parts %+v", parts)
+
+	if parts[0] != "#" {
+		return "", fmt.Errorf("Expected '#' in 0th part of pointer %v", pointer)
+	}
+
+	if parts[1] != "definitions" {
+		return "", fmt.Errorf("Expected 'definitions' in 1st part of pointer %v",
+			pointer)
+	}
+
+	if len(parts) > 3 {
+		return "", fmt.Errorf("Pointer too long to be handle %v", pointer)
+	}
+
+	return parts[2], nil
 }
 
 // ---
