@@ -215,41 +215,63 @@ func definitionFromJSONPointer(pointer string) (string, error) {
 func generateResponseData(schema JSONSchema, requestPath string,
 	definitions map[string]OpenAPIDefinition, fixtures *Fixtures) (interface{}, error) {
 
+	notSupportedErr := fmt.Errorf("Expected response to be a list or include $ref")
+
 	ref, ok := schema["$ref"].(string)
 	if ok {
 		return generateResponseResourceData(ref, definitions, fixtures)
 	}
 
-	listProperties, ok := schema["properties"].(map[string]interface{})
-	if ok {
-		// TODO: this is incredibly fragile and could panic on any coercion.
-		// Rebuild so that every one of these is checked independently and
-		// deviance tolerated.
-		if listProperties["object"].(map[string]interface{})["enum"].([]interface{})[0] == interface{}("list") {
-			// TODO: same here.
-			itemsRef, ok := listProperties["data"].(map[string]interface{})["items"].(map[string]interface{})["$ref"].(string)
-			if ok {
-				innerData, err := generateResponseResourceData(itemsRef, definitions, fixtures)
-				if err != nil {
-					return nil, err
-				}
-
-				// TODO: don't hardcode this. Go through each property in the
-				// defined schema and generate values for the ones that we
-				// recognize. This should allow us to be a little more tolerant
-				// of changes that happen in the future.
-				return map[string]interface{}{
-					"data":        []interface{}{innerData},
-					"has_more":    false,
-					"object":      "list",
-					"total_count": 1,
-					"url":         requestPath,
-				}, nil
-			}
-		}
+	properties, ok := schema["properties"].(map[string]interface{})
+	if !ok {
+		return nil, notSupportedErr
 	}
 
-	return nil, fmt.Errorf("Expected response to be a list or include $ref")
+	object, ok := properties["object"].(map[string]interface{})
+	if !ok {
+		return nil, notSupportedErr
+	}
+
+	objectEnum, ok := object["enum"].([]interface{})
+	if !ok {
+		return nil, notSupportedErr
+	}
+
+	if objectEnum[0] != interface{}("list") {
+		return nil, notSupportedErr
+	}
+
+	data, ok := properties["data"].(map[string]interface{})
+	if !ok {
+		return nil, notSupportedErr
+	}
+
+	items, ok := data["items"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("Expected list to include items schema")
+	}
+
+	itemsRef, ok := items["$ref"].(string)
+	if !ok {
+		return nil, fmt.Errorf("Expected items schema to include $ref")
+	}
+
+	innerData, err := generateResponseResourceData(itemsRef, definitions, fixtures)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: don't hardcode this. Go through each property in the
+	// defined schema and generate values for the ones that we
+	// recognize. This should allow us to be a little more tolerant
+	// of changes that happen in the future.
+	return map[string]interface{}{
+		"data":        []interface{}{innerData},
+		"has_more":    false,
+		"object":      "list",
+		"total_count": 1,
+		"url":         requestPath,
+	}, nil
 }
 
 func generateResponseResourceData(pointer string,

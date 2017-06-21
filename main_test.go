@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	assert "github.com/stretchr/testify/require"
 )
 
 var chargeAllMethod *OpenAPIMethod
