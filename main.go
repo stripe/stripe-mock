@@ -14,7 +14,7 @@ import (
 )
 
 type Fixtures struct {
-	Resources map[string]interface{} `json:"resources"`
+	Resources map[ResourceID]interface{} `json:"resources"`
 }
 
 type HTTPVerb string
@@ -22,7 +22,7 @@ type HTTPVerb string
 type JSONSchema map[string]interface{}
 
 type OpenAPIDefinition struct {
-	XResourceID string `json:"x-resourceId"`
+	XResourceID ResourceID `json:"x-resourceId"`
 }
 
 type OpenAPIParameter struct {
@@ -53,6 +53,8 @@ type OpenAPISpec struct {
 }
 
 type OpenAPIStatusCode string
+
+type ResourceID string
 
 type StubServerRoute struct {
 	pattern *regexp.Regexp
@@ -99,35 +101,14 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Response schema: %+v", response.Schema)
 	}
 
-	ref, ok := response.Schema["$ref"].(string)
-	if !ok {
-		log.Printf("Expected response to include $ref")
-		writeInternalError(w)
-		return
-	}
-
-	definition, err := definitionFromJSONPointer(ref)
+	responseData, err := generateResponseData(response.Schema, s.spec.Definitions, s.fixtures)
 	if err != nil {
-		log.Printf("Error extracting definition: %v", err)
+		log.Printf("Couldn't generate response: %v", err)
 		writeInternalError(w)
 		return
 	}
 
-	resource, ok := s.spec.Definitions[definition]
-	if !ok {
-		log.Printf("Expected definitions to include %v", ref)
-		writeInternalError(w)
-		return
-	}
-
-	fixture, ok := s.fixtures.Resources[resource.XResourceID]
-	if !ok {
-		log.Printf("Expected fixtures to include %v", resource.XResourceID)
-		writeInternalError(w)
-		return
-	}
-
-	data, err := json.Marshal(&fixture)
+	data, err := json.Marshal(&responseData)
 	if err != nil {
 		log.Printf("Error serializing fixture: %v", err)
 		writeInternalError(w)
@@ -229,6 +210,30 @@ func definitionFromJSONPointer(pointer string) (string, error) {
 	}
 
 	return parts[2], nil
+}
+
+func generateResponseData(schema JSONSchema, definitions map[string]OpenAPIDefinition, fixtures *Fixtures) (interface{}, error) {
+	ref, ok := schema["$ref"].(string)
+	if !ok {
+		return nil, fmt.Errorf("Expected response to include $ref")
+	}
+
+	definition, err := definitionFromJSONPointer(ref)
+	if err != nil {
+		return nil, fmt.Errorf("Error extracting definition: %v", err)
+	}
+
+	resource, ok := definitions[definition]
+	if !ok {
+		return nil, fmt.Errorf("Expected definitions to include %v", definition)
+	}
+
+	fixture, ok := fixtures.Resources[resource.XResourceID]
+	if !ok {
+		return nil, fmt.Errorf("Expected fixtures to include %v", resource.XResourceID)
+	}
+
+	return fixture, nil
 }
 
 func writeInternalError(w http.ResponseWriter) {
