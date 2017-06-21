@@ -19,16 +19,18 @@ type Fixtures struct {
 
 type HTTPVerb string
 
+type JSONSchema map[string]interface{}
+
 type OpenAPIDefinition struct {
 	XResourceID string `json:"x-resourceId"`
 }
 
 type OpenAPIParameter struct {
-	Description string                 `json:"description"`
-	In          string                 `json:"in"`
-	Name        string                 `json:"name"`
-	Required    bool                   `json:"required"`
-	Schema      map[string]interface{} `json:"schema"`
+	Description string     `json:"description"`
+	In          string     `json:"in"`
+	Name        string     `json:"name"`
+	Required    bool       `json:"required"`
+	Schema      JSONSchema `json:"schema"`
 }
 
 type OpenAPIMethod struct {
@@ -41,10 +43,8 @@ type OpenAPIMethod struct {
 type OpenAPIPath string
 
 type OpenAPIResponse struct {
-	Description string `json:"description"`
-
-	// Schema is the JSON schema of a response from the API.
-	Schema map[string]interface{} `json:"schema"`
+	Description string     `json:"description"`
+	Schema      JSONSchema `json:"schema"`
 }
 
 type OpenAPISpec struct {
@@ -95,7 +95,9 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("schema %+v", response.Schema)
+	if Verbose {
+		log.Printf("Response schema: %+v", response.Schema)
+	}
 
 	ref, ok := response.Schema["$ref"].(string)
 	if !ok {
