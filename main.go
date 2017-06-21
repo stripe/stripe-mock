@@ -1,4 +1,4 @@
-//go:generate go-bindata openapi/fixtures.json openapi/spec2.json
+//go:generate go-bindata openapi/openapi/fixtures.json openapi/openapi/spec2.json
 
 package main
 

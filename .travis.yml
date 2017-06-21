@@ -8,8 +8,10 @@ sudo: false
 
 before_install:
   - go get -u github.com/golang/lint/golint
+  - go get -u github.com/jteeuwen/go-bindata/...
 
 script:
+  - go generate
   - go test
   - go vet
   - scripts/check_gofmt.sh
