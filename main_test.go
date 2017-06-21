@@ -68,9 +68,9 @@ func TestStubServerRouteRequest(t *testing.T) {
 // ---
 
 func TestCompilePath(t *testing.T) {
-	assert.Equal(t, `/v1/charges`,
+	assert.Equal(t, `\A/v1/charges\z`,
 		compilePath(OpenAPIPath("/v1/charges")).String())
-	assert.Equal(t, `/v1/charges/(?P<id>\w+)`,
+	assert.Equal(t, `\A/v1/charges/(?P<id>\w+)\z`,
 		compilePath(OpenAPIPath("/v1/charges/{id}")).String())
 }
 

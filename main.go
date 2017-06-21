@@ -117,7 +117,10 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(data)
+	_, err = w.Write(data)
+	if err != nil {
+		log.Printf("Error writing to client: %v", err)
+	}
 }
 
 func (s *StubServer) initializeRouter() {
@@ -160,7 +163,7 @@ func (s *StubServer) initializeRouter() {
 var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
 
 func compilePath(path OpenAPIPath) *regexp.Regexp {
-	var pattern string
+	pattern := `\A`
 	parts := strings.Split(string(path), "/")
 
 	for _, part := range parts {
@@ -176,7 +179,7 @@ func compilePath(path OpenAPIPath) *regexp.Regexp {
 		}
 	}
 
-	return regexp.MustCompile(pattern)
+	return regexp.MustCompile(pattern + `\z`)
 }
 
 // countAPIMethods counts the number of separate API methods that the spec is
