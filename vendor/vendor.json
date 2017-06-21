@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "b2zeY1R5JLmyuRe0mJ0RvP1tlCI=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "089c7181b8c728499929ff09b62d3fdd8df8adff",
+			"revisionTime": "2015-06-20T23:27:11Z"
+		}
+	],
+	"rootPath": "github.com/brandur/stripestub"
+}
