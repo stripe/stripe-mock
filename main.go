@@ -4,11 +4,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
-	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -97,7 +99,7 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if Verbose {
+	if verbose {
 		log.Printf("Response schema: %+v", response.Schema)
 	}
 
@@ -125,16 +127,16 @@ func (s *StubServer) initializeRouter() {
 	s.routes = make(map[HTTPVerb][]StubServerRoute)
 
 	for path, verbs := range s.spec.Paths {
-		numPaths += 1
+		numPaths++
 
 		pathPattern := compilePath(path)
 
-		if Verbose {
+		if verbose {
 			log.Printf("Compiled path: %v", pathPattern.String())
 		}
 
 		for verb, method := range verbs {
-			numEndpoints += 1
+			numEndpoints++
 
 			route := StubServerRoute{
 				pattern: pathPattern,
@@ -265,7 +267,7 @@ func generateResponseData(schema JSONSchema, requestPath string,
 	// it respects the list properties dictated by the included schema rather
 	// than assuming its own.
 	listData := make(map[string]interface{})
-	for key, _ := range properties {
+	for key := range properties {
 		var val interface{}
 		switch key {
 		case "data":
@@ -319,11 +321,22 @@ func writeNotFound(w http.ResponseWriter) {
 
 // ---
 
-var Verbose bool
+const defaultPort = 6065
+
+// verbose tracks whether the program is operating in verbose mode
+var verbose bool
 
 func main() {
-	if os.Getenv("STRIPE_VERBOSE") == "true" {
-		Verbose = true
+	var port int
+	var unix string
+	flag.IntVar(&port, "port", 0, "Port to listen on")
+	flag.StringVar(&unix, "unix", "", "Unix socket to listen on")
+	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
+	flag.Parse()
+
+	if unix != "" && port != 0 {
+		flag.Usage()
+		log.Fatalf("Specify only one of -port or -unix")
 	}
 
 	// Load the spec information from go-bindata
@@ -353,7 +366,22 @@ func main() {
 	stub := StubServer{fixtures: &fixtures, spec: &spec}
 	stub.initializeRouter()
 
+	var listener net.Listener
+	if unix != "" {
+		listener, err = net.Listen("unix", unix)
+		log.Printf("Listening on unix socket %v", unix)
+	} else {
+		if port == 0 {
+			port = defaultPort
+		}
+		listener, err = net.Listen("tcp", ":"+strconv.Itoa(port))
+		log.Printf("Listening on port %v", port)
+	}
+	if err != nil {
+		log.Fatalf("Error listening on socket: %v", err)
+	}
+
 	http.HandleFunc("/", stub.handleRequest)
-	log.Printf("Listening on :6065")
-	log.Fatal(http.ListenAndServe(":6065", nil))
+	server := http.Server{}
+	server.Serve(listener)
 }
