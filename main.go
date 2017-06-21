@@ -101,7 +101,7 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Response schema: %+v", response.Schema)
 	}
 
-	responseData, err := generateResponseData(response.Schema, s.spec.Definitions, s.fixtures)
+	responseData, err := generateResponseData(response.Schema, r.URL.Path, s.spec.Definitions, s.fixtures)
 	if err != nil {
 		log.Printf("Couldn't generate response: %v", err)
 		writeInternalError(w)
@@ -212,13 +212,46 @@ func definitionFromJSONPointer(pointer string) (string, error) {
 	return parts[2], nil
 }
 
-func generateResponseData(schema JSONSchema, definitions map[string]OpenAPIDefinition, fixtures *Fixtures) (interface{}, error) {
+func generateResponseData(schema JSONSchema, requestPath string,
+	definitions map[string]OpenAPIDefinition, fixtures *Fixtures) (interface{}, error) {
+
 	ref, ok := schema["$ref"].(string)
-	if !ok {
-		return nil, fmt.Errorf("Expected response to include $ref")
+	if ok {
+		return generateResponseResourceData(ref, definitions, fixtures)
 	}
 
-	definition, err := definitionFromJSONPointer(ref)
+	listProperties, ok := schema["properties"].(map[string]interface{})
+	if ok {
+		// TODO: this is incredibly fragile and could panic on any coercion.
+		// Rebuild so that every one of these is checked independently and
+		// deviance tolerated.
+		if listProperties["object"].(map[string]interface{})["enum"].([]interface{})[0] == interface{}("list") {
+			// TODO: same here.
+			itemsRef, ok := listProperties["data"].(map[string]interface{})["items"].(map[string]interface{})["$ref"].(string)
+			if ok {
+				innerData, err := generateResponseResourceData(itemsRef, definitions, fixtures)
+				if err != nil {
+					return nil, err
+				}
+
+				return map[string]interface{}{
+					"data":        []interface{}{innerData},
+					"has_more":    false,
+					"object":      "list",
+					"total_count": 1,
+					"url":         requestPath,
+				}, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("Expected response to be a list or include $ref")
+}
+
+func generateResponseResourceData(pointer string,
+	definitions map[string]OpenAPIDefinition, fixtures *Fixtures) (interface{}, error) {
+
+	definition, err := definitionFromJSONPointer(pointer)
 	if err != nil {
 		return nil, fmt.Errorf("Error extracting definition: %v", err)
 	}

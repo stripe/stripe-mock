@@ -78,25 +78,48 @@ func TestGenerateResponseData(t *testing.T) {
 	var data interface{}
 	var err error
 
+	// basic reference
 	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}),
+		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "",
 		testSpec.Definitions, testFixtures)
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		data.(map[string]interface{})["id"])
 
+	// list
+	data, err = generateResponseData(
+		JSONSchema(map[string]interface{}{
+			"properties": map[string]interface{}{
+				"data": map[string]interface{}{
+					"items": map[string]interface{}{
+						"$ref": "#/definitions/charge",
+					},
+				},
+				"object": map[string]interface{}{
+					"enum": []interface{}{"list"},
+				},
+			},
+		}), "/v1/charges",
+		testSpec.Definitions, testFixtures)
+	assert.Nil(t, err)
+	assert.Equal(t, "list", data.(map[string]interface{})["object"])
+	assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
+	assert.Equal(t,
+		testFixtures.Resources["charge"].(map[string]interface{})["id"],
+		data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+
 	// error: unhandled JSON schema type
 	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{}),
+		JSONSchema(map[string]interface{}{}), "",
 		testSpec.Definitions, testFixtures)
 	assert.Equal(t,
-		fmt.Errorf("Expected response to include $ref"),
+		fmt.Errorf("Expected response to be a list or include $ref"),
 		err)
 
 	// error: no definition in OpenAPI
 	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/doesnt-exist"}),
+		JSONSchema(map[string]interface{}{"$ref": "#/definitions/doesnt-exist"}), "",
 		testSpec.Definitions, testFixtures)
 	assert.Equal(t,
 		fmt.Errorf("Expected definitions to include doesnt-exist"),
@@ -104,7 +127,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// error: no fixture
 	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}),
+		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "",
 		testSpec.Definitions,
 		// this is an empty set of fixtures
 		&Fixtures{
