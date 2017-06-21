@@ -7,12 +7,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"regexp"
 	"strings"
+	"time"
 )
 
 type Fixtures struct {
 	Resources map[string]interface{} `json:"resources"`
 }
+
+type HTTPVerb string
 
 type OpenAPIDefinition struct {
 	XResourceID string `json:"x-resourceId"`
@@ -43,40 +48,42 @@ type OpenAPIResponse struct {
 }
 
 type OpenAPISpec struct {
-	Definitions map[string]OpenAPIDefinition                  `json:"definitions"`
-	Paths       map[OpenAPIPath]map[OpenAPIVerb]OpenAPIMethod `json:"paths"`
+	Definitions map[string]OpenAPIDefinition                `json:"definitions"`
+	Paths       map[OpenAPIPath]map[HTTPVerb]*OpenAPIMethod `json:"paths"`
 }
 
 type OpenAPIStatusCode string
 
-type OpenAPIVerb string
+type StubServerRoute struct {
+	pattern *regexp.Regexp
+	method  *OpenAPIMethod
+}
 
 type StubServer struct {
 	fixtures *Fixtures
+	routes   map[HTTPVerb][]StubServerRoute
 	spec     *OpenAPISpec
 }
 
-func writeInternalError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	fmt.Fprintf(w, "Internal server error")
-}
-
-func writeNotFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "Not found")
+func (s *StubServer) routeRequest(r *http.Request) *OpenAPIMethod {
+	verbRoutes := s.routes[HTTPVerb(r.Method)]
+	for _, route := range verbRoutes {
+		if route.pattern.MatchString(r.URL.Path) {
+			return route.method
+		}
+	}
+	return nil
 }
 
 func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request: %v %v", r.Method, r.URL.Path)
+	start := time.Now()
+	defer func() {
+		log.Printf("Response: elapsed=%v status=200", time.Now().Sub(start))
+	}()
 
-	verbs, ok := s.spec.Paths[OpenAPIPath(r.URL.Path)]
-	if !ok {
-		writeNotFound(w)
-		return
-	}
-
-	method, ok := verbs[OpenAPIVerb(strings.ToLower(r.Method))]
-	if !ok {
+	method := s.routeRequest(r)
+	if method == nil {
 		writeNotFound(w)
 		return
 	}
@@ -128,7 +135,64 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func (s *StubServer) initializeRouter() {
+	var numEndpoints int
+	var numPaths int
+
+	s.routes = make(map[HTTPVerb][]StubServerRoute)
+
+	for path, verbs := range s.spec.Paths {
+		numPaths += 1
+
+		pathPattern := compilePath(path)
+
+		if Verbose {
+			log.Printf("Compiled path: %v", pathPattern.String())
+		}
+
+		for verb, method := range verbs {
+			numEndpoints += 1
+
+			route := StubServerRoute{
+				pattern: pathPattern,
+				method:  method,
+			}
+
+			// net/http will always give us verbs in uppercase, so build our
+			// routing table this way too
+			verb = HTTPVerb(strings.ToUpper(string(verb)))
+
+			s.routes[verb] = append(s.routes[verb], route)
+		}
+	}
+
+	log.Printf("Routing to %v path(s) and %v endpoint(s)",
+		numPaths, numEndpoints)
+}
+
 // ---
+
+var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
+
+func compilePath(path OpenAPIPath) *regexp.Regexp {
+	var pattern string
+	parts := strings.Split(string(path), "/")
+
+	for _, part := range parts {
+		if part == "" {
+			continue
+		}
+
+		submatches := pathParameterPattern.FindAllStringSubmatch(part, -1)
+		if submatches == nil {
+			pattern += `/` + part
+		} else {
+			pattern += `/(?P<` + submatches[0][1] + `>\w+)`
+		}
+	}
+
+	return regexp.MustCompile(pattern)
+}
 
 // countAPIMethods counts the number of separate API methods that the spec is
 // handling. That's all verbs across all paths.
@@ -147,7 +211,7 @@ func countAPIMethods(spec *OpenAPISpec) int {
 // shape. If this gets too hacky, it will be better to put a more legitimate
 // JSON schema parser in place.
 func definitionFromJSONPointer(pointer string) (string, error) {
-	log.Printf("parts %+v", parts)
+	parts := strings.Split(pointer, "/")
 
 	if parts[0] != "#" {
 		return "", fmt.Errorf("Expected '#' in 0th part of pointer %v", pointer)
@@ -165,9 +229,25 @@ func definitionFromJSONPointer(pointer string) (string, error) {
 	return parts[2], nil
 }
 
+func writeInternalError(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprintf(w, "Internal server error")
+}
+
+func writeNotFound(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintf(w, "Not found")
+}
+
 // ---
 
+var Verbose bool
+
 func main() {
+	if os.Getenv("STRIPE_VERBOSE") == "true" {
+		Verbose = true
+	}
+
 	// Load the spec information from go-bindata
 	data, err := Asset("openapi/spec2.json")
 	if err != nil {
@@ -192,10 +272,10 @@ func main() {
 		log.Fatalf("Error decoding spec: %v", err)
 	}
 
-	log.Printf("Listening for API requests with %v method(s)",
-		countAPIMethods(&spec))
-
 	stub := StubServer{fixtures: &fixtures, spec: &spec}
+	stub.initializeRouter()
+
 	http.HandleFunc("/", stub.handleRequest)
+	log.Printf("Listening on :6065")
 	log.Fatal(http.ListenAndServe(":6065", nil))
 }
