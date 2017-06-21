@@ -96,9 +96,12 @@ func TestGenerateResponseData(t *testing.T) {
 						"$ref": "#/definitions/charge",
 					},
 				},
+				"has_more": nil,
 				"object": map[string]interface{}{
 					"enum": []interface{}{"list"},
 				},
+				"total_count": nil,
+				"url":         nil,
 			},
 		}), "/v1/charges",
 		testSpec.Definitions, testFixtures)

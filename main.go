@@ -261,17 +261,29 @@ func generateResponseData(schema JSONSchema, requestPath string,
 		return nil, err
 	}
 
-	// TODO: don't hardcode this. Go through each property in the
-	// defined schema and generate values for the ones that we
-	// recognize. This should allow us to be a little more tolerant
-	// of changes that happen in the future.
-	return map[string]interface{}{
-		"data":        []interface{}{innerData},
-		"has_more":    false,
-		"object":      "list",
-		"total_count": 1,
-		"url":         requestPath,
-	}, nil
+	// This is written to hopefully be a little more forward compatible in that
+	// it respects the list properties dictated by the included schema rather
+	// than assuming its own.
+	listData := make(map[string]interface{})
+	for key, _ := range properties {
+		var val interface{}
+		switch key {
+		case "data":
+			val = []interface{}{innerData}
+		case "has_more":
+			val = false
+		case "object":
+			val = "list"
+		case "total_count":
+			val = 1
+		case "url":
+			val = requestPath
+		default:
+			val = nil
+		}
+		listData[key] = val
+	}
+	return listData, nil
 }
 
 func generateResponseResourceData(pointer string,
