@@ -340,7 +340,7 @@ func main() {
 	}
 
 	// Load the spec information from go-bindata
-	data, err := Asset("openapi/spec2.json")
+	data, err := Asset("openapi/openapi/spec2.json")
 	if err != nil {
 		log.Fatalf("Error loading spec: %v", err)
 	}
@@ -352,7 +352,7 @@ func main() {
 	}
 
 	// And do the same for fixtures
-	data, err = Asset("openapi/fixtures.json")
+	data, err = Asset("openapi/openapi/fixtures.json")
 	if err != nil {
 		log.Fatalf("Error loading fixtures: %v", err)
 	}
