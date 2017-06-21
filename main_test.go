@@ -34,11 +34,11 @@ func init() {
 			"charge": {XResourceID: "charge"},
 		},
 		Paths: map[OpenAPIPath]map[HTTPVerb]*OpenAPIMethod{
-			OpenAPIPath("/v1/charges"): map[HTTPVerb]*OpenAPIMethod{
+			OpenAPIPath("/v1/charges"): {
 				"get":  chargeAllMethod,
 				"post": chargeCreateMethod,
 			},
-			OpenAPIPath("/v1/charges/{id}"): map[HTTPVerb]*OpenAPIMethod{
+			OpenAPIPath("/v1/charges/{id}"): {
 				"get":    chargeGetMethod,
 				"delete": chargeDeleteMethod,
 			},
