@@ -1,11 +1,13 @@
 # stripestub [![Build Status](https://travis-ci.org/brandur/stripestub.svg?branch=master)](https://travis-ci.org/brandur/stripestub)
 
-A stub for the Stripe API based on its generated OpenAPI
-specification.
+A stub for the Stripe API powered by the OpenAPI specification that it
+generates as an artifact.
+
+Fetch and run it with:
 
 ``` sh
 go get -u github.com/brandur/stripestub
-go install && stripestub
+stripestub
 ```
 
 Then from another terminal:
@@ -26,9 +28,9 @@ go test
 
 ### Binary data
 
-The project uses [go-bindata] to bundle OpenAPI and fixture
-data into `bindata.go` so that it's automatically included
-with built executables. Rebuild it with:
+The project uses [go-bindata] to bundle OpenAPI and fixture data into
+`bindata.go` so that it's automatically included with built executables.
+Rebuild it with:
 
 ``` sh
 go get -u github.com/jteeuwen/go-bindata/...
@@ -37,8 +39,8 @@ go generate
 
 ## Release
 
-Release builds are generated with [goreleaser]. Make sure
-you have the software and a `GITHUB_TOKEN`:
+Release builds are generated with [goreleaser]. Make sure you have the software
+and a `GITHUB_TOKEN`:
 
 ``` sh
 go get -u github.com/goreleaser/goreleaser
@@ -60,3 +62,7 @@ goreleaser
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
 [releases]: https://github.com/brandur/stripestub/releases
+
+<!--
+# vim: set tw=79:
+-->
