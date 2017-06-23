@@ -7,24 +7,24 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-var listSchema JSONSchema
+var listSchema *JSONSchema
 
 func init() {
-	listSchema = JSONSchema(map[string]interface{}{
-		"properties": map[string]interface{}{
-			"data": map[string]interface{}{
-				"items": map[string]interface{}{
-					"$ref": "#/definitions/charge",
+	listSchema = &JSONSchema{
+		Properties: map[string]*JSONSchema{
+			"data": &JSONSchema{
+				Items: &JSONSchema{
+					Ref: "#/definitions/charge",
 				},
 			},
 			"has_more": nil,
-			"object": map[string]interface{}{
-				"enum": []interface{}{"list"},
+			"object": &JSONSchema{
+				Enum: []string{"list"},
 			},
 			"total_count": nil,
 			"url":         nil,
 		},
-	})
+	}
 }
 
 func TestGenerateResponseData(t *testing.T) {
@@ -35,7 +35,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "")
+		&JSONSchema{Ref: "#/definitions/charge"}, "")
 
 	assert.Nil(t, err)
 	assert.Equal(t,
@@ -55,11 +55,11 @@ func TestGenerateResponseData(t *testing.T) {
 	// nested list
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		JSONSchema(map[string]interface{}{
-			"properties": map[string]interface{}{
+		&JSONSchema{
+			Properties: map[string]*JSONSchema{
 				"charges_list": listSchema,
 			},
-		}), "/v1/charges")
+		}, "/v1/charges")
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
@@ -71,7 +71,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// error: unhandled JSON schema type
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		JSONSchema(map[string]interface{}{"type": "string"}), "")
+		&JSONSchema{Type: []string{"string"}}, "")
 	assert.Equal(t,
 		fmt.Errorf("Expected response to be a list or include $ref"),
 		err)
@@ -79,7 +79,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// error: no definition in OpenAPI
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/doesnt-exist"}), "")
+		&JSONSchema{Ref: "#/definitions/doesnt-exist"}, "")
 	assert.Equal(t,
 		fmt.Errorf("Couldn't dereference: #/definitions/doesnt-exist"),
 		err)
@@ -93,7 +93,7 @@ func TestGenerateResponseData(t *testing.T) {
 		},
 	}
 	data, err = generator.Generate(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "")
+		&JSONSchema{Ref: "#/definitions/charge"}, "")
 	assert.Equal(t,
 		fmt.Errorf("Expected fixtures to include charge"),
 		err)
