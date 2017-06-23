@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -89,20 +88,17 @@ func (s *StubServer) routeRequest(r *http.Request) *OpenAPIMethod {
 func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request: %v %v", r.Method, r.URL.Path)
 	start := time.Now()
-	defer func() {
-		log.Printf("Response: elapsed=%v status=200", time.Now().Sub(start))
-	}()
 
 	method := s.routeRequest(r)
 	if method == nil {
-		writeNotFound(w)
+		writeResponse(w, start, http.StatusNotFound, nil)
 		return
 	}
 
 	response, ok := method.Responses["200"]
 	if !ok {
 		log.Printf("Couldn't find 200 response in spec")
-		writeInternalError(w)
+		writeResponse(w, start, http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -111,24 +107,13 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	generator := DataGenerator{s.spec.Definitions, s.fixtures}
-	responseData, err := generator.Generate(response.Schema, r.URL.Path)
+	data, err := generator.Generate(response.Schema, r.URL.Path)
 	if err != nil {
 		log.Printf("Couldn't generate response: %v", err)
-		writeInternalError(w)
+		writeResponse(w, start, http.StatusInternalServerError, nil)
 		return
 	}
-
-	data, err := json.Marshal(&responseData)
-	if err != nil {
-		log.Printf("Error serializing fixture: %v", err)
-		writeInternalError(w)
-		return
-	}
-
-	_, err = w.Write(data)
-	if err != nil {
-		log.Printf("Error writing to client: %v", err)
-	}
+	writeResponse(w, start, http.StatusOK, data)
 }
 
 func (s *StubServer) initializeRouter() {
@@ -200,14 +185,27 @@ func countAPIMethods(spec *OpenAPISpec) int {
 	return count
 }
 
-func writeInternalError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	fmt.Fprintf(w, "Internal server error")
-}
+func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
+	if data == nil {
+		data = []byte(http.StatusText(status))
+	}
 
-func writeNotFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "Not found")
+	encodedData, err := json.Marshal(&data)
+	if err != nil {
+		log.Printf("Error serializing response: %v", err)
+		writeResponse(w, start, http.StatusInternalServerError, nil)
+		return
+	}
+
+	w.WriteHeader(status)
+	_, err = w.Write(encodedData)
+	if err != nil {
+		log.Printf("Error writing to client: %v", err)
+	}
+	log.Printf("Response: elapsed=%v status=%v", time.Now().Sub(start), status)
+	if verbose {
+		log.Printf("Response body: %v", encodedData)
+	}
 }
 
 // ---
