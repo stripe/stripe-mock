@@ -175,16 +175,6 @@ func compilePath(path OpenAPIPath) *regexp.Regexp {
 	return regexp.MustCompile(pattern + `\z`)
 }
 
-// countAPIMethods counts the number of separate API methods that the spec is
-// handling. That's all verbs across all paths.
-func countAPIMethods(spec *OpenAPISpec) int {
-	count := 0
-	for _, verbs := range spec.Paths {
-		count += len(verbs)
-	}
-	return count
-}
-
 func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
 	if data == nil {
 		data = []byte(http.StatusText(status))
