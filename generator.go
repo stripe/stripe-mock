@@ -54,6 +54,10 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 }
 
 func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string) (interface{}, error) {
+	return g.generateInternal(schema, requestPath, nil)
+}
+
+func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string, existingData interface{}) (interface{}, error) {
 	schema, err := g.maybeDereference(schema)
 	if err != nil {
 		return nil, err
@@ -65,7 +69,8 @@ func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string) (interf
 	}
 
 	if schema.Properties != nil {
-		listData, err := g.maybeGenerateList(schema.Properties, requestPath)
+		listData, err := g.maybeGenerateList(
+			schema.Properties, existingData, requestPath)
 		if err != nil {
 			return nil, err
 		}
@@ -74,21 +79,22 @@ func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string) (interf
 		}
 
 		for key, property := range schema.Properties {
-			keyData, err := g.Generate(property, requestPath)
+			dataMap := data.(map[string]interface{})
+			keyData, err := g.generateInternal(property, requestPath, dataMap[key])
 			if err == notSupportedErr {
 				continue
 			}
 			if err != nil {
 				return nil, err
 			}
-			data.(map[string]interface{})[key] = keyData
+			dataMap[key] = keyData
 		}
 	}
 
 	return data, nil
 }
 
-func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, requestPath string) (interface{}, error) {
+func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, existingData interface{}, requestPath string) (interface{}, error) {
 	object, ok := properties["object"]
 	if !ok {
 		return nil, nil
@@ -137,7 +143,13 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, req
 		case "total_count":
 			val = 1
 		case "url":
-			val = requestPath
+			existingDataMap, ok := existingData.(map[string]interface{})
+			if ok {
+				// Reuse a URL that came from fixture data if one is available
+				val = existingDataMap["url"]
+			} else {
+				val = requestPath
+			}
 		default:
 			val = nil
 		}

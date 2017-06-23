@@ -53,17 +53,30 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
 
 	// nested list
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{
+		testSpec.Definitions,
+		&Fixtures{
+			Resources: map[ResourceID]interface{}{
+				ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
+				ResourceID("with_charges_list"): map[string]interface{}{
+					"charges_list": map[string]interface{}{
+						"url": "/v1/from_charges_list",
+					},
+				},
+			},
+		},
+	}
 	data, err = generator.Generate(
 		&JSONSchema{
 			Properties: map[string]*JSONSchema{
 				"charges_list": listSchema,
 			},
-		}, "/v1/charges")
+			XResourceID: "with_charges_list",
+		}, "")
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/charges", chargesList.(map[string]interface{})["url"])
+	assert.Equal(t, "/v1/from_charges_list", chargesList.(map[string]interface{})["url"])
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
