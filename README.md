@@ -50,7 +50,8 @@ export GITHUB_TOKEN=...
 Commit changes and tag `HEAD`:
 
 ``` sh
-git tag -a v0.1.1 && git push origin --tags
+git tag v0.1.1
+git push origin --tags
 ```
 
 Then run goreleaser and you're done! Check [releases].
