@@ -61,4 +61,8 @@ func TestParseExpansionLevel(t *testing.T) {
 			}},
 		}},
 		ParseExpansionLevel([]string{"charge.customer.default_source", "charge"}))
+
+	assert.Equal(t,
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{}, wildcard: true},
+		ParseExpansionLevel([]string{"*"}))
 }

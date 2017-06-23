@@ -18,7 +18,10 @@ func init() {
 	testFixtures =
 		&Fixtures{
 			Resources: map[ResourceID]interface{}{
-				ResourceID("charge"):   map[string]interface{}{"id": "ch_123"},
+				ResourceID("charge"): map[string]interface{}{
+					"customer": "cus_123",
+					"id":       "ch_123",
+				},
 				ResourceID("customer"): map[string]interface{}{"id": "cus_123"},
 			},
 		}

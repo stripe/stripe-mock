@@ -15,6 +15,9 @@ import (
 // nested below it (on other levels).
 type ExpansionLevel struct {
 	expansions map[string]*ExpansionLevel
+
+	// wildcard specifies that everything should be expanded.
+	wildcard bool
 }
 
 // ParseExpasionLevel parses a set of raw expansions from a request query
@@ -29,7 +32,11 @@ func ParseExpansionLevel(raw []string) *ExpansionLevel {
 	for _, expansion := range raw {
 		parts := strings.Split(expansion, ".")
 		if len(parts) == 1 {
-			level.expansions[parts[0]] = nil
+			if parts[0] == "*" {
+				level.wildcard = true
+			} else {
+				level.expansions[parts[0]] = nil
+			}
 		} else {
 			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
 		}

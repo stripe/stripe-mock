@@ -99,8 +99,17 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 			if expansions != nil {
 				var ok bool
 				subExpansions, ok = expansions.expansions[key]
-				if ok {
-					subSchema = property.XExpansionResources.OneOf[0]
+
+				var expansion *JSONSchema
+				if property.XExpansionResources != nil {
+					expansion = property.XExpansionResources.OneOf[0]
+				}
+
+				// Point to the expanded schema in either the case that an
+				// expansion was requested on this field or we have a wildcard
+				// expansion active.
+				if expansion != nil && (ok || expansions.wildcard) {
+					subSchema = expansion
 				}
 			}
 

@@ -41,6 +41,11 @@ func TestGenerateResponseData(t *testing.T) {
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		data.(map[string]interface{})["id"])
 
+	// Makes sure that customer is *not* expanded
+	assert.Equal(t,
+		testFixtures.Resources["customer"].(map[string]interface{})["id"],
+		data.(map[string]interface{})["customer"])
+
 	// expansion
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
@@ -67,6 +72,17 @@ func TestGenerateResponseData(t *testing.T) {
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
 	assert.Equal(t, err, errExpansionNotSupported)
+
+	// wildcard expansion
+	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	data, err = generator.Generate(
+		&JSONSchema{Ref: "#/definitions/charge"},
+		"",
+		&ExpansionLevel{wildcard: true})
+	assert.Nil(t, err)
+	assert.Equal(t,
+		testFixtures.Resources["customer"].(map[string]interface{})["id"],
+		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// list
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
