@@ -29,8 +29,8 @@ func init() {
 		}
 
 	testSpec = &OpenAPISpec{
-		Definitions: map[string]OpenAPIDefinition{
-			"charge": {XResourceID: "charge"},
+		Definitions: map[string]JSONSchema{
+			"charge": {"x-resourceId": "charge"},
 		},
 		Paths: map[OpenAPIPath]map[HTTPVerb]*OpenAPIMethod{
 			OpenAPIPath("/v1/charges"): {

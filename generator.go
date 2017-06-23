@@ -8,51 +8,126 @@ import (
 var notSupportedErr = fmt.Errorf("Expected response to be a list or include $ref")
 
 type DataGenerator struct {
-	definitions map[string]OpenAPIDefinition
+	definitions map[string]JSONSchema
 	fixtures    *Fixtures
 }
 
-func (g *DataGenerator) Generate(schema JSONSchema, requestPath string) (interface{}, error) {
+func (g *DataGenerator) maybeDereference(schema JSONSchema) (JSONSchema, error) {
 	ref, ok := schema["$ref"].(string)
 	if ok {
-		return g.generateResource(ref)
+		definition, err := definitionFromJSONPointer(ref)
+		if err != nil {
+			return nil, err
+		}
+
+		schema, ok = g.definitions[definition]
+		if !ok {
+			return nil, fmt.Errorf("Couldn't dereference: %v", ref)
+		}
+	}
+	return schema, nil
+}
+
+func (g *DataGenerator) generateResource(schema JSONSchema) (interface{}, error) {
+	xResourceID, ok := schema["x-resourceId"].(string)
+	if !ok {
+		schemaType, ok := schema["type"].(string)
+		if ok {
+			if schemaType == "object" {
+				return map[string]interface{}{}, nil
+			}
+			return nil, notSupportedErr
+		}
+
+		// Types are also allowed to be an array of types
+		schemaTypes, ok := schema["type"].([]string)
+		if ok {
+			for _, schemaType := range schemaTypes {
+				if schemaType == "object" {
+					return map[string]interface{}{}, nil
+				}
+			}
+			return nil, notSupportedErr
+		}
+
+		// Support schemas with no type annotation at all
+		return map[string]interface{}{}, nil
+	}
+
+	fixture, ok := g.fixtures.Resources[ResourceID(xResourceID)]
+	if !ok {
+		return nil, fmt.Errorf("Expected fixtures to include %v", xResourceID)
+	}
+	return fixture, nil
+}
+
+func (g *DataGenerator) Generate(schema JSONSchema, requestPath string) (interface{}, error) {
+	schema, err := g.maybeDereference(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := g.generateResource(schema)
+	if err != nil {
+		return nil, err
 	}
 
 	properties, ok := schema["properties"].(map[string]interface{})
-	if !ok {
-		return nil, notSupportedErr
+	if ok {
+		listData, err := g.maybeGenerateList(properties, requestPath)
+		if err != nil {
+			return nil, err
+		}
+		if listData != nil {
+			return listData, nil
+		}
+
+		for key, property := range properties {
+			keyData, err := g.Generate(property.(JSONSchema), requestPath)
+			if err == notSupportedErr {
+				continue
+			}
+			if err != nil {
+				return nil, err
+			}
+			data.(map[string]interface{})[key] = keyData
+		}
 	}
 
+	return data, nil
+}
+
+func (g *DataGenerator) maybeGenerateList(properties map[string]interface{}, requestPath string) (interface{}, error) {
 	object, ok := properties["object"].(map[string]interface{})
 	if !ok {
-		return nil, notSupportedErr
+		return nil, nil
 	}
 
 	objectEnum, ok := object["enum"].([]interface{})
 	if !ok {
-		return nil, notSupportedErr
+		return nil, nil
 	}
 
 	if objectEnum[0] != interface{}("list") {
-		return nil, notSupportedErr
+		return nil, nil
 	}
 
 	data, ok := properties["data"].(map[string]interface{})
 	if !ok {
-		return nil, notSupportedErr
+		return nil, nil
 	}
 
 	items, ok := data["items"].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("Expected list to include items schema")
+		return nil, nil
 	}
 
-	itemsRef, ok := items["$ref"].(string)
-	if !ok {
-		return nil, fmt.Errorf("Expected items schema to include $ref")
+	itemsSchema, err := g.maybeDereference(items)
+	if err != nil {
+		return nil, err
 	}
 
-	innerData, err := g.generateResource(itemsRef)
+	itemsData, err := g.Generate(itemsSchema, requestPath)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +140,7 @@ func (g *DataGenerator) Generate(schema JSONSchema, requestPath string) (interfa
 		var val interface{}
 		switch key {
 		case "data":
-			val = []interface{}{innerData}
+			val = []interface{}{itemsData}
 		case "has_more":
 			val = false
 		case "object":
@@ -80,25 +155,6 @@ func (g *DataGenerator) Generate(schema JSONSchema, requestPath string) (interfa
 		listData[key] = val
 	}
 	return listData, nil
-}
-
-func (g *DataGenerator) generateResource(pointer string) (interface{}, error) {
-	definition, err := definitionFromJSONPointer(pointer)
-	if err != nil {
-		return nil, fmt.Errorf("Error extracting definition: %v", err)
-	}
-
-	resource, ok := g.definitions[definition]
-	if !ok {
-		return nil, fmt.Errorf("Expected definitions to include %v", definition)
-	}
-
-	fixture, ok := g.fixtures.Resources[resource.XResourceID]
-	if !ok {
-		return nil, fmt.Errorf("Expected fixtures to include %v", resource.XResourceID)
-	}
-
-	return fixture, nil
 }
 
 // ---

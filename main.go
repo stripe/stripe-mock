@@ -23,10 +23,6 @@ type HTTPVerb string
 
 type JSONSchema map[string]interface{}
 
-type OpenAPIDefinition struct {
-	XResourceID ResourceID `json:"x-resourceId"`
-}
-
 type OpenAPIParameter struct {
 	Description string     `json:"description"`
 	In          string     `json:"in"`
@@ -50,7 +46,7 @@ type OpenAPIResponse struct {
 }
 
 type OpenAPISpec struct {
-	Definitions map[string]OpenAPIDefinition                `json:"definitions"`
+	Definitions map[string]JSONSchema                       `json:"definitions"`
 	Paths       map[OpenAPIPath]map[HTTPVerb]*OpenAPIMethod `json:"paths"`
 }
 
