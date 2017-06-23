@@ -47,8 +47,9 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 
 	fixture, ok := g.fixtures.Resources[ResourceID(schema.XResourceID)]
 	if !ok {
-		return nil, fmt.Errorf("Expected fixtures to include %v", schema.XResourceID)
+		return map[string]interface{}{}, nil
 	}
+
 	return fixture, nil
 }
 

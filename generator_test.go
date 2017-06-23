@@ -68,6 +68,19 @@ func TestGenerateResponseData(t *testing.T) {
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
 
+	// no fixture (returns an empty object)
+	generator = DataGenerator{
+		testSpec.Definitions,
+		// this is an empty set of fixtures
+		&Fixtures{
+			Resources: map[ResourceID]interface{}{},
+		},
+	}
+	data, err = generator.Generate(
+		&JSONSchema{Ref: "#/definitions/charge"}, "")
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]interface{}{}, data)
+
 	// error: unhandled JSON schema type
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
@@ -82,20 +95,6 @@ func TestGenerateResponseData(t *testing.T) {
 		&JSONSchema{Ref: "#/definitions/doesnt-exist"}, "")
 	assert.Equal(t,
 		fmt.Errorf("Couldn't dereference: #/definitions/doesnt-exist"),
-		err)
-
-	// error: no fixture
-	generator = DataGenerator{
-		testSpec.Definitions,
-		// this is an empty set of fixtures
-		&Fixtures{
-			Resources: map[ResourceID]interface{}{},
-		},
-	}
-	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"}, "")
-	assert.Equal(t,
-		fmt.Errorf("Expected fixtures to include charge"),
 		err)
 }
 
