@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"testing"
@@ -72,77 +71,4 @@ func TestCompilePath(t *testing.T) {
 		compilePath(OpenAPIPath("/v1/charges")).String())
 	assert.Equal(t, `\A/v1/charges/(?P<id>\w+)\z`,
 		compilePath(OpenAPIPath("/v1/charges/{id}")).String())
-}
-
-func TestGenerateResponseData(t *testing.T) {
-	var data interface{}
-	var err error
-
-	// basic reference
-	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "",
-		testSpec.Definitions, testFixtures)
-	assert.Nil(t, err)
-	assert.Equal(t,
-		testFixtures.Resources["charge"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["id"])
-
-	// list
-	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{
-			"properties": map[string]interface{}{
-				"data": map[string]interface{}{
-					"items": map[string]interface{}{
-						"$ref": "#/definitions/charge",
-					},
-				},
-				"has_more": nil,
-				"object": map[string]interface{}{
-					"enum": []interface{}{"list"},
-				},
-				"total_count": nil,
-				"url":         nil,
-			},
-		}), "/v1/charges",
-		testSpec.Definitions, testFixtures)
-	assert.Nil(t, err)
-	assert.Equal(t, "list", data.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
-	assert.Equal(t,
-		testFixtures.Resources["charge"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
-
-	// error: unhandled JSON schema type
-	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{}), "",
-		testSpec.Definitions, testFixtures)
-	assert.Equal(t,
-		fmt.Errorf("Expected response to be a list or include $ref"),
-		err)
-
-	// error: no definition in OpenAPI
-	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/doesnt-exist"}), "",
-		testSpec.Definitions, testFixtures)
-	assert.Equal(t,
-		fmt.Errorf("Expected definitions to include doesnt-exist"),
-		err)
-
-	// error: no fixture
-	data, err = generateResponseData(
-		JSONSchema(map[string]interface{}{"$ref": "#/definitions/charge"}), "",
-		testSpec.Definitions,
-		// this is an empty set of fixtures
-		&Fixtures{
-			Resources: map[ResourceID]interface{}{},
-		})
-	assert.Equal(t,
-		fmt.Errorf("Expected fixtures to include charge"),
-		err)
-}
-
-func TestDefinitionFromJSONPointer(t *testing.T) {
-	definition, err := definitionFromJSONPointer("#/definitions/charge")
-	assert.Nil(t, err)
-	assert.Equal(t, "charge", definition)
 }
