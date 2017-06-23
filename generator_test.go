@@ -52,6 +52,22 @@ func TestGenerateResponseData(t *testing.T) {
 		testFixtures.Resources["customer"].(map[string]interface{})["id"],
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
+	// bad expansion
+	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	data, err = generator.Generate(
+		&JSONSchema{Ref: "#/definitions/charge"},
+		"",
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": nil}})
+	assert.Equal(t, err, errExpansionNotSupported)
+
+	// bad nested expansion
+	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	data, err = generator.Generate(
+		&JSONSchema{Ref: "#/definitions/charge"},
+		"",
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
+	assert.Equal(t, err, errExpansionNotSupported)
+
 	// list
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(listSchema, "/v1/charges", nil)

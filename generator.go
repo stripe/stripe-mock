@@ -68,7 +68,8 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 	// Determine if the requested expansions are possible
 	if expansions != nil {
 		for key, _ := range expansions.expansions {
-			if sort.SearchStrings(schema.XExpandableFields, key) == -1 {
+			if sort.SearchStrings(schema.XExpandableFields, key) ==
+				len(schema.XExpandableFields) {
 				return nil, errExpansionNotSupported
 			}
 		}
