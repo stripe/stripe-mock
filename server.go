@@ -20,7 +20,7 @@ type ExpansionLevel struct {
 	wildcard bool
 }
 
-// ParseExpasionLevel parses a set of raw expansions from a request query
+// ParseExpansionLevel parses a set of raw expansions from a request query
 // string or form and produces a structure more useful for performing actual
 // expansions.
 func ParseExpansionLevel(raw []string) *ExpansionLevel {
@@ -65,6 +65,7 @@ type stubServerRoute struct {
 	method  *OpenAPIMethod
 }
 
+// HandleRequest handes an HTTP request directed at the API stub.
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request: %v %v", r.Method, r.URL.Path)
 	start := time.Now()

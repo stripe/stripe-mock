@@ -9,11 +9,14 @@ import (
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
 var errNotSupported = fmt.Errorf("Expected response to be a list or include $ref")
 
+// DataGenerator generates fixture response data based off a response schema, a
+// set of definitions, and a fixture store.
 type DataGenerator struct {
 	definitions map[string]*JSONSchema
 	fixtures    *Fixtures
 }
 
+// Generate generates a fixture response.
 func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	return g.generateInternal(schema, requestPath, expansions, nil)
 }
@@ -26,7 +29,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 
 	// Determine if the requested expansions are possible
 	if expansions != nil {
-		for key, _ := range expansions.expansions {
+		for key := range expansions.expansions {
 			if sort.SearchStrings(schema.XExpandableFields, key) ==
 				len(schema.XExpandableFields) {
 				return nil, errExpansionNotSupported
