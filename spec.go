@@ -16,7 +16,9 @@ type JSONSchema struct {
 	// it defines the location of the actual schema definition.
 	Ref string `json:"$ref"`
 
-	XResourceID string `json:"x-resourceId"`
+	XExpandableFields   []string      `json:"x-expandableFields"`
+	XExpansionResources []*JSONSchema `json:"x-expansionResources"`
+	XResourceID         string        `json:"x-resourceId"`
 }
 
 type OpenAPIParameter struct {

@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
-var notSupportedErr = fmt.Errorf("Expected response to be a list or include $ref")
+var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
+var errNotSupported = fmt.Errorf("Expected response to be a list or include $ref")
 
 type DataGenerator struct {
 	definitions map[string]*JSONSchema
@@ -38,7 +40,7 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 					return map[string]interface{}{}, nil
 				}
 			}
-			return nil, notSupportedErr
+			return nil, errNotSupported
 		}
 
 		// Support schemas with no type annotation at all
@@ -63,6 +65,15 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 		return nil, err
 	}
 
+	// Determine if the requested expansions are possible
+	if expansions != nil {
+		for key, _ := range expansions.expansions {
+			if sort.SearchStrings(schema.XExpandableFields, key) == -1 {
+				return nil, errExpansionNotSupported
+			}
+		}
+	}
+
 	data, err := g.generateResource(schema)
 	if err != nil {
 		return nil, err
@@ -80,8 +91,21 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 
 		for key, property := range schema.Properties {
 			dataMap := data.(map[string]interface{})
-			keyData, err := g.generateInternal(property, requestPath, expansions, dataMap[key])
-			if err == notSupportedErr {
+
+			subSchema := property
+
+			var subExpansions *ExpansionLevel
+			if expansions != nil {
+				var ok bool
+				subExpansions, ok = expansions.expansions[key]
+				if ok {
+					subSchema = property.XExpansionResources[0]
+				}
+			}
+
+			keyData, err := g.generateInternal(
+				subSchema, requestPath, subExpansions, dataMap[key])
+			if err == errNotSupported {
 				continue
 			}
 			if err != nil {

@@ -36,11 +36,21 @@ func TestGenerateResponseData(t *testing.T) {
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
 		&JSONSchema{Ref: "#/definitions/charge"}, "", nil)
-
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		data.(map[string]interface{})["id"])
+
+	// expansion
+	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	data, err = generator.Generate(
+		&JSONSchema{Ref: "#/definitions/charge"},
+		"",
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": nil}})
+	assert.Nil(t, err)
+	assert.Equal(t,
+		testFixtures.Resources["customer"].(map[string]interface{})["id"],
+		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// list
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
