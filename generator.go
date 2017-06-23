@@ -99,7 +99,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 				var ok bool
 				subExpansions, ok = expansions.expansions[key]
 				if ok {
-					subSchema = property.XExpansionResources[0]
+					subSchema = property.XExpansionResources.OneOf[0]
 				}
 			}
 

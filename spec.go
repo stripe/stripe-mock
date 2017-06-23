@@ -9,6 +9,7 @@ type HTTPVerb string
 type JSONSchema struct {
 	Enum       []string               `json:"enum"`
 	Items      *JSONSchema            `json:"items"`
+	OneOf      []*JSONSchema          `json:"oneOf"`
 	Properties map[string]*JSONSchema `json:"properties"`
 	Type       []string               `json:"type"`
 
@@ -16,9 +17,9 @@ type JSONSchema struct {
 	// it defines the location of the actual schema definition.
 	Ref string `json:"$ref"`
 
-	XExpandableFields   []string      `json:"x-expandableFields"`
-	XExpansionResources []*JSONSchema `json:"x-expansionResources"`
-	XResourceID         string        `json:"x-resourceId"`
+	XExpandableFields   []string    `json:"x-expandableFields"`
+	XExpansionResources *JSONSchema `json:"x-expansionResources"`
+	XResourceID         string      `json:"x-resourceId"`
 }
 
 type OpenAPIParameter struct {

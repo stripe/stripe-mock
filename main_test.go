@@ -31,8 +31,10 @@ func init() {
 					// customer resource
 					"customer": {
 						Type: []string{"string"},
-						XExpansionResources: []*JSONSchema{
-							&JSONSchema{Ref: "#/definitions/customer"},
+						XExpansionResources: &JSONSchema{
+							OneOf: []*JSONSchema{
+								&JSONSchema{Ref: "#/definitions/customer"},
+							},
 						},
 					},
 				},
