@@ -73,7 +73,7 @@ func main() {
 		log.Fatalf("Error listening on socket: %v", err)
 	}
 
-	http.HandleFunc("/", stub.handleRequest)
+	http.HandleFunc("/", stub.HandleRequest)
 	server := http.Server{}
 	server.Serve(listener)
 }

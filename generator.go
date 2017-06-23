@@ -14,47 +14,6 @@ type DataGenerator struct {
 	fixtures    *Fixtures
 }
 
-func (g *DataGenerator) maybeDereference(schema *JSONSchema) (*JSONSchema, error) {
-	if schema.Ref != "" {
-		definition, err := definitionFromJSONPointer(schema.Ref)
-		if err != nil {
-			return nil, err
-		}
-
-		newSchema, ok := g.definitions[definition]
-		if !ok {
-			return nil, fmt.Errorf("Couldn't dereference: %v", schema.Ref)
-		}
-		schema = newSchema
-	}
-	return schema, nil
-}
-
-func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error) {
-	if schema.XResourceID == "" {
-		// Technically type can also be just a string, but we're not going to
-		// support this for now.
-		if schema.Type != nil {
-			for _, schemaType := range schema.Type {
-				if schemaType == "object" {
-					return map[string]interface{}{}, nil
-				}
-			}
-			return nil, errNotSupported
-		}
-
-		// Support schemas with no type annotation at all
-		return map[string]interface{}{}, nil
-	}
-
-	fixture, ok := g.fixtures.Resources[ResourceID(schema.XResourceID)]
-	if !ok {
-		return map[string]interface{}{}, nil
-	}
-
-	return fixture, nil
-}
-
 func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	return g.generateInternal(schema, requestPath, expansions, nil)
 }
@@ -126,6 +85,47 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 	}
 
 	return data, nil
+}
+
+func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error) {
+	if schema.XResourceID == "" {
+		// Technically type can also be just a string, but we're not going to
+		// support this for now.
+		if schema.Type != nil {
+			for _, schemaType := range schema.Type {
+				if schemaType == "object" {
+					return map[string]interface{}{}, nil
+				}
+			}
+			return nil, errNotSupported
+		}
+
+		// Support schemas with no type annotation at all
+		return map[string]interface{}{}, nil
+	}
+
+	fixture, ok := g.fixtures.Resources[ResourceID(schema.XResourceID)]
+	if !ok {
+		return map[string]interface{}{}, nil
+	}
+
+	return fixture, nil
+}
+
+func (g *DataGenerator) maybeDereference(schema *JSONSchema) (*JSONSchema, error) {
+	if schema.Ref != "" {
+		definition, err := definitionFromJSONPointer(schema.Ref)
+		if err != nil {
+			return nil, err
+		}
+
+		newSchema, ok := g.definitions[definition]
+		if !ok {
+			return nil, fmt.Errorf("Couldn't dereference: %v", schema.Ref)
+		}
+		schema = newSchema
+	}
+	return schema, nil
 }
 
 func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {

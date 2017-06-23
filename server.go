@@ -65,17 +65,7 @@ type stubServerRoute struct {
 	method  *OpenAPIMethod
 }
 
-func (s *StubServer) routeRequest(r *http.Request) *OpenAPIMethod {
-	verbRoutes := s.routes[HTTPVerb(r.Method)]
-	for _, route := range verbRoutes {
-		if route.pattern.MatchString(r.URL.Path) {
-			return route.method
-		}
-	}
-	return nil
-}
-
-func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
+func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request: %v %v", r.Method, r.URL.Path)
 	start := time.Now()
 
@@ -147,6 +137,16 @@ func (s *StubServer) initializeRouter() {
 
 	log.Printf("Routing to %v path(s) and %v endpoint(s)",
 		numPaths, numEndpoints)
+}
+
+func (s *StubServer) routeRequest(r *http.Request) *OpenAPIMethod {
+	verbRoutes := s.routes[HTTPVerb(r.Method)]
+	for _, route := range verbRoutes {
+		if route.pattern.MatchString(r.URL.Path) {
+			return route.method
+		}
+	}
+	return nil
 }
 
 // ---
