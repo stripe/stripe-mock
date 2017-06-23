@@ -53,11 +53,11 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 	return fixture, nil
 }
 
-func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string) (interface{}, error) {
-	return g.generateInternal(schema, requestPath, nil)
+func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
+	return g.generateInternal(schema, requestPath, expansions, nil)
 }
 
-func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string, existingData interface{}) (interface{}, error) {
+func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
 	schema, err := g.maybeDereference(schema)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 
 	if schema.Properties != nil {
 		listData, err := g.maybeGenerateList(
-			schema.Properties, existingData, requestPath)
+			schema.Properties, existingData, requestPath, expansions)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 
 		for key, property := range schema.Properties {
 			dataMap := data.(map[string]interface{})
-			keyData, err := g.generateInternal(property, requestPath, dataMap[key])
+			keyData, err := g.generateInternal(property, requestPath, expansions, dataMap[key])
 			if err == notSupportedErr {
 				continue
 			}
@@ -94,7 +94,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 	return data, nil
 }
 
-func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, existingData interface{}, requestPath string) (interface{}, error) {
+func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	object, ok := properties["object"]
 	if !ok {
 		return nil, nil
@@ -122,7 +122,7 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, exi
 		return nil, err
 	}
 
-	itemsData, err := g.Generate(itemsSchema, requestPath)
+	itemsData, err := g.generateInternal(itemsSchema, requestPath, expansions, nil)
 	if err != nil {
 		return nil, err
 	}

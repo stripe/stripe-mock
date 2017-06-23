@@ -72,3 +72,32 @@ func TestCompilePath(t *testing.T) {
 	assert.Equal(t, `\A/v1/charges/(?P<id>\w+)\z`,
 		compilePath(OpenAPIPath("/v1/charges/{id}")).String())
 }
+
+func TestParseExpansionLevel(t *testing.T) {
+	assert.Equal(t,
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+			"charge":   nil,
+			"customer": nil,
+		}},
+		ParseExpansionLevel([]string{"charge", "customer"}))
+
+	assert.Equal(t,
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+			"charge": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
+				"customer": nil,
+				"source":   nil,
+			}},
+			"customer": nil,
+		}},
+		ParseExpansionLevel([]string{"charge.customer", "customer", "charge.source"}))
+
+	assert.Equal(t,
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+			"charge": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
+				"customer": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
+					"default_source": nil,
+				}},
+			}},
+		}},
+		ParseExpansionLevel([]string{"charge.customer.default_source", "charge"}))
+}

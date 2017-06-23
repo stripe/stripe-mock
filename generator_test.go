@@ -35,7 +35,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"}, "")
+		&JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 
 	assert.Nil(t, err)
 	assert.Equal(t,
@@ -44,7 +44,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// list
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
-	data, err = generator.Generate(listSchema, "/v1/charges")
+	data, err = generator.Generate(listSchema, "/v1/charges", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "list", data.(map[string]interface{})["object"])
 	assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
@@ -72,7 +72,7 @@ func TestGenerateResponseData(t *testing.T) {
 				"charges_list": listSchema,
 			},
 			XResourceID: "with_charges_list",
-		}, "")
+		}, "", nil)
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
@@ -90,14 +90,14 @@ func TestGenerateResponseData(t *testing.T) {
 		},
 	}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"}, "")
+		&JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{}, data)
 
 	// error: unhandled JSON schema type
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Type: []string{"string"}}, "")
+		&JSONSchema{Type: []string{"string"}}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Expected response to be a list or include $ref"),
 		err)
@@ -105,7 +105,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// error: no definition in OpenAPI
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/doesnt-exist"}, "")
+		&JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Couldn't dereference: #/definitions/doesnt-exist"),
 		err)

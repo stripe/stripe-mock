@@ -5,9 +5,42 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
+
+// ExpansionLevel represents expansions on a single "level" of resource. It may
+// have subexpansions that are meant to take effect on resources that are
+// nested below it (on other levels).
+type ExpansionLevel struct {
+	expansions map[string]*ExpansionLevel
+}
+
+// ParseExpasionLevel parses a set of raw expansions from a request query
+// string or form and produces a structure more useful for performing actual
+// expansions.
+func ParseExpansionLevel(raw []string) *ExpansionLevel {
+	sort.Strings(raw)
+
+	level := &ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
+	groups := make(map[string][]string)
+
+	for _, expansion := range raw {
+		parts := strings.Split(expansion, ".")
+		if len(parts) == 1 {
+			level.expansions[parts[0]] = nil
+		} else {
+			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
+		}
+	}
+
+	for key, subexpansions := range groups {
+		level.expansions[key] = ParseExpansionLevel(subexpansions)
+	}
+
+	return level
+}
 
 // StubServer handles incoming HTTP requests and responds to them appropriately
 // based off the set of OpenAPI routes that it's been configured with.
@@ -56,8 +89,16 @@ func (s *StubServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Response schema: %+v", response.Schema)
 	}
 
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Couldn't parse query/body: %v", err)
+		writeResponse(w, start, http.StatusInternalServerError, nil)
+		return
+	}
+
+	expansions := extractExpansions(r)
 	generator := DataGenerator{s.spec.Definitions, s.fixtures}
-	data, err := generator.Generate(response.Schema, r.URL.Path)
+	data, err := generator.Generate(response.Schema, r.URL.Path, expansions)
 	if err != nil {
 		log.Printf("Couldn't generate response: %v", err)
 		writeResponse(w, start, http.StatusInternalServerError, nil)
@@ -123,6 +164,13 @@ func compilePath(path OpenAPIPath) *regexp.Regexp {
 	}
 
 	return regexp.MustCompile(pattern + `\z`)
+}
+
+func extractExpansions(r *http.Request) *ExpansionLevel {
+	var expansions []string
+	expansions = append(expansions, r.Form["expand"]...)
+	expansions = append(expansions, r.Form["expand[]"]...)
+	return ParseExpansionLevel(expansions)
 }
 
 func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
