@@ -37,9 +37,14 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 		}
 	}
 
-	data, err := g.generateResource(schema)
-	if err != nil {
-		return nil, err
+	var data interface{}
+	if existingData != nil {
+		data = existingData
+	} else {
+		data, err = g.generateResource(schema)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if schema.Properties != nil {
@@ -51,39 +56,40 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 		if listData != nil {
 			return listData, nil
 		}
+		dataMap, ok := data.(map[string]interface{})
+		if ok {
+			for key, property := range schema.Properties {
 
-		for key, property := range schema.Properties {
-			dataMap := data.(map[string]interface{})
+				subSchema := property
 
-			subSchema := property
+				var subExpansions *ExpansionLevel
+				if expansions != nil {
+					var ok bool
+					subExpansions, ok = expansions.expansions[key]
 
-			var subExpansions *ExpansionLevel
-			if expansions != nil {
-				var ok bool
-				subExpansions, ok = expansions.expansions[key]
+					var expansion *JSONSchema
+					if property.XExpansionResources != nil {
+						expansion = property.XExpansionResources.OneOf[0]
+					}
 
-				var expansion *JSONSchema
-				if property.XExpansionResources != nil {
-					expansion = property.XExpansionResources.OneOf[0]
+					// Point to the expanded schema in either the case that an
+					// expansion was requested on this field or we have a wildcard
+					// expansion active.
+					if expansion != nil && (ok || expansions.wildcard) {
+						subSchema = expansion
+					}
 				}
 
-				// Point to the expanded schema in either the case that an
-				// expansion was requested on this field or we have a wildcard
-				// expansion active.
-				if expansion != nil && (ok || expansions.wildcard) {
-					subSchema = expansion
+				keyData, err := g.generateInternal(
+					subSchema, requestPath, subExpansions, dataMap[key])
+				if err == errNotSupported {
+					continue
 				}
+				if err != nil {
+					return nil, err
+				}
+				dataMap[key] = keyData
 			}
-
-			keyData, err := g.generateInternal(
-				subSchema, requestPath, subExpansions, dataMap[key])
-			if err == errNotSupported {
-				continue
-			}
-			if err != nil {
-				return nil, err
-			}
-			dataMap[key] = keyData
 		}
 	}
 
