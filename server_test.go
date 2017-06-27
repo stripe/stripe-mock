@@ -44,7 +44,7 @@ func TestParseExpansionLevel(t *testing.T) {
 
 	assert.Equal(t,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-			"charge": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
+			"charge": {expansions: map[string]*ExpansionLevel{
 				"customer": nil,
 				"source":   nil,
 			}},
@@ -54,8 +54,8 @@ func TestParseExpansionLevel(t *testing.T) {
 
 	assert.Equal(t,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-			"charge": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
-				"customer": &ExpansionLevel{expansions: map[string]*ExpansionLevel{
+			"charge": {expansions: map[string]*ExpansionLevel{
+				"customer": {expansions: map[string]*ExpansionLevel{
 					"default_source": nil,
 				}},
 			}},

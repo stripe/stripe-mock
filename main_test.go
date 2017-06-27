@@ -1,7 +1,5 @@
 package main
 
-import ()
-
 var chargeAllMethod *OpenAPIMethod
 var chargeCreateMethod *OpenAPIMethod
 var chargeDeleteMethod *OpenAPIMethod
@@ -36,7 +34,7 @@ func init() {
 						Type: []string{"string"},
 						XExpansionResources: &JSONSchema{
 							OneOf: []*JSONSchema{
-								&JSONSchema{Ref: "#/definitions/customer"},
+								{Ref: "#/definitions/customer"},
 							},
 						},
 					},

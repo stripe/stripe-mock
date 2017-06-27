@@ -12,13 +12,13 @@ var listSchema *JSONSchema
 func init() {
 	listSchema = &JSONSchema{
 		Properties: map[string]*JSONSchema{
-			"data": &JSONSchema{
+			"data": {
 				Items: &JSONSchema{
 					Ref: "#/definitions/charge",
 				},
 			},
 			"has_more": nil,
-			"object": &JSONSchema{
+			"object": {
 				Enum: []string{"list"},
 			},
 			"total_count": nil,
