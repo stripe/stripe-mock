@@ -9,6 +9,8 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+
+	"github.com/brandur/stripestub/spec"
 )
 
 const defaultPort = 6065
@@ -37,8 +39,8 @@ func main() {
 		log.Fatalf("Error loading spec: %v", err)
 	}
 
-	var spec OpenAPISpec
-	err = json.Unmarshal(data, &spec)
+	var stripeSpec spec.Spec
+	err = json.Unmarshal(data, &stripeSpec)
 	if err != nil {
 		log.Fatalf("Error decoding spec: %v", err)
 	}
@@ -49,14 +51,17 @@ func main() {
 		log.Fatalf("Error loading fixtures: %v", err)
 	}
 
-	var fixtures Fixtures
+	var fixtures spec.Fixtures
 	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
 		log.Fatalf("Error decoding spec: %v", err)
 	}
 
-	stub := StubServer{fixtures: &fixtures, spec: &spec}
-	stub.initializeRouter()
+	stub := StubServer{fixtures: &fixtures, spec: &stripeSpec}
+	err = stub.initializeRouter()
+	if err != nil {
+		log.Fatalf("Error initializing router: %v", err)
+	}
 
 	var listener net.Listener
 	if unix != "" {

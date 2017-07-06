@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/brandur/stripestub/spec"
 	assert "github.com/stretchr/testify/require"
 )
 
-var listSchema *JSONSchema
+var listSchema *spec.JSONSchema
 
 func init() {
-	listSchema = &JSONSchema{
-		Properties: map[string]*JSONSchema{
+	listSchema = &spec.JSONSchema{
+		Properties: map[string]*spec.JSONSchema{
 			"data": {
-				Items: &JSONSchema{
+				Items: &spec.JSONSchema{
 					Ref: "#/definitions/charge",
 				},
 			},
@@ -35,7 +36,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"}, "", nil)
+		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
@@ -49,7 +50,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// expansion
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"},
+		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": nil}})
 	assert.Nil(t, err)
@@ -60,7 +61,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// bad expansion
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"},
+		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": nil}})
 	assert.Equal(t, err, errExpansionNotSupported)
@@ -68,7 +69,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// bad nested expansion
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"},
+		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
 	assert.Equal(t, err, errExpansionNotSupported)
@@ -76,7 +77,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// wildcard expansion
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"},
+		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
 		&ExpansionLevel{wildcard: true})
 	assert.Nil(t, err)
@@ -97,10 +98,10 @@ func TestGenerateResponseData(t *testing.T) {
 	// nested list
 	generator = DataGenerator{
 		testSpec.Definitions,
-		&Fixtures{
-			Resources: map[ResourceID]interface{}{
-				ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
-				ResourceID("with_charges_list"): map[string]interface{}{
+		&spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
+				spec.ResourceID("with_charges_list"): map[string]interface{}{
 					"charges_list": map[string]interface{}{
 						"url": "/v1/from_charges_list",
 					},
@@ -109,8 +110,8 @@ func TestGenerateResponseData(t *testing.T) {
 		},
 	}
 	data, err = generator.Generate(
-		&JSONSchema{
-			Properties: map[string]*JSONSchema{
+		&spec.JSONSchema{
+			Properties: map[string]*spec.JSONSchema{
 				"charges_list": listSchema,
 			},
 			XResourceID: "with_charges_list",
@@ -127,19 +128,19 @@ func TestGenerateResponseData(t *testing.T) {
 	generator = DataGenerator{
 		testSpec.Definitions,
 		// this is an empty set of fixtures
-		&Fixtures{
-			Resources: map[ResourceID]interface{}{},
+		&spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{},
 		},
 	}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/charge"}, "", nil)
+		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{}, data)
 
 	// error: unhandled JSON schema type
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Type: []string{"string"}}, "", nil)
+		&spec.JSONSchema{Type: []string{"string"}}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Expected response to be a list or include $ref"),
 		err)
@@ -147,7 +148,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// error: no definition in OpenAPI
 	generator = DataGenerator{testSpec.Definitions, testFixtures}
 	data, err = generator.Generate(
-		&JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
+		&spec.JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Couldn't dereference: #/definitions/doesnt-exist"),
 		err)

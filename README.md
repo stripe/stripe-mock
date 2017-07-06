@@ -23,7 +23,7 @@ curl -i http://localhost:6065/v1/charges
 Run the test suite:
 
 ``` sh
-go test
+go test ./...
 ```
 
 ### Binary data

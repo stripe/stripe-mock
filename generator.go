@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/brandur/stripestub/spec"
 )
 
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
@@ -12,16 +14,16 @@ var errNotSupported = fmt.Errorf("Expected response to be a list or include $ref
 // DataGenerator generates fixture response data based off a response schema, a
 // set of definitions, and a fixture store.
 type DataGenerator struct {
-	definitions map[string]*JSONSchema
-	fixtures    *Fixtures
+	definitions map[string]*spec.JSONSchema
+	fixtures    *spec.Fixtures
 }
 
 // Generate generates a fixture response.
-func (g *DataGenerator) Generate(schema *JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
+func (g *DataGenerator) Generate(schema *spec.JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	return g.generateInternal(schema, requestPath, expansions, nil)
 }
 
-func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
+func (g *DataGenerator) generateInternal(schema *spec.JSONSchema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
 	schema, err := g.maybeDereference(schema)
 	if err != nil {
 		return nil, err
@@ -62,7 +64,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 				var ok bool
 				subExpansions, ok = expansions.expansions[key]
 
-				var expansion *JSONSchema
+				var expansion *spec.JSONSchema
 				if property.XExpansionResources != nil {
 					expansion = property.XExpansionResources.OneOf[0]
 				}
@@ -90,7 +92,7 @@ func (g *DataGenerator) generateInternal(schema *JSONSchema, requestPath string,
 	return data, nil
 }
 
-func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error) {
+func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, error) {
 	if schema.XResourceID == "" {
 		// Technically type can also be just a string, but we're not going to
 		// support this for now.
@@ -107,7 +109,7 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 		return map[string]interface{}{}, nil
 	}
 
-	fixture, ok := g.fixtures.Resources[ResourceID(schema.XResourceID)]
+	fixture, ok := g.fixtures.Resources[spec.ResourceID(schema.XResourceID)]
 	if !ok {
 		return map[string]interface{}{}, nil
 	}
@@ -115,7 +117,7 @@ func (g *DataGenerator) generateResource(schema *JSONSchema) (interface{}, error
 	return fixture, nil
 }
 
-func (g *DataGenerator) maybeDereference(schema *JSONSchema) (*JSONSchema, error) {
+func (g *DataGenerator) maybeDereference(schema *spec.JSONSchema) (*spec.JSONSchema, error) {
 	if schema.Ref != "" {
 		definition, err := definitionFromJSONPointer(schema.Ref)
 		if err != nil {
@@ -131,7 +133,7 @@ func (g *DataGenerator) maybeDereference(schema *JSONSchema) (*JSONSchema, error
 	return schema, nil
 }
 
-func (g *DataGenerator) maybeGenerateList(properties map[string]*JSONSchema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
+func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.JSONSchema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	object, ok := properties["object"]
 	if !ok {
 		return nil, nil
