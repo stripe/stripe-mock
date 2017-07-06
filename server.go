@@ -67,8 +67,8 @@ type stubServerRoute struct {
 
 // HandleRequest handes an HTTP request directed at the API stub.
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Request: %v %v", r.Method, r.URL.Path)
 	start := time.Now()
+	log.Printf("Request: %v %v (expansions: %+v)", r.Method, r.URL.Path)
 
 	method := s.routeRequest(r)
 	if method == nil {
@@ -94,7 +94,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expansions := extractExpansions(r)
+	expansions, rawExpansions := extractExpansions(r)
+	if verbose {
+		log.Printf("Expansions: %+v", rawExpansions)
+	}
+
 	generator := DataGenerator{s.spec.Definitions, s.fixtures}
 	data, err := generator.Generate(response.Schema, r.URL.Path, expansions)
 	if err != nil {
@@ -174,11 +178,11 @@ func compilePath(path OpenAPIPath) *regexp.Regexp {
 	return regexp.MustCompile(pattern + `\z`)
 }
 
-func extractExpansions(r *http.Request) *ExpansionLevel {
+func extractExpansions(r *http.Request) (*ExpansionLevel, []string) {
 	var expansions []string
 	expansions = append(expansions, r.Form["expand"]...)
 	expansions = append(expansions, r.Form["expand[]"]...)
-	return ParseExpansionLevel(expansions)
+	return ParseExpansionLevel(expansions), expansions
 }
 
 func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
@@ -199,7 +203,4 @@ func writeResponse(w http.ResponseWriter, start time.Time, status int, data inte
 		log.Printf("Error writing to client: %v", err)
 	}
 	log.Printf("Response: elapsed=%v status=%v", time.Now().Sub(start), status)
-	if verbose {
-		log.Printf("Response body: %v", encodedData)
-	}
 }
