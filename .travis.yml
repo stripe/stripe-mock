@@ -12,8 +12,8 @@ before_install:
 
 script:
   - go generate
-  - go test
-  - go vet
+  - make test
+  - make vet
   - scripts/check_gofmt.sh
 
 notifications:
