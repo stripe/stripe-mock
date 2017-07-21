@@ -3,20 +3,25 @@
 A stub for the Stripe API powered by the OpenAPI specification that it
 generates as an artifact.
 
-Fetch and run it with:
-
-``` sh
-go get -u github.com/brandur/stripelocal
-stripelocal
-```
-
-Or from Homebrew:
+Get it from Homebrew or download it [from the releases page][releases]:
 
 ``` sh
 brew install brandur/stripelocal/stripelocal
 
 # or to upgrade if you already have it
 brew upgrade stripelocal
+```
+
+Or if you have Go installed you can build it:
+
+``` sh
+go get -u github.com/brandur/stripelocal
+```
+
+Run it:
+
+``` sh
+stripelocal -port 6065
 ```
 
 Then from another terminal:
