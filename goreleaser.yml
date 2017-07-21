@@ -29,7 +29,8 @@ brew:
         <key>ProgramArguments</key>
         <array>
           <string>#{opt_bin}/stripestub</string>
-          <string>-port 6065</string>
+          <string>-port</string>
+          <string>6065</string>
         </array>
         <key>RunAtLoad</key>
         <true/>
