@@ -6,3 +6,38 @@ build:
     - linux
   goarch:
     - amd64
+
+brew:
+  github:
+    owner: brandur
+    name: homebrew-stripestub
+  homepage: "https://github.com.com/brandur/stripestub"
+  description: "Stripestub is a test server for the Stripe API."
+
+  plist: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+      <dict>
+        <key>KeepAlive</key>
+        <dict>
+          <key>SuccessfulExit</key>
+          <false/>
+        </dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>ProgramArguments</key>
+        <array>
+          <string>#{opt_bin}/stripestub</string>
+          <string>-port 6065</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>WorkingDirectory</key>
+        <string>#{var}</string>
+        <key>StandardErrorPath</key>
+        <string>#{var}/log/stripestub.log</string>
+        <key>StandardOutPath</key>
+        <string>#{var}/log/stripestub.log</string>
+      </dict>
+    </plist>
