@@ -10,6 +10,15 @@ go get -u github.com/brandur/stripestub
 stripestub
 ```
 
+Or from Homebrew:
+
+``` sh
+brew install brandur/stripestub/stripestub
+
+# or to upgrade if you already have it
+brew upgrade stripestub
+```
+
 Then from another terminal:
 
 ``` sh
@@ -54,7 +63,8 @@ git tag v0.1.1
 git push origin --tags
 ```
 
-Then run goreleaser and you're done! Check [releases].
+Then run goreleaser and you're done! Check [releases] (it also pushes to the
+Homebrew tap).
 
 ``` sh
 goreleaser
