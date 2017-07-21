@@ -1,4 +1,4 @@
-# stripestub [![Build Status](https://travis-ci.org/brandur/stripestub.svg?branch=master)](https://travis-ci.org/brandur/stripestub)
+# stripelocal [![Build Status](https://travis-ci.org/brandur/stripelocal.svg?branch=master)](https://travis-ci.org/brandur/stripelocal)
 
 A stub for the Stripe API powered by the OpenAPI specification that it
 generates as an artifact.
@@ -6,17 +6,17 @@ generates as an artifact.
 Fetch and run it with:
 
 ``` sh
-go get -u github.com/brandur/stripestub
-stripestub
+go get -u github.com/brandur/stripelocal
+stripelocal
 ```
 
 Or from Homebrew:
 
 ``` sh
-brew install brandur/stripestub/stripestub
+brew install brandur/stripelocal/stripelocal
 
 # or to upgrade if you already have it
-brew upgrade stripestub
+brew upgrade stripelocal
 ```
 
 Then from another terminal:
@@ -72,7 +72,7 @@ goreleaser
 
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
-[releases]: https://github.com/brandur/stripestub/releases
+[releases]: https://github.com/brandur/stripelocal/releases
 
 <!--
 # vim: set tw=79:

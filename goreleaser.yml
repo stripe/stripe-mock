@@ -1,5 +1,5 @@
 build:
-  binary: stripestub
+  binary: stripelocal
   goos:
     - windows
     - darwin
@@ -10,9 +10,9 @@ build:
 brew:
   github:
     owner: brandur
-    name: homebrew-stripestub
-  homepage: "https://github.com.com/brandur/stripestub"
-  description: "Stripestub is a test server for the Stripe API."
+    name: homebrew-stripelocal
+  homepage: "https://github.com.com/brandur/stripelocal"
+  description: "stripelocal is a server that can be run locally and which responds like the real Stripe API."
 
   plist: |
     <?xml version="1.0" encoding="UTF-8"?>
@@ -28,7 +28,7 @@ brew:
         <string>#{plist_name}</string>
         <key>ProgramArguments</key>
         <array>
-          <string>#{opt_bin}/stripestub</string>
+          <string>#{opt_bin}/stripelocal</string>
           <string>-port</string>
           <string>6065</string>
         </array>
@@ -37,8 +37,8 @@ brew:
         <key>WorkingDirectory</key>
         <string>#{var}</string>
         <key>StandardErrorPath</key>
-        <string>#{var}/log/stripestub.log</string>
+        <string>#{var}/log/stripelocal.log</string>
         <key>StandardOutPath</key>
-        <string>#{var}/log/stripestub.log</string>
+        <string>#{var}/log/stripelocal.log</string>
       </dict>
     </plist>

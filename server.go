@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brandur/stripestub/param/coercer"
-	"github.com/brandur/stripestub/param/parser"
-	"github.com/brandur/stripestub/spec"
+	"github.com/brandur/stripelocal/param/coercer"
+	"github.com/brandur/stripelocal/param/parser"
+	"github.com/brandur/stripelocal/spec"
 	"github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-jsval/builder"

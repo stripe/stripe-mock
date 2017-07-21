@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/brandur/stripestub/spec"
+	"github.com/brandur/stripelocal/spec"
 )
 
 const defaultPort = 6065
