@@ -239,7 +239,7 @@ func compilePath(path spec.Path) *regexp.Regexp {
 		if submatches == nil {
 			pattern += `/` + part
 		} else {
-			pattern += `/(?P<` + submatches[0][1] + `>\w+)`
+			pattern += `/(?P<` + submatches[0][1] + `>[\w-_.]+)`
 		}
 	}
 
