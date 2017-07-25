@@ -8,7 +8,10 @@ Get it from Homebrew or download it [from the releases page][releases]:
 ``` sh
 brew install brandur/stripelocal/stripelocal
 
-# or to upgrade if you already have it
+# start a stripelocal service at login
+brew services start stripelocal
+
+# upgrade if you already have it
 brew upgrade stripelocal
 ```
 
