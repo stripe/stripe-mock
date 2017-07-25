@@ -19,8 +19,8 @@ const defaultPort = 6065
 // verbose tracks whether the program is operating in verbose mode
 var verbose bool
 
-// This is set to the actual version by GoReleaser as it's run. Versions built
-// from source will always show master.
+// This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
+// as it's run. Versions built from source will always show master.
 var version = "master"
 
 // ---
