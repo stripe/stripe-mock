@@ -11,13 +11,6 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
-func getStubServer(t *testing.T) *StubServer {
-	server := &StubServer{spec: testSpec}
-	err := server.initializeRouter()
-	assert.NoError(t, err)
-	return server
-}
-
 func TestStubServer_ParameterValidation(t *testing.T) {
 	server := getStubServer(t)
 
@@ -138,4 +131,15 @@ func TestParseExpansionLevel(t *testing.T) {
 	assert.Equal(t,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{}, wildcard: true},
 		ParseExpansionLevel([]string{"*"}))
+}
+
+//
+// ---
+//
+
+func getStubServer(t *testing.T) *StubServer {
+	server := &StubServer{spec: testSpec}
+	err := server.initializeRouter()
+	assert.NoError(t, err)
+	return server
 }
