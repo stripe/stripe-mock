@@ -3,7 +3,7 @@ package coercer
 import (
 	"strconv"
 
-	"github.com/brandur/stripelocal/spec"
+	"github.com/brandur/stripe-mock/spec"
 )
 
 // CoerceParams coerces the types of certain parameters according to typing

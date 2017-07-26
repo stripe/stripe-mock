@@ -1,5 +1,5 @@
 build:
-  binary: stripelocal
+  binary: stripe-mock
   goos:
     - windows
     - darwin
@@ -10,9 +10,9 @@ build:
 brew:
   github:
     owner: brandur
-    name: homebrew-stripelocal
-  homepage: "https://github.com.com/brandur/stripelocal"
-  description: "stripelocal is a server that can be run locally and which responds like the real Stripe API."
+    name: homebrew-stripe-mock
+  homepage: "https://github.com.com/brandur/stripe-mock"
+  description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
 
   plist: |
     <?xml version="1.0" encoding="UTF-8"?>
@@ -28,7 +28,7 @@ brew:
         <string>#{plist_name}</string>
         <key>ProgramArguments</key>
         <array>
-          <string>#{opt_bin}/stripelocal</string>
+          <string>#{opt_bin}/stripe-mock</string>
           <string>-port</string>
           <string>12111</string>
         </array>
@@ -37,8 +37,8 @@ brew:
         <key>WorkingDirectory</key>
         <string>#{var}</string>
         <key>StandardErrorPath</key>
-        <string>#{var}/log/stripelocal.log</string>
+        <string>#{var}/log/stripe-mock.log</string>
         <key>StandardOutPath</key>
-        <string>#{var}/log/stripelocal.log</string>
+        <string>#{var}/log/stripe-mock.log</string>
       </dict>
     </plist>

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/brandur/stripelocal/spec"
+	"github.com/brandur/stripe-mock/spec"
 )
 
 var chargeAllMethod *spec.Method

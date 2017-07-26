@@ -1,30 +1,29 @@
-# stripelocal [![Build Status](https://travis-ci.org/brandur/stripelocal.svg?branch=master)](https://travis-ci.org/brandur/stripelocal)
+# stripe-mock [![Build Status](https://travis-ci.org/brandur/stripe-mock.svg?branch=master)](https://travis-ci.org/brandur/stripe-mock)
 
-A stub for the Stripe API powered by the OpenAPI specification that it
-generates as an artifact.
+stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle.
 
 Get it from Homebrew or download it [from the releases page][releases]:
 
 ``` sh
-brew install brandur/stripelocal/stripelocal
+brew install brandur/stripe-mock/stripe-mock
 
-# start a stripelocal service at login
-brew services start stripelocal
+# start a stripe-mock service at login
+brew services start stripe-mock
 
 # upgrade if you already have it
-brew upgrade stripelocal
+brew upgrade stripe-mock
 ```
 
 Or if you have Go installed you can build it:
 
 ``` sh
-go get -u github.com/brandur/stripelocal
+go get -u github.com/brandur/stripe-mock
 ```
 
 Run it:
 
 ``` sh
-stripelocal
+stripe-mock
 ```
 
 Then from another terminal:
@@ -33,7 +32,7 @@ Then from another terminal:
 curl -i http://localhost:12111/v1/charges
 ```
 
-By default, stripelocal runs on port 12111, but is configurable with the
+By default, stripe-mock runs on port 12111, but is configurable with the
 `-port` option.
 
 ## Development
@@ -91,7 +90,7 @@ goreleaser
 
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
-[releases]: https://github.com/brandur/stripelocal/releases
+[releases]: https://github.com/brandur/stripe-mock/releases
 
 <!--
 # vim: set tw=79:
