@@ -24,7 +24,7 @@ go get -u github.com/brandur/stripelocal
 Run it:
 
 ``` sh
-stripelocal -port 12111
+stripelocal
 ```
 
 Then from another terminal:
@@ -32,6 +32,9 @@ Then from another terminal:
 ``` sh
 curl -i http://localhost:12111/v1/charges
 ```
+
+By default, stripelocal runs on port 12111, but is configurable with the
+`-port` option.
 
 ## Development
 
