@@ -11,6 +11,19 @@ import (
 	assert "github.com/stretchr/testify/require"
 )
 
+func TestStubServer_SetsSpecialHeaders(t *testing.T) {
+	server := getStubServer(t)
+
+	// Does this regardless of endpoint
+	req := httptest.NewRequest("GET", "https://stripe.com/", nil)
+	w := httptest.NewRecorder()
+	server.HandleRequest(w, req)
+
+	resp := w.Result()
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, version, resp.Header.Get("Stripelocal-Version"))
+}
+
 func TestStubServer_ParameterValidation(t *testing.T) {
 	server := getStubServer(t)
 
@@ -23,7 +36,7 @@ func TestStubServer_ParameterValidation(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Contains(t, string(body), "property 'amount' is required")
-	assert.Equal(t, 400, resp.StatusCode)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
 func TestStubServer_RoutesRequest(t *testing.T) {

@@ -305,6 +305,8 @@ func writeResponse(w http.ResponseWriter, start time.Time, status int, data inte
 		return
 	}
 
+	w.Header().Set("Stripelocal-Version", version)
+
 	w.WriteHeader(status)
 	_, err = w.Write(encodedData)
 	if err != nil {
