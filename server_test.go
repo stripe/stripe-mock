@@ -20,7 +20,7 @@ func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	server.HandleRequest(w, req)
 
 	resp := w.Result()
-	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
 }
 
@@ -28,6 +28,7 @@ func TestStubServer_ParameterValidation(t *testing.T) {
 	server := getStubServer(t)
 
 	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges", nil)
+	req.Header.Set("Authorization", "Bearer sk_test_123")
 	w := httptest.NewRecorder()
 	server.HandleRequest(w, req)
 
@@ -144,6 +145,27 @@ func TestParseExpansionLevel(t *testing.T) {
 	assert.Equal(t,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{}, wildcard: true},
 		ParseExpansionLevel([]string{"*"}))
+}
+
+func TestValidateAuth(t *testing.T) {
+	testCases := []struct {
+		auth string
+		want bool
+	}{
+		{"Bearer sk_test_123", true},
+		{"", false},
+		{"Bearer", false},
+		{"Bearer sk_test_123 extra", false},
+		{"Bearer sk_test", false},
+		{"Bearer sk_test_123_extra", false},
+		{"Bearer sk_live_123", false},
+		{"Bearer sk_test_", false},
+	}
+	for _, tc := range testCases {
+		t.Run("Authorization: "+tc.auth, func(t *testing.T) {
+			assert.Equal(t, tc.want, validateAuth(tc.auth))
+		})
+	}
 }
 
 //

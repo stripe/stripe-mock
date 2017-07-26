@@ -19,6 +19,13 @@ import (
 	"github.com/lestrrat/go-jsval/builder"
 )
 
+const (
+	invalidAuthorization = "Please authenticate by specifying an " +
+		"`Authorization` header with any valid looking testmode secret API " +
+		"key. For example, `Authorization: Bearer sk_test_123`. " +
+		"Authorization was '%s'."
+)
+
 // ExpansionLevel represents expansions on a single "level" of resource. It may
 // have subexpansions that are meant to take effect on resources that are
 // nested below it (on other levels).
@@ -79,6 +86,13 @@ type stubServerRoute struct {
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	log.Printf("Request: %v %v", r.Method, r.URL.Path)
+
+	auth := r.Header.Get("Authorization")
+	if !validateAuth(auth) {
+		writeResponse(w, start, http.StatusUnauthorized,
+			fmt.Sprintf(invalidAuthorization, auth))
+		return
+	}
 
 	route := s.routeRequest(r)
 	if route == nil {
@@ -295,7 +309,7 @@ func getValidator(method *spec.Method) (*jsval.JSVal, error) {
 
 func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
 	if data == nil {
-		data = []byte(http.StatusText(status))
+		data = http.StatusText(status)
 	}
 
 	encodedData, err := json.Marshal(&data)
@@ -313,4 +327,43 @@ func writeResponse(w http.ResponseWriter, start time.Time, status int, data inte
 		log.Printf("Error writing to client: %v", err)
 	}
 	log.Printf("Response: elapsed=%v status=%v", time.Now().Sub(start), status)
+}
+
+func validateAuth(auth string) bool {
+	if auth == "" {
+		return false
+	}
+
+	parts := strings.Split(auth, " ")
+
+	// Expect ["Bearer", "sk_test_123"]
+	if len(parts) != 2 {
+		return false
+	}
+
+	if parts[0] != "Bearer" {
+		return false
+	}
+
+	keyParts := strings.Split(parts[1], "_")
+
+	// Expect ["sk", "test", "123"]
+	if len(keyParts) != 3 {
+		return false
+	}
+
+	if keyParts[0] != "sk" {
+		return false
+	}
+
+	if keyParts[1] != "test" {
+		return false
+	}
+
+	// Expect something (anything but an empty string) in the third position
+	if len(keyParts[2]) == 0 {
+		return false
+	}
+
+	return true
 }
