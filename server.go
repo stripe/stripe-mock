@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brandur/stripelocal/param/coercer"
-	"github.com/brandur/stripelocal/param/parser"
-	"github.com/brandur/stripelocal/spec"
+	"github.com/brandur/stripe-mock/param/coercer"
+	"github.com/brandur/stripe-mock/param/parser"
+	"github.com/brandur/stripe-mock/spec"
 	"github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-jsval/builder"
@@ -305,7 +305,7 @@ func writeResponse(w http.ResponseWriter, start time.Time, status int, data inte
 		return
 	}
 
-	w.Header().Set("Stripelocal-Version", version)
+	w.Header().Set("Stripe-Mock-Version", version)
 
 	w.WriteHeader(status)
 	_, err = w.Write(encodedData)

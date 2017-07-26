@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/brandur/stripelocal/spec"
+	"github.com/brandur/stripe-mock/spec"
 	assert "github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 
 	resp := w.Result()
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-	assert.Equal(t, version, resp.Header.Get("Stripelocal-Version"))
+	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
 }
 
 func TestStubServer_ParameterValidation(t *testing.T) {

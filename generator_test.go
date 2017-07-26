@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/brandur/stripelocal/spec"
+	"github.com/brandur/stripe-mock/spec"
 	assert "github.com/stretchr/testify/require"
 )
 
