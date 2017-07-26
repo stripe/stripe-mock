@@ -24,13 +24,13 @@ go get -u github.com/brandur/stripelocal
 Run it:
 
 ``` sh
-stripelocal -port 6065
+stripelocal -port 12111
 ```
 
 Then from another terminal:
 
 ``` sh
-curl -i http://localhost:6065/v1/charges
+curl -i http://localhost:12111/v1/charges
 ```
 
 ## Development

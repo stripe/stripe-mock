@@ -14,7 +14,7 @@ import (
 	"github.com/brandur/stripelocal/spec"
 )
 
-const defaultPort = 6065
+const defaultPort = 12111
 
 // verbose tracks whether the program is operating in verbose mode
 var verbose bool

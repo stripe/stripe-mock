@@ -30,7 +30,7 @@ brew:
         <array>
           <string>#{opt_bin}/stripelocal</string>
           <string>-port</string>
-          <string>6065</string>
+          <string>12111</string>
         </array>
         <key>RunAtLoad</key>
         <true/>
