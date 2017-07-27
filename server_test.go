@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -152,9 +153,15 @@ func TestValidateAuth(t *testing.T) {
 		auth string
 		want bool
 	}{
+		{"Basic " + encode64("sk_test_123"), true},
 		{"Bearer sk_test_123", true},
 		{"", false},
 		{"Bearer", false},
+		{"Basic", false},
+		{"Bearer ", false},
+		{"Basic ", false},
+		{"Basic 123", false}, // "123" is not a valid key when decoded
+		{"Basic " + encode64("sk_test"), false},
 		{"Bearer sk_test_123 extra", false},
 		{"Bearer sk_test", false},
 		{"Bearer sk_test_123_extra", false},
@@ -171,6 +178,10 @@ func TestValidateAuth(t *testing.T) {
 //
 // ---
 //
+
+func encode64(s string) string {
+	return base64.StdEncoding.EncodeToString([]byte(s))
+}
 
 func getStubServer(t *testing.T) *StubServer {
 	server := &StubServer{spec: testSpec}

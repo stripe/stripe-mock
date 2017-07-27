@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -336,16 +337,28 @@ func validateAuth(auth string) bool {
 
 	parts := strings.Split(auth, " ")
 
-	// Expect ["Bearer", "sk_test_123"]
-	if len(parts) != 2 {
+	// Expect ["Bearer", "sk_test_123"] or ["Basic", "aaaaa"]
+	if len(parts) != 2 || parts[1] == "" {
 		return false
 	}
 
-	if parts[0] != "Bearer" {
+	var key string
+	switch parts[0] {
+	case "Basic":
+		keyBytes, err := base64.StdEncoding.DecodeString(parts[1])
+		if err != nil {
+			return false
+		}
+		key = string(keyBytes)
+
+	case "Bearer":
+		key = parts[1]
+
+	default:
 		return false
 	}
 
-	keyParts := strings.Split(parts[1], "_")
+	keyParts := strings.Split(key, "_")
 
 	// Expect ["sk", "test", "123"]
 	if len(keyParts) != 3 {
