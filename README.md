@@ -1,11 +1,11 @@
-# stripe-mock [![Build Status](https://travis-ci.org/brandur/stripe-mock.svg?branch=master)](https://travis-ci.org/brandur/stripe-mock)
+# stripe-mock [![Build Status](https://travis-ci.org/stripe/stripe-mock.svg?branch=master)](https://travis-ci.org/stripe/stripe-mock)
 
 stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle.
 
 Get it from Homebrew or download it [from the releases page][releases]:
 
 ``` sh
-brew install brandur/stripe-mock/stripe-mock
+brew install stripe/stripe-mock/stripe-mock
 
 # start a stripe-mock service at login
 brew services start stripe-mock
@@ -17,7 +17,7 @@ brew upgrade stripe-mock
 Or if you have Go installed you can build it:
 
 ``` sh
-go get -u github.com/brandur/stripe-mock
+go get -u github.com/stripe/stripe-mock
 ```
 
 Run it:
@@ -90,7 +90,7 @@ goreleaser
 
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
-[releases]: https://github.com/brandur/stripe-mock/releases
+[releases]: https://github.com/stripe/stripe-mock/releases
 
 <!--
 # vim: set tw=79:

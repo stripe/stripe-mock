@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/brandur/stripe-mock/spec"
+	"github.com/stripe/stripe-mock/spec"
 )
 
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")

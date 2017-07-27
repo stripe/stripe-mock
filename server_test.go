@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/brandur/stripe-mock/spec"
 	assert "github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-mock/spec"
 )
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {

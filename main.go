@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/brandur/stripe-mock/spec"
+	"github.com/stripe/stripe-mock/spec"
 )
 
 const defaultPort = 12111

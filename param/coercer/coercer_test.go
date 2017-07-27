@@ -3,8 +3,8 @@ package coercer
 import (
 	"testing"
 
-	"github.com/brandur/stripe-mock/spec"
 	assert "github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-mock/spec"
 )
 
 func TestCoerceParams_IntegerCoercion(t *testing.T) {

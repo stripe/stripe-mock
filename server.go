@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/brandur/stripe-mock/param/coercer"
-	"github.com/brandur/stripe-mock/param/parser"
-	"github.com/brandur/stripe-mock/spec"
 	"github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsval"
 	"github.com/lestrrat/go-jsval/builder"
+	"github.com/stripe/stripe-mock/param/coercer"
+	"github.com/stripe/stripe-mock/param/parser"
+	"github.com/stripe/stripe-mock/spec"
 )
 
 const (
