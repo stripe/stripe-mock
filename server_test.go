@@ -160,7 +160,7 @@ func TestValidateAuth(t *testing.T) {
 		{"Basic", false},
 		{"Bearer ", false},
 		{"Basic ", false},
-		{"Basic 123", false}, // "123" is not a valid key when decoded
+		{"Basic 123", false}, // "123" is not a valid key when base64 decoded
 		{"Basic " + encode64("sk_test"), false},
 		{"Bearer sk_test_123 extra", false},
 		{"Bearer sk_test", false},
