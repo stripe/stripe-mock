@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -116,36 +117,50 @@ func TestGetValidator_NoSuitableParameter(t *testing.T) {
 }
 
 func TestParseExpansionLevel(t *testing.T) {
-	assert.Equal(t,
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-			"charge":   nil,
-			"customer": nil,
-		}},
-		ParseExpansionLevel([]string{"charge", "customer"}))
-
-	assert.Equal(t,
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-			"charge": {expansions: map[string]*ExpansionLevel{
+	testCases := []struct {
+		expansions []string
+		want       *ExpansionLevel
+	}{
+		{
+			[]string{"charge", "customer"},
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+				"charge":   nil,
 				"customer": nil,
-				"source":   nil,
 			}},
-			"customer": nil,
-		}},
-		ParseExpansionLevel([]string{"charge.customer", "customer", "charge.source"}))
-
-	assert.Equal(t,
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-			"charge": {expansions: map[string]*ExpansionLevel{
-				"customer": {expansions: map[string]*ExpansionLevel{
-					"default_source": nil,
+		},
+		{
+			[]string{"charge.customer", "customer", "charge.source"},
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+				"charge": {expansions: map[string]*ExpansionLevel{
+					"customer": nil,
+					"source":   nil,
+				}},
+				"customer": nil,
+			}},
+		},
+		{
+			[]string{"charge.customer.default_source", "charge"},
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
+				"charge": {expansions: map[string]*ExpansionLevel{
+					"customer": {expansions: map[string]*ExpansionLevel{
+						"default_source": nil,
+					}},
 				}},
 			}},
-		}},
-		ParseExpansionLevel([]string{"charge.customer.default_source", "charge"}))
-
-	assert.Equal(t,
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{}, wildcard: true},
-		ParseExpansionLevel([]string{"*"}))
+		},
+		{
+			[]string{"*"},
+			&ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{},
+				wildcard:   true,
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%+v", tc.expansions), func(t *testing.T) {
+			assert.Equal(t, tc.want, ParseExpansionLevel(tc.expansions))
+		})
+	}
 }
 
 func TestValidateAuth(t *testing.T) {
