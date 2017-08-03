@@ -7,6 +7,18 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+func TestCoerceParams_BooleanCoercion(t *testing.T) {
+	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
+		"boolkey": {Type: []string{booleanType}},
+	}}
+	data := map[string]interface{}{
+		"boolkey": "true",
+	}
+
+	CoerceParams(schema, data)
+	assert.Equal(t, true, data["boolkey"])
+}
+
 func TestCoerceParams_IntegerCoercion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
 		"intkey": {Type: []string{integerType}},
