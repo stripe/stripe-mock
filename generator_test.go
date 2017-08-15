@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -25,6 +26,42 @@ func init() {
 			"total_count": nil,
 			"url":         nil,
 		},
+	}
+}
+
+func TestConcurrentAcccess(t *testing.T) {
+	// Load the spec information from go-bindata
+	data, err := Asset("openapi/openapi/spec2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var stripeSpec spec.Spec
+	err = json.Unmarshal(data, &stripeSpec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// And do the same for fixtures
+	data, err = Asset("openapi/openapi/fixtures.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var fixtures spec.Fixtures
+	err = json.Unmarshal(data, &fixtures)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var generator DataGenerator
+	generator = DataGenerator{stripeSpec.Definitions, &fixtures}
+
+	for i := 0; i < 10; i++ {
+		go func() {
+			_, _ = generator.Generate(
+				&spec.JSONSchema{Ref: "#/definitions/subscription"}, "", nil)
+		}()
 	}
 }
 
