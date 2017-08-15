@@ -17,8 +17,8 @@ var chargeGetMethod *spec.Method
 var realSpec spec.Spec
 var realFixtures spec.Fixtures
 
-var testSpec *spec.Spec
-var testFixtures *spec.Fixtures
+var testSpec spec.Spec
+var testFixtures spec.Fixtures
 
 func init() {
 	initRealSpec()
@@ -84,7 +84,7 @@ func initTestSpec() {
 	chargeGetMethod = &spec.Method{}
 
 	testFixtures =
-		&spec.Fixtures{
+		spec.Fixtures{
 			Resources: map[spec.ResourceID]interface{}{
 				spec.ResourceID("charge"): map[string]interface{}{
 					"customer": "cus_123",
@@ -94,7 +94,7 @@ func initTestSpec() {
 			},
 		}
 
-	testSpec = &spec.Spec{
+	testSpec = spec.Spec{
 		Definitions: map[string]*spec.JSONSchema{
 			"charge": {
 				Properties: map[string]*spec.JSONSchema{

@@ -199,7 +199,7 @@ func encode64(s string) string {
 }
 
 func getStubServer(t *testing.T) *StubServer {
-	server := &StubServer{spec: testSpec}
+	server := &StubServer{spec: &testSpec}
 	err := server.initializeRouter()
 	assert.NoError(t, err)
 	return server

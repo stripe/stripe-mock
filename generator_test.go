@@ -57,7 +57,7 @@ func TestGenerateResponseData(t *testing.T) {
 	var generator DataGenerator
 
 	// basic reference
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 	assert.Nil(t, err)
@@ -71,7 +71,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"])
 
 	// expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -82,7 +82,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// bad expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -90,7 +90,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// bad nested expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -98,7 +98,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// wildcard expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -109,7 +109,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// list
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(listSchema, "/v1/charges", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "list", data.(map[string]interface{})["object"])
@@ -161,7 +161,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{}, data)
 
 	// error: unhandled JSON schema type
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Type: []string{"string"}}, "", nil)
 	assert.Equal(t,
@@ -169,7 +169,7 @@ func TestGenerateResponseData(t *testing.T) {
 		err)
 
 	// error: no definition in OpenAPI
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
 	assert.Equal(t,
