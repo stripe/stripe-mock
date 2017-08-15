@@ -114,7 +114,7 @@ func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, 
 		return map[string]interface{}{}, nil
 	}
 
-	return fixture, nil
+	return duplicateMap(fixture.(map[string]interface{})), nil
 }
 
 func (g *DataGenerator) maybeDereference(schema *spec.JSONSchema) (*spec.JSONSchema, error) {
@@ -198,6 +198,54 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.JSONSchema
 }
 
 // ---
+
+// duplicateArr is a helper method for duplicateMap.
+func duplicateArr(dataArr []interface{}) []interface{} {
+	copyArr := make([]interface{}, len(dataArr))
+
+	for i, v := range dataArr {
+		vMap, ok := v.(map[string]interface{})
+		if ok {
+			copyArr[i] = duplicateMap(vMap)
+			continue
+		}
+
+		vArr, ok := v.([]interface{})
+		if ok {
+			copyArr[i] = duplicateArr(vArr)
+			continue
+		}
+
+		copyArr[i] = v
+	}
+
+	return copyArr
+}
+
+// duplicateMap is a hacky way around the fact that there's no way to copy
+// something like a map in Go. We need to copy a fixture so that we can modify
+// and return it, which is why this exists.
+func duplicateMap(dataMap map[string]interface{}) map[string]interface{} {
+	copyMap := make(map[string]interface{})
+
+	for k, v := range dataMap {
+		vMap, ok := v.(map[string]interface{})
+		if ok {
+			copyMap[k] = duplicateMap(vMap)
+			continue
+		}
+
+		vArr, ok := v.([]interface{})
+		if ok {
+			copyMap[k] = duplicateArr(vArr)
+			continue
+		}
+
+		copyMap[k] = v
+	}
+
+	return copyMap
+}
 
 // definitionFromJSONPointer extracts the name of a JSON schema definition from
 // a JSON pointer, so "#/definitions/charge" would become just "charge". This

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"sync"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
@@ -30,39 +30,25 @@ func init() {
 }
 
 func TestConcurrentAcccess(t *testing.T) {
-	// Load the spec information from go-bindata
-	data, err := Asset("openapi/openapi/spec2.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var stripeSpec spec.Spec
-	err = json.Unmarshal(data, &stripeSpec)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// And do the same for fixtures
-	data, err = Asset("openapi/openapi/fixtures.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var fixtures spec.Fixtures
-	err = json.Unmarshal(data, &fixtures)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	var generator DataGenerator
-	generator = DataGenerator{stripeSpec.Definitions, &fixtures}
 
-	for i := 0; i < 10; i++ {
+	// We use the real spec here because when there was a concurrency problem,
+	// it wasn't revealed due to the test spec being oversimplistic.
+	generator = DataGenerator{realSpec.Definitions, &realFixtures}
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
 		go func() {
-			_, _ = generator.Generate(
+			defer wg.Done()
+			_, err := generator.Generate(
 				&spec.JSONSchema{Ref: "#/definitions/subscription"}, "", nil)
+			assert.NoError(t, err)
 		}()
 	}
+
+	wg.Wait()
 }
 
 func TestGenerateResponseData(t *testing.T) {
@@ -192,6 +178,29 @@ func TestGenerateResponseData(t *testing.T) {
 }
 
 // ---
+
+func TestDuplicateMap(t *testing.T) {
+	data := map[string]interface{}{
+		"key1": "foo",
+		"key2": 123,
+		"key3": true,
+		"key4": []interface{}{
+			"bar",
+			"456",
+			true,
+			[]interface{}{
+				"baz",
+				"789",
+			},
+		},
+		"key5": map[string]interface{}{
+			"keyA": "abc",
+			"keyB": 999,
+			"keyC": true,
+		},
+	}
+	assert.Equal(t, data, duplicateMap(data))
+}
 
 func TestDefinitionFromJSONPointer(t *testing.T) {
 	definition, err := definitionFromJSONPointer("#/definitions/charge")
