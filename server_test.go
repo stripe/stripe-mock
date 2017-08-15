@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -40,6 +41,25 @@ func TestStubServer_ParameterValidation(t *testing.T) {
 
 	assert.Contains(t, string(body), "property 'amount' is required")
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+}
+
+func TestStubServer_FormatsForCurl(t *testing.T) {
+	server := getStubServer(t)
+
+	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
+		bytes.NewBufferString("amount=123&currency=usd"))
+	req.Header.Set("Authorization", "Bearer sk_test_123")
+	w := httptest.NewRecorder()
+	server.HandleRequest(w, req)
+
+	resp := w.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	// Note the two spaces in front of "id" which indicate that our JSON is
+	// pretty printed.
+	assert.Contains(t, string(body), `  "id"`)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
 func TestStubServer_RoutesRequest(t *testing.T) {
@@ -114,6 +134,27 @@ func TestGetValidator_NoSuitableParameter(t *testing.T) {
 	validator, err := getValidator(method)
 	assert.NoError(t, err)
 	assert.Nil(t, validator)
+}
+
+func TestIsCurl(t *testing.T) {
+	testCases := []struct {
+		userAgent string
+		want      bool
+	}{
+		{"curl/7.51.0", true},
+
+		// false because it's not something (to my knowledge) that cURL would
+		// ever return
+		{"curl", false},
+
+		{"Mozilla", false},
+		{"", false},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.userAgent, func(t *testing.T) {
+			assert.Equal(t, tc.want, isCurl(tc.userAgent))
+		})
+	}
 }
 
 func TestParseExpansionLevel(t *testing.T) {
@@ -199,7 +240,7 @@ func encode64(s string) string {
 }
 
 func getStubServer(t *testing.T) *StubServer {
-	server := &StubServer{spec: &testSpec}
+	server := &StubServer{spec: &testSpec, fixtures: &testFixtures}
 	err := server.initializeRouter()
 	assert.NoError(t, err)
 	return server
