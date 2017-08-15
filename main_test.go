@@ -57,6 +57,11 @@ func initTestSpec() {
 			{
 				In: "body",
 				Schema: &spec.JSONSchema{
+					Properties: map[string]*spec.JSONSchema{
+						"amount": {
+							Type: []string{"integer"},
+						},
+					},
 					RawFields: map[string]interface{}{
 						"properties": map[string]interface{}{
 							"amount": map[string]interface{}{

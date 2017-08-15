@@ -90,21 +90,21 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	auth := r.Header.Get("Authorization")
 	if !validateAuth(auth) {
-		writeResponse(w, start, http.StatusUnauthorized,
+		writeResponse(w, r, start, http.StatusUnauthorized,
 			fmt.Sprintf(invalidAuthorization, auth))
 		return
 	}
 
 	route := s.routeRequest(r)
 	if route == nil {
-		writeResponse(w, start, http.StatusNotFound, nil)
+		writeResponse(w, r, start, http.StatusNotFound, nil)
 		return
 	}
 
 	response, ok := route.method.Responses["200"]
 	if !ok {
 		log.Printf("Couldn't find 200 response in spec")
-		writeResponse(w, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -119,7 +119,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		formBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("Couldn't read request body: %v", err)
-			writeResponse(w, start, http.StatusInternalServerError, nil)
+			writeResponse(w, r, start, http.StatusInternalServerError, nil)
 			return
 		}
 		r.Body.Close()
@@ -128,7 +128,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	requestData, err := parser.ParseFormString(formString)
 	if err != nil {
 		log.Printf("Couldn't parse query/body: %v", err)
-		writeResponse(w, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -143,13 +143,14 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// support validation all verbs, and much more simply.
 	requestSchema := bodyParameterSchema(route.method)
 	if requestSchema != nil {
+		log.Printf("requestSchema = %+v\n", requestSchema)
 		coercer.CoerceParams(requestSchema, requestData)
 
 		err := route.validator.Validate(requestData)
 		if err != nil {
 			log.Printf("Validation error: %v", err)
 			responseData := fmt.Sprintf("Request error: %v", err)
-			writeResponse(w, start, http.StatusBadRequest, responseData)
+			writeResponse(w, r, start, http.StatusBadRequest, responseData)
 			return
 		}
 	}
@@ -163,10 +164,10 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	responseData, err := generator.Generate(response.Schema, r.URL.Path, expansions)
 	if err != nil {
 		log.Printf("Couldn't generate response: %v", err)
-		writeResponse(w, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
-	writeResponse(w, start, http.StatusOK, responseData)
+	writeResponse(w, r, start, http.StatusOK, responseData)
 }
 
 func (s *StubServer) initializeRouter() error {
@@ -308,15 +309,27 @@ func getValidator(method *spec.Method) (*jsval.JSVal, error) {
 	return nil, nil
 }
 
-func writeResponse(w http.ResponseWriter, start time.Time, status int, data interface{}) {
+func isCurl(userAgent string) bool {
+	return strings.HasPrefix(userAgent, "curl/")
+}
+
+func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, status int, data interface{}) {
 	if data == nil {
 		data = http.StatusText(status)
 	}
 
-	encodedData, err := json.Marshal(&data)
+	var encodedData []byte
+	var err error
+
+	if isCurl(r.Header.Get("User-Agent")) {
+		encodedData, err = json.Marshal(&data)
+	} else {
+		encodedData, err = json.MarshalIndent(&data, "", "  ")
+	}
+
 	if err != nil {
 		log.Printf("Error serializing response: %v", err)
-		writeResponse(w, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 
