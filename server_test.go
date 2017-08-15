@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +14,28 @@ import (
 	assert "github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-mock/spec"
 )
+
+func TestStubServer(t *testing.T) {
+	server := getStubServer(t)
+
+	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
+		bytes.NewBufferString("amount=123&currency=usd"))
+	req.Header.Set("Authorization", "Bearer sk_test_123")
+	w := httptest.NewRecorder()
+	server.HandleRequest(w, req)
+
+	resp := w.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var data map[string]interface{}
+	err = json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	_, ok := data["id"]
+	assert.True(t, ok)
+}
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	server := getStubServer(t)
