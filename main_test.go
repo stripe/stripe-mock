@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/stripe/stripe-mock/spec"
 )
 
@@ -8,10 +10,47 @@ var chargeAllMethod *spec.Method
 var chargeCreateMethod *spec.Method
 var chargeDeleteMethod *spec.Method
 var chargeGetMethod *spec.Method
-var testSpec *spec.Spec
-var testFixtures *spec.Fixtures
+
+// Try to avoid using the real spec as much as possible because it's more
+// complicated and slower. A test spec is provided below. If you do use it,
+// don't mutate it.
+var realSpec spec.Spec
+var realFixtures spec.Fixtures
+
+var testSpec spec.Spec
+var testFixtures spec.Fixtures
 
 func init() {
+	initRealSpec()
+	initTestSpec()
+}
+
+func initRealSpec() {
+	// Load the spec information from go-bindata
+	data, err := Asset("openapi/openapi/spec2.json")
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(data, &realSpec)
+	if err != nil {
+		panic(err)
+	}
+
+	// And do the same for fixtures
+	data, err = Asset("openapi/openapi/fixtures.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var fixtures spec.Fixtures
+	err = json.Unmarshal(data, &fixtures)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initTestSpec() {
 	chargeAllMethod = &spec.Method{}
 	chargeCreateMethod = &spec.Method{
 		Parameters: []*spec.Parameter{
@@ -45,7 +84,7 @@ func init() {
 	chargeGetMethod = &spec.Method{}
 
 	testFixtures =
-		&spec.Fixtures{
+		spec.Fixtures{
 			Resources: map[spec.ResourceID]interface{}{
 				spec.ResourceID("charge"): map[string]interface{}{
 					"customer": "cus_123",
@@ -55,7 +94,7 @@ func init() {
 			},
 		}
 
-	testSpec = &spec.Spec{
+	testSpec = spec.Spec{
 		Definitions: map[string]*spec.JSONSchema{
 			"charge": {
 				Properties: map[string]*spec.JSONSchema{

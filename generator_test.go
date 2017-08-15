@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
@@ -28,13 +29,35 @@ func init() {
 	}
 }
 
+func TestConcurrentAcccess(t *testing.T) {
+	var generator DataGenerator
+
+	// We use the real spec here because when there was a concurrency problem,
+	// it wasn't revealed due to the test spec being oversimplistic.
+	generator = DataGenerator{realSpec.Definitions, &realFixtures}
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := generator.Generate(
+				&spec.JSONSchema{Ref: "#/definitions/subscription"}, "", nil)
+			assert.NoError(t, err)
+		}()
+	}
+
+	wg.Wait()
+}
+
 func TestGenerateResponseData(t *testing.T) {
 	var data interface{}
 	var err error
 	var generator DataGenerator
 
 	// basic reference
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
 	assert.Nil(t, err)
@@ -48,7 +71,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"])
 
 	// expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -59,7 +82,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// bad expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -67,7 +90,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// bad nested expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -75,7 +98,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// wildcard expansion
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/charge"},
 		"",
@@ -86,7 +109,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// list
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(listSchema, "/v1/charges", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "list", data.(map[string]interface{})["object"])
@@ -138,7 +161,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{}, data)
 
 	// error: unhandled JSON schema type
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Type: []string{"string"}}, "", nil)
 	assert.Equal(t,
@@ -146,7 +169,7 @@ func TestGenerateResponseData(t *testing.T) {
 		err)
 
 	// error: no definition in OpenAPI
-	generator = DataGenerator{testSpec.Definitions, testFixtures}
+	generator = DataGenerator{testSpec.Definitions, &testFixtures}
 	data, err = generator.Generate(
 		&spec.JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
 	assert.Equal(t,
@@ -155,6 +178,29 @@ func TestGenerateResponseData(t *testing.T) {
 }
 
 // ---
+
+func TestDuplicateMap(t *testing.T) {
+	data := map[string]interface{}{
+		"key1": "foo",
+		"key2": 123,
+		"key3": true,
+		"key4": []interface{}{
+			"bar",
+			"456",
+			true,
+			[]interface{}{
+				"baz",
+				"789",
+			},
+		},
+		"key5": map[string]interface{}{
+			"keyA": "abc",
+			"keyB": 999,
+			"keyC": true,
+		},
+	}
+	assert.Equal(t, data, duplicateMap(data))
+}
 
 func TestDefinitionFromJSONPointer(t *testing.T) {
 	definition, err := definitionFromJSONPointer("#/definitions/charge")
