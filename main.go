@@ -5,10 +5,10 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/stripe/stripe-mock/spec"
@@ -26,6 +26,8 @@ var version = "master"
 // ---
 
 func main() {
+	log.SetOutput(os.Stdout)
+
 	var showVersion bool
 	var port int
 	var unix string
@@ -36,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	if showVersion || len(flag.Args()) == 1 && flag.Arg(0) == "version" {
-		fmt.Printf("%s\n", version)
+		log.Printf("%s\n", version)
 		return
 	}
 
