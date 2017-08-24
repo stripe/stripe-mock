@@ -5,7 +5,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"log"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -26,8 +26,6 @@ var version = "master"
 // ---
 
 func main() {
-	log.SetOutput(os.Stdout)
-
 	var showVersion bool
 	var port int
 	var unix string
@@ -38,58 +36,65 @@ func main() {
 	flag.Parse()
 
 	if showVersion || len(flag.Args()) == 1 && flag.Arg(0) == "version" {
-		log.Printf("%s\n", version)
+		fmt.Printf("%s\n", version)
 		return
 	}
 
 	if unix != "" && port != 0 {
 		flag.Usage()
-		log.Fatalf("Specify only one of -port or -unix")
+		fmt.Fprintf(os.Stderr, "Specify only one of -port or -unix\n")
+		os.Exit(1)
 	}
 
 	// Load the spec information from go-bindata
 	data, err := Asset("openapi/openapi/spec2.json")
 	if err != nil {
-		log.Fatalf("Error loading spec: %v", err)
+		fmt.Fprintf(os.Stderr, "Error loading spec: %v\n", err)
+		os.Exit(1)
 	}
 
 	var stripeSpec spec.Spec
 	err = json.Unmarshal(data, &stripeSpec)
 	if err != nil {
-		log.Fatalf("Error decoding spec: %v", err)
+		fmt.Fprintf(os.Stderr, "Error decoding spec: %v\n", err)
+		os.Exit(1)
 	}
 
 	// And do the same for fixtures
 	data, err = Asset("openapi/openapi/fixtures.json")
 	if err != nil {
-		log.Fatalf("Error loading fixtures: %v", err)
+		fmt.Fprintf(os.Stderr, "Error loading fixtures: %v\n", err)
+		os.Exit(1)
 	}
 
 	var fixtures spec.Fixtures
 	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
-		log.Fatalf("Error decoding spec: %v", err)
+		fmt.Fprintf(os.Stderr, "Error decoding spec: %v\n", err)
+		os.Exit(1)
 	}
 
 	stub := StubServer{fixtures: &fixtures, spec: &stripeSpec}
 	err = stub.initializeRouter()
 	if err != nil {
-		log.Fatalf("Error initializing router: %v", err)
+		fmt.Fprintf(os.Stderr, "Error initializing router: %v\n", err)
+		os.Exit(1)
 	}
 
 	var listener net.Listener
 	if unix != "" {
 		listener, err = net.Listen("unix", unix)
-		log.Printf("Listening on unix socket %v", unix)
+		fmt.Printf("Listening on unix socket %v", unix)
 	} else {
 		if port == 0 {
 			port = defaultPort
 		}
 		listener, err = net.Listen("tcp", ":"+strconv.Itoa(port))
-		log.Printf("Listening on port %v", port)
+		fmt.Printf("Listening on port %v", port)
 	}
 	if err != nil {
-		log.Fatalf("Error listening on socket: %v", err)
+		fmt.Fprintf(os.Stderr, "Error listening on socket: %v\n", err)
+		os.Exit(1)
 	}
 
 	http.HandleFunc("/", stub.HandleRequest)

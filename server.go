@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"regexp"
 	"sort"
@@ -86,7 +85,7 @@ type stubServerRoute struct {
 // HandleRequest handes an HTTP request directed at the API stub.
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	log.Printf("Request: %v %v", r.Method, r.URL.Path)
+	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
 
 	auth := r.Header.Get("Authorization")
 	if !validateAuth(auth) {
@@ -103,13 +102,13 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	response, ok := route.method.Responses["200"]
 	if !ok {
-		log.Printf("Couldn't find 200 response in spec")
+		fmt.Printf("Couldn't find 200 response in spec\n")
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 
 	if verbose {
-		log.Printf("Response schema: %+v", response.Schema)
+		fmt.Printf("Response schema: %+v\n", response.Schema)
 	}
 
 	var formString string
@@ -118,7 +117,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	} else {
 		formBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("Couldn't read request body: %v", err)
+			fmt.Printf("Couldn't read request body: %v\n", err)
 			writeResponse(w, r, start, http.StatusInternalServerError, nil)
 			return
 		}
@@ -127,13 +126,13 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 	requestData, err := parser.ParseFormString(formString)
 	if err != nil {
-		log.Printf("Couldn't parse query/body: %v", err)
+		fmt.Printf("Couldn't parse query/body: %v\n", err)
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 
 	if verbose {
-		log.Printf("Request data: %+v", requestData)
+		fmt.Printf("Request data: %+v\n", requestData)
 	}
 
 	// OpenAPI 2.0 stores a possible JSON schema in a special parameter that's
@@ -143,12 +142,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// support validation all verbs, and much more simply.
 	requestSchema := bodyParameterSchema(route.method)
 	if requestSchema != nil {
-		log.Printf("requestSchema = %+v\n", requestSchema)
 		coercer.CoerceParams(requestSchema, requestData)
 
 		err := route.validator.Validate(requestData)
 		if err != nil {
-			log.Printf("Validation error: %v", err)
+			fmt.Printf("Validation error: %v\n", err)
 			responseData := fmt.Sprintf("Request error: %v", err)
 			writeResponse(w, r, start, http.StatusBadRequest, responseData)
 			return
@@ -157,13 +155,13 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	expansions, rawExpansions := extractExpansions(requestData)
 	if verbose {
-		log.Printf("Expansions: %+v", rawExpansions)
+		fmt.Printf("Expansions: %+v\n", rawExpansions)
 	}
 
 	generator := DataGenerator{s.spec.Definitions, s.fixtures}
 	responseData, err := generator.Generate(response.Schema, r.URL.Path, expansions)
 	if err != nil {
-		log.Printf("Couldn't generate response: %v", err)
+		fmt.Printf("Couldn't generate response: %v\n", err)
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
@@ -183,7 +181,7 @@ func (s *StubServer) initializeRouter() error {
 		pathPattern := compilePath(path)
 
 		if verbose {
-			log.Printf("Compiled path: %v", pathPattern.String())
+			fmt.Printf("Compiled path: %v\n", pathPattern.String())
 		}
 
 		for verb, method := range verbs {
@@ -214,7 +212,7 @@ func (s *StubServer) initializeRouter() error {
 		}
 	}
 
-	log.Printf("Routing to %v path(s) and %v endpoint(s) with %v validator(s)",
+	fmt.Printf("Routing to %v path(s) and %v endpoint(s) with %v validator(s)\n",
 		numPaths, numEndpoints, numValidators)
 	return nil
 }
@@ -328,7 +326,7 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	}
 
 	if err != nil {
-		log.Printf("Error serializing response: %v", err)
+		fmt.Printf("Error serializing response: %v\n", err)
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
@@ -338,9 +336,9 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	w.WriteHeader(status)
 	_, err = w.Write(encodedData)
 	if err != nil {
-		log.Printf("Error writing to client: %v", err)
+		fmt.Printf("Error writing to client: %v\n", err)
 	}
-	log.Printf("Response: elapsed=%v status=%v", time.Now().Sub(start), status)
+	fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
 }
 
 func validateAuth(auth string) bool {
