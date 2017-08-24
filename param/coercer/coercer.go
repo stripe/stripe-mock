@@ -42,6 +42,13 @@ func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) {
 					valInt = 0
 				}
 				data[key] = valInt
+
+			case hasType(subSchema, numberType):
+				valFloat, err := strconv.ParseFloat(valStr, 64)
+				if err != nil {
+					valFloat = 0.0
+				}
+				data[key] = valFloat
 			}
 		}
 	}
@@ -56,6 +63,8 @@ const booleanType = "boolean"
 
 // integerType is the name of the integer type in a JSON schema.
 const integerType = "integer"
+
+const numberType = "number"
 
 func hasType(schema *spec.JSONSchema, targetTypeStr string) bool {
 	for _, typeStr := range schema.Type {

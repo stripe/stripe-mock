@@ -31,6 +31,18 @@ func TestCoerceParams_IntegerCoercion(t *testing.T) {
 	assert.Equal(t, 123, data["intkey"])
 }
 
+func TestCoerceParams_NumberCoercion(t *testing.T) {
+	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
+		"numberkey": {Type: []string{numberType}},
+	}}
+	data := map[string]interface{}{
+		"numberkey": "123.45",
+	}
+
+	CoerceParams(schema, data)
+	assert.Equal(t, 123.45, data["numberkey"])
+}
+
 func TestCoerceParams_Recursion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
 		"mapkey": {Properties: map[string]*spec.JSONSchema{
