@@ -108,7 +108,9 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
+		fmt.Printf("Response: %+v\n", response)
 		fmt.Printf("Response schema: %+v\n", response.Schema)
+		fmt.Printf("Response schema ref: '%+v'\n", response.Schema.Ref)
 	}
 
 	var formString string
@@ -164,6 +166,9 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Couldn't generate response: %v\n", err)
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
+	}
+	if verbose {
+		fmt.Printf("Response data: %+v\n", responseData)
 	}
 	writeResponse(w, r, start, http.StatusOK, responseData)
 }
