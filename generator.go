@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/stripe/stripe-mock/spec"
+	"github.com/stripe/stripe-mock/util"
 )
 
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
@@ -111,6 +112,7 @@ func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, 
 
 	fixture, ok := g.fixtures.Resources[spec.ResourceID(schema.XResourceID)]
 	if !ok {
+		util.Warningf("No fixture for: %s", spec.ResourceID(schema.XResourceID))
 		return map[string]interface{}{}, nil
 	}
 
