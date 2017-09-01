@@ -11,19 +11,19 @@ type Fixtures struct {
 type HTTPVerb string
 
 type JSONSchema struct {
-	Enum       []string               `json:"enum"`
-	Items      *JSONSchema            `json:"items"`
-	OneOf      []*JSONSchema          `json:"oneOf"`
-	Properties map[string]*JSONSchema `json:"properties"`
-	Type       []string               `json:"type"`
+	Enum       []string               `json:"enum" yaml:"enum"`
+	Items      *JSONSchema            `json:"items" yaml:"items"`
+	OneOf      []*JSONSchema          `json:"oneOf" yaml:"oneOf"`
+	Properties map[string]*JSONSchema `json:"properties" yaml:"properties"`
+	Type       []string               `json:"type" yaml:"type"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
-	Ref string `json:"$ref"`
+	Ref string `json:"$ref" yaml:"$ref"`
 
-	XExpandableFields   []string    `json:"x-expandableFields"`
-	XExpansionResources *JSONSchema `json:"x-expansionResources"`
-	XResourceID         string      `json:"x-resourceId"`
+	XExpandableFields   []string    `json:"x-expandableFields" yaml:"x-expandableFields"`
+	XExpansionResources *JSONSchema `json:"x-expansionResources" yaml:"x-expansionResources"`
+	XResourceID         string      `json:"x-resourceId" yaml:"x-resourceId"`
 
 	// RawFields stores a raw map of JSON schema fields to values. This is
 	// useful when trying to interoperate with other libraries that use JSON
@@ -51,32 +51,32 @@ func (s *JSONSchema) UnmarshalJSON(data []byte) error {
 }
 
 type Parameter struct {
-	Description string      `json:"description"`
-	In          string      `json:"in"`
-	Name        string      `json:"name"`
-	Required    bool        `json:"required"`
-	Schema      *JSONSchema `json:"schema"`
+	Description string      `json:"description" yaml:"description"`
+	In          string      `json:"in" yaml:"in"`
+	Name        string      `json:"name" yaml:"name"`
+	Required    bool        `json:"required" yaml:"required"`
+	Schema      *JSONSchema `json:"schema" yaml:"schema"`
 }
 
 type Method struct {
-	Description string                  `json:"description"`
-	OperationID string                  `json:"operation_id"`
-	Parameters  []*Parameter            `json:"parameters"`
-	Responses   map[StatusCode]Response `json:"responses"`
+	Description string                  `json:"description" yaml:"description"`
+	OperationID string                  `json:"operation_id" yaml:"operation_id"`
+	Parameters  []*Parameter            `json:"parameters" yaml:"parameters"`
+	Responses   map[StatusCode]Response `json:"responses" yaml:"responses"`
 }
 
 type Path string
 
 type Response struct {
-	Description string      `json:"description"`
-	Schema      *JSONSchema `json:"schema"`
+	Description string      `json:"description" yaml:"description"`
+	Schema      *JSONSchema `json:"schema" yaml:"schema"`
 }
 
 type ResourceID string
 
 type Spec struct {
-	Definitions map[string]*JSONSchema        `json:"definitions"`
-	Paths       map[Path]map[HTTPVerb]*Method `json:"paths"`
+	Definitions map[string]*JSONSchema        `json:"definitions" yaml:"definitions"`
+	Paths       map[Path]map[HTTPVerb]*Method `json:"paths" yaml:"paths"`
 }
 
 type StatusCode string

@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "5rPfda8jFccr3A6heL+JAmi9K9g=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "5215b55f46b2b919f50a1df0eaa5886afe4e3b3d",
+			"revisionTime": "2015-11-05T21:09:06Z"
+		},
+		{
 			"checksumSHA1": "WSr7qrbD1n9LpDa2Ni9hedIhx48=",
 			"path": "github.com/lestrrat/go-jspointer",
 			"revision": "f4881e611bdbe9fb413a7780721ef8400a1f2341",
@@ -67,7 +73,13 @@
 			"path": "github.com/stretchr/testify/require",
 			"revision": "089c7181b8c728499929ff09b62d3fdd8df8adff",
 			"revisionTime": "2015-06-20T23:27:11Z"
+		},
+		{
+			"checksumSHA1": "RDJpJQwkF012L6m/2BJizyOksNw=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "eb3733d160e74a9c7e442f435eb3bea458e1d19f",
+			"revisionTime": "2017-08-12T16:00:11Z"
 		}
 	],
-	"rootPath": "github.com/brandur/stripe-mock"
+	"rootPath": "github.com/stripe/stripe-mock"
 }
