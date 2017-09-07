@@ -11,9 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-jsval/builder"
 	"github.com/stripe/stripe-mock/param/coercer"
 	"github.com/stripe/stripe-mock/param/parser"
 	"github.com/stripe/stripe-mock/spec"
@@ -109,7 +107,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	if verbose {
 		fmt.Printf("Response: %+v\n", response)
-		schema := response.Content["application/x-www-form-urlencoded"]
+		schema := response.Content["application/x-www-form-urlencoded"].Schema
 		fmt.Printf("Response schema: %+v\n", schema)
 		fmt.Printf("Response schema ref: '%+v'\n", schema.Ref)
 	}
@@ -161,7 +159,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
 	responseData, err := generator.Generate(
-		response.Content["application/x-www-form-urlencoded"],
+		response.Content["application/x-www-form-urlencoded"].Schema,
 		r.URL.Path,
 		expansions)
 	if err != nil {
@@ -194,9 +192,15 @@ func (s *StubServer) initializeRouter() error {
 		for verb, operation := range verbs {
 			numEndpoints++
 
-			requestBodyValidator, err := getRequestBodyValidator(operation)
-			if err != nil {
-				return err
+			requestBodySchema := getRequestBodySchema(operation)
+			var requestBodyValidator *jsval.JSVal
+			if requestBodySchema != nil {
+				var err error
+				requestBodyValidator, err =
+					spec.GetValidatorForOpenAPI3Schema(requestBodySchema)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Note that this may be nil if no suitable validator could be
@@ -236,14 +240,12 @@ func (s *StubServer) routeRequest(r *http.Request) *stubServerRoute {
 
 // ---
 
-func getRequestBodySchema(operation *spec.Operation) *spec.JSONSchema {
-	fmt.Printf("Operation: %+v\n", operation)
+func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
 	if operation.RequestBody == nil {
 		return nil
 	}
 	mediaType, mediaTypePresent :=
 		operation.RequestBody.Content["application/x-www-form-urlencoded"]
-	fmt.Printf("mediaType: %+v mediaTypePresent: %+v\n", mediaType, mediaTypePresent)
 	if !mediaTypePresent {
 		return nil
 	}
@@ -296,27 +298,6 @@ func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) 
 	}
 
 	return nil, nil
-}
-
-func getRequestBodyValidator(operation *spec.Operation) (*jsval.JSVal, error) {
-	requestBodySchema := getRequestBodySchema(operation)
-	if requestBodySchema == nil {
-		return nil, nil
-	}
-
-	schema := schema.New()
-	err := schema.Extract(requestBodySchema.RawFields)
-	if err != nil {
-		return nil, err
-	}
-
-	validatorBuilder := builder.New()
-	validator, err := validatorBuilder.Build(schema)
-	if err != nil {
-		return nil, err
-	}
-
-	return validator, nil
 }
 
 func isCurl(userAgent string) bool {

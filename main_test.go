@@ -56,33 +56,24 @@ func initTestSpec() {
 		RequestBody: &spec.RequestBody{
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": spec.MediaType{
-					Schema: &spec.JSONSchema{
-						Properties: map[string]*spec.JSONSchema{
+					Schema: &spec.Schema{
+						Properties: map[string]*spec.Schema{
 							"amount": {
 								Type: "integer",
 							},
 						},
-						RawFields: map[string]interface{}{
-							"properties": map[string]interface{}{
-								"amount": map[string]interface{}{
-									"type": []interface{}{
-										"integer",
-									},
-								},
-							},
-							"required": []interface{}{
-								"amount",
-							},
-						},
+						Required: []string{"amount",},
 					},
 				},
 			},
 		},
 		Responses: map[spec.StatusCode]spec.Response{
 			"200": spec.Response{
-				Content: map[string]*spec.JSONSchema{
-					"application/x-www-form-urlencoded": &spec.JSONSchema{
-						Ref: "#/components/schemas/customer",
+				Content: map[string]spec.MediaType{
+					"application/x-www-form-urlencoded": spec.MediaType{
+						Schema: &spec.Schema{
+							Ref: "#/components/schemas/customer",
+						},
 					},
 				},
 			},
@@ -104,15 +95,15 @@ func initTestSpec() {
 
 	testSpec = spec.Spec{
 		Components: spec.Components{
-			Schemas: map[string]*spec.JSONSchema{
+			Schemas: map[string]*spec.Schema{
 				"charge": {
-					Properties: map[string]*spec.JSONSchema{
+					Properties: map[string]*spec.Schema{
 						// Normally a customer ID, but expandable to a full
 						// customer resource
 						"customer": {
 							Type: "string",
 							XExpansionResources: &spec.ExpansionResources{
-								OneOf: []*spec.JSONSchema{
+								OneOf: []*spec.Schema{
 									{Ref: "#/components/schemas/customer"},
 								},
 							},

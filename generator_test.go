@@ -9,13 +9,13 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-var listSchema *spec.JSONSchema
+var listSchema *spec.Schema
 
 func init() {
-	listSchema = &spec.JSONSchema{
-		Properties: map[string]*spec.JSONSchema{
+	listSchema = &spec.Schema{
+		Properties: map[string]*spec.Schema{
 			"data": {
-				Items: &spec.JSONSchema{
+				Items: &spec.Schema{
 					Ref: "#/components/schemas/charge",
 				},
 			},
@@ -43,7 +43,7 @@ func TestConcurrentAcccess(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			_, err := generator.Generate(
-				&spec.JSONSchema{Ref: "#/components/schemas/subscription"}, "", nil)
+				&spec.Schema{Ref: "#/components/schemas/subscription"}, "", nil)
 			assert.NoError(t, err)
 		}()
 	}
@@ -59,7 +59,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"}, "", nil)
+		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
@@ -73,7 +73,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// expansion
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": nil}})
 	assert.Nil(t, err)
@@ -84,7 +84,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// bad expansion
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": nil}})
 	assert.Equal(t, err, errExpansionNotSupported)
@@ -92,7 +92,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// bad nested expansion
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
 	assert.Equal(t, err, errExpansionNotSupported)
@@ -100,7 +100,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// wildcard expansion
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
 		&ExpansionLevel{wildcard: true})
 	assert.Nil(t, err)
@@ -133,8 +133,8 @@ func TestGenerateResponseData(t *testing.T) {
 		},
 	}
 	data, err = generator.Generate(
-		&spec.JSONSchema{
-			Properties: map[string]*spec.JSONSchema{
+		&spec.Schema{
+			Properties: map[string]*spec.Schema{
 				"charges_list": listSchema,
 			},
 			XResourceID: "with_charges_list",
@@ -156,14 +156,14 @@ func TestGenerateResponseData(t *testing.T) {
 		},
 	}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/charge"}, "", nil)
+		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]interface{}{}, data)
 
 	// error: unhandled JSON schema type
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Type: "string"}, "", nil)
+		&spec.Schema{Type: "string"}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Expected response to be a list or include $ref"),
 		err)
@@ -171,7 +171,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// error: no definition in OpenAPI
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/components/schemas/doesnt-exist"}, "", nil)
+		&spec.Schema{Ref: "#/components/schemas/doesnt-exist"}, "", nil)
 	assert.Equal(t,
 		fmt.Errorf("Couldn't dereference: #/components/schemas/doesnt-exist"),
 		err)

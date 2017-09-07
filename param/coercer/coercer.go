@@ -13,7 +13,7 @@ import (
 // integers.
 //
 // Currently only the coercion of strings to bool and int64 is supported.
-func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) {
+func CoerceParams(schema *spec.Schema, data map[string]interface{}) {
 	for key, subSchema := range schema.Properties {
 		val, ok := data[key]
 		if !ok {

@@ -124,22 +124,22 @@ func TestCompilePath(t *testing.T) {
 }
 
 func TestGetValidator(t *testing.T) {
-	method := &spec.Operation{RequestBody: &spec.RequestBody{
+	operation := &spec.Operation{RequestBody: &spec.RequestBody{
 		Content: map[string]spec.MediaType{
 			"application/x-www-form-urlencoded": spec.MediaType{
-				Schema: &spec.JSONSchema{
-					RawFields: map[string]interface{}{
-						"properties": map[string]interface{}{
-							"name": map[string]interface{}{
-								"type": "string",
-							},
+				Schema: &spec.Schema{
+					Properties: map[string]*spec.Schema{
+						"name": &spec.Schema{
+							Type: "string",
 						},
 					},
 				},
 			},
 		},
 	}}
-	validator, err := getRequestBodyValidator(method)
+	schema := getRequestBodySchema(operation)
+	assert.NotNil(t, schema)
+	validator, err := spec.GetValidatorForOpenAPI3Schema(schema)
 	assert.NoError(t, err)
 	assert.NotNil(t, validator)
 
@@ -158,9 +158,8 @@ func TestGetValidator_NoSuitableParameter(t *testing.T) {
 	method := &spec.Operation{Parameters: []*spec.Parameter{
 		{Schema: nil},
 	}}
-	validator, err := getRequestBodyValidator(method)
-	assert.NoError(t, err)
-	assert.Nil(t, validator)
+	schema := getRequestBodySchema(method)
+	assert.Nil(t, schema)
 }
 
 func TestIsCurl(t *testing.T) {

@@ -15,16 +15,16 @@ var errNotSupported = fmt.Errorf("Expected response to be a list or include $ref
 // DataGenerator generates fixture response data based off a response schema, a
 // set of definitions, and a fixture store.
 type DataGenerator struct {
-	definitions map[string]*spec.JSONSchema
+	definitions map[string]*spec.Schema
 	fixtures    *spec.Fixtures
 }
 
 // Generate generates a fixture response.
-func (g *DataGenerator) Generate(schema *spec.JSONSchema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
+func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	return g.generateInternal(schema, requestPath, expansions, nil)
 }
 
-func (g *DataGenerator) generateInternal(schema *spec.JSONSchema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
+func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
 	schema, err := g.maybeDereference(schema)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (g *DataGenerator) generateInternal(schema *spec.JSONSchema, requestPath st
 				var ok bool
 				subExpansions, ok = expansions.expansions[key]
 
-				var expansion *spec.JSONSchema
+				var expansion *spec.Schema
 				if property.XExpansionResources != nil {
 					expansion = property.XExpansionResources.OneOf[0]
 				}
@@ -93,7 +93,7 @@ func (g *DataGenerator) generateInternal(schema *spec.JSONSchema, requestPath st
 	return data, nil
 }
 
-func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, error) {
+func (g *DataGenerator) generateResource(schema *spec.Schema) (interface{}, error) {
 	if schema.XResourceID == "" {
 		if schema.Type == "" || schema.Type == "object" {
 			return map[string]interface{}{}, nil
@@ -111,7 +111,7 @@ func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, 
 	return duplicateMap(fixture.(map[string]interface{})), nil
 }
 
-func (g *DataGenerator) maybeDereference(schema *spec.JSONSchema) (*spec.JSONSchema, error) {
+func (g *DataGenerator) maybeDereference(schema *spec.Schema) (*spec.Schema, error) {
 	if schema.Ref != "" {
 		definition, err := definitionFromJSONPointer(schema.Ref)
 		if err != nil {
@@ -127,7 +127,7 @@ func (g *DataGenerator) maybeDereference(schema *spec.JSONSchema) (*spec.JSONSch
 	return schema, nil
 }
 
-func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.JSONSchema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
+func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.Schema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
 	object, ok := properties["object"]
 	if !ok {
 		return nil, nil

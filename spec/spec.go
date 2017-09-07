@@ -2,14 +2,15 @@ package spec
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type Components struct {
-	Schemas map[string]*JSONSchema `json:"schemas"`
+	Schemas map[string]*Schema `json:"schemas"`
 }
 
 type ExpansionResources struct {
-	OneOf []*JSONSchema `json:"oneOf" yaml:"oneOf"`
+	OneOf []*Schema `json:"oneOf" yaml:"oneOf"`
 }
 
 type Fixtures struct {
@@ -18,13 +19,14 @@ type Fixtures struct {
 
 type HTTPVerb string
 
-type JSONSchema struct {
-	AnyOf      []*JSONSchema          `json:"anyOf" yaml:"anyOf"`
-	Enum       []string               `json:"enum" yaml:"enum"`
-	Items      *JSONSchema            `json:"items" yaml:"items"`
-	Nullable   bool                   `json:"nullable" yaml:"nullable"`
-	Properties map[string]*JSONSchema `json:"properties" yaml:"properties"`
-	Type       string                 `json:"type" yaml:"type"`
+type Schema struct {
+	AnyOf      []*Schema          `json:"anyOf" yaml:"anyOf"`
+	Enum       []string           `json:"enum" yaml:"enum"`
+	Items      *Schema            `json:"items" yaml:"items"`
+	Nullable   bool               `json:"nullable" yaml:"nullable"`
+	Properties map[string]*Schema `json:"properties" yaml:"properties"`
+	Required   []string           `json:"required" yaml:"required"`
+	Type       string             `json:"type" yaml:"type"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
@@ -33,34 +35,43 @@ type JSONSchema struct {
 	XExpandableFields   []string            `json:"x-expandableFields" yaml:"x-expandableFields"`
 	XExpansionResources *ExpansionResources `json:"x-expansionResources" yaml:"x-expansionResources"`
 	XResourceID         string              `json:"x-resourceId" yaml:"x-resourceId"`
-
-	// RawFields stores a raw map of JSON schema fields to values. This is
-	// useful when trying to interoperate with other libraries that use JSON
-	// schemas.
-	RawFields map[string]interface{}
 }
 
-func (s *JSONSchema) UnmarshalJSON(data []byte) error {
-	type jsonSchema JSONSchema
-	var inner jsonSchema
-	err := json.Unmarshal(data, &inner)
-	if err != nil {
-		return err
-	}
-	*s = JSONSchema(inner)
-
+func (s *Schema) UnmarshalJSON(data []byte) error {
 	var rawFields map[string]interface{}
-	err = json.Unmarshal(data, &rawFields)
+	err := json.Unmarshal(data, &rawFields)
 	if err != nil {
 		return err
 	}
-	s.RawFields = rawFields
 
-	return nil
+	// If you update this, be sure to also update getJSONSchemaForOpenAPI3Schema
+	// to pass the fields through to the JSON validator
+	supportedFields := []string {
+		"anyOf", "enum", "items", "nullable", "properties", "required", "type",
+		"x-expandableFields", "x-expansionResources", "x-resourceId", "$ref",
+		"title", "description",
+	}
+	for _, supportedField := range supportedFields {
+		delete(rawFields, supportedField)
+	}
+	for unsupportedField, _ := range rawFields {
+		return fmt.Errorf(
+			"unsupported field in JSON schema: '%s'", unsupportedField)
+	}
+
+  type schema2 Schema
+  var inner schema2
+  err = json.Unmarshal(data, &inner)
+  if err != nil {
+    return err
+  }
+  *s = Schema(inner)
+
+  return nil
 }
 
 type MediaType struct {
-	Schema *JSONSchema `json:"schema" yaml:"schema"`
+	Schema *Schema `json:"schema" yaml:"schema"`
 }
 
 type Operation struct {
@@ -72,11 +83,11 @@ type Operation struct {
 }
 
 type Parameter struct {
-	Description string      `json:"description" yaml:"description"`
-	In          string      `json:"in" yaml:"in"`
-	Name        string      `json:"name" yaml:"name"`
-	Required    bool        `json:"required" yaml:"required"`
-	Schema      *JSONSchema `json:"schema" yaml:"schema"`
+	Description string  `json:"description" yaml:"description"`
+	In          string  `json:"in" yaml:"in"`
+	Name        string  `json:"name" yaml:"name"`
+	Required    bool    `json:"required" yaml:"required"`
+	Schema      *Schema `json:"schema" yaml:"schema"`
 }
 
 type Path string
@@ -87,8 +98,8 @@ type RequestBody struct {
 }
 
 type Response struct {
-	Description string                 `json:"description" yaml:"description"`
-	Content     map[string]*JSONSchema `json:"content" yaml:"content"`
+	Description string               `json:"description" yaml:"description"`
+	Content     map[string]MediaType `json:"content" yaml:"content"`
 }
 
 type ResourceID string

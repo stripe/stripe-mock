@@ -20,7 +20,7 @@ import (
 const defaultPort = 12111
 
 // verbose tracks whether the program is operating in verbose mode
-var verbose bool = true
+var verbose bool
 
 // This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
 // as it's run. Versions built from source will always show master.
