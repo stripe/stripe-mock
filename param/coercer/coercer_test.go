@@ -9,7 +9,7 @@ import (
 
 func TestCoerceParams_BooleanCoercion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-		"boolkey": {Type: []string{booleanType}},
+		"boolkey": {Type: booleanType},
 	}}
 	data := map[string]interface{}{
 		"boolkey": "true",
@@ -21,7 +21,7 @@ func TestCoerceParams_BooleanCoercion(t *testing.T) {
 
 func TestCoerceParams_IntegerCoercion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-		"intkey": {Type: []string{integerType}},
+		"intkey": {Type: integerType},
 	}}
 	data := map[string]interface{}{
 		"intkey": "123",
@@ -33,7 +33,7 @@ func TestCoerceParams_IntegerCoercion(t *testing.T) {
 
 func TestCoerceParams_NumberCoercion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-		"numberkey": {Type: []string{numberType}},
+		"numberkey": {Type: numberType},
 	}}
 	data := map[string]interface{}{
 		"numberkey": "123.45",
@@ -46,7 +46,7 @@ func TestCoerceParams_NumberCoercion(t *testing.T) {
 func TestCoerceParams_Recursion(t *testing.T) {
 	schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
 		"mapkey": {Properties: map[string]*spec.JSONSchema{
-			"intkey": {Type: []string{integerType}},
+			"intkey": {Type: integerType},
 		}},
 	}}
 	data := map[string]interface{}{

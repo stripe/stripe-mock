@@ -92,22 +92,22 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeAllMethod, route.method)
+	assert.Equal(t, chargeAllMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeCreateMethod, route.method)
+	assert.Equal(t, chargeCreateMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeGetMethod, route.method)
+	assert.Equal(t, chargeGetMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeDeleteMethod, route.method)
+	assert.Equal(t, chargeDeleteMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/doesnt-exist"}})
@@ -124,18 +124,22 @@ func TestCompilePath(t *testing.T) {
 }
 
 func TestGetValidator(t *testing.T) {
-	method := &spec.Method{Parameters: []*spec.Parameter{
-		{Schema: &spec.JSONSchema{
-			RawFields: map[string]interface{}{
-				"properties": map[string]interface{}{
-					"name": map[string]interface{}{
-						"type": "string",
+	method := &spec.Operation{RequestBody: &spec.RequestBody{
+		Content: map[string]spec.MediaType{
+			"application/x-www-form-urlencoded": spec.MediaType{
+				Schema: &spec.JSONSchema{
+					RawFields: map[string]interface{}{
+						"properties": map[string]interface{}{
+							"name": map[string]interface{}{
+								"type": "string",
+							},
+						},
 					},
 				},
 			},
-		}},
+		},
 	}}
-	validator, err := getValidator(method)
+	validator, err := getRequestBodyValidator(method)
 	assert.NoError(t, err)
 	assert.NotNil(t, validator)
 
@@ -151,10 +155,10 @@ func TestGetValidator(t *testing.T) {
 }
 
 func TestGetValidator_NoSuitableParameter(t *testing.T) {
-	method := &spec.Method{Parameters: []*spec.Parameter{
+	method := &spec.Operation{Parameters: []*spec.Parameter{
 		{Schema: nil},
 	}}
-	validator, err := getValidator(method)
+	validator, err := getRequestBodyValidator(method)
 	assert.NoError(t, err)
 	assert.Nil(t, validator)
 }

@@ -1,4 +1,4 @@
-//go:generate go-bindata openapi/openapi/fixtures.json openapi/openapi/spec2.json
+//go:generate go-bindata openapi/openapi/fixtures3.json openapi/openapi/spec3.json
 
 package main
 
@@ -20,7 +20,7 @@ import (
 const defaultPort = 12111
 
 // verbose tracks whether the program is operating in verbose mode
-var verbose bool
+var verbose bool = true
 
 // This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
 // as it's run. Versions built from source will always show master.
@@ -97,7 +97,7 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 
 	if fixturesPath == "" {
 		// And do the same for fixtures
-		data, err = Asset("openapi/openapi/fixtures.json")
+		data, err = Asset("openapi/openapi/fixtures3.json")
 	} else {
 		data, err = ioutil.ReadFile(fixturesPath)
 
@@ -151,7 +151,7 @@ func getSpec(specPath string) (*spec.Spec, error) {
 
 	if specPath == "" {
 		// Load the spec information from go-bindata
-		data, err = Asset("openapi/openapi/spec2.json")
+		data, err = Asset("openapi/openapi/spec3.json")
 	} else {
 		data, err = ioutil.ReadFile(specPath)
 

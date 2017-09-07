@@ -95,19 +95,11 @@ func (g *DataGenerator) generateInternal(schema *spec.JSONSchema, requestPath st
 
 func (g *DataGenerator) generateResource(schema *spec.JSONSchema) (interface{}, error) {
 	if schema.XResourceID == "" {
-		// Technically type can also be just a string, but we're not going to
-		// support this for now.
-		if schema.Type != nil {
-			for _, schemaType := range schema.Type {
-				if schemaType == "object" {
-					return map[string]interface{}{}, nil
-				}
-			}
+		if schema.Type == "" || schema.Type == "object" {
+			return map[string]interface{}{}, nil
+		} else {
 			return nil, errNotSupported
 		}
-
-		// Support schemas with no type annotation at all
-		return map[string]interface{}{}, nil
 	}
 
 	fixture, ok := g.fixtures.Resources[spec.ResourceID(schema.XResourceID)]
@@ -250,26 +242,20 @@ func duplicateMap(dataMap map[string]interface{}) map[string]interface{} {
 }
 
 // definitionFromJSONPointer extracts the name of a JSON schema definition from
-// a JSON pointer, so "#/definitions/charge" would become just "charge". This
-// is a simplified workaround to avoid bringing in JSON schema infrastructure
-// because we can guarantee that the spec we're producing will take a certain
-// shape. If this gets too hacky, it will be better to put a more legitimate
-// JSON schema parser in place.
+// a JSON pointer, so "#/components/schemas/charge" would become just "charge".
+// This is a simplified workaround to avoid bringing in JSON schema
+// infrastructure because we can guarantee that the spec we're producing will
+// take a certain shape. If this gets too hacky, it will be better to put a more
+// legitimate JSON schema parser in place.
 func definitionFromJSONPointer(pointer string) (string, error) {
 	parts := strings.Split(pointer, "/")
 
-	if parts[0] != "#" {
-		return "", fmt.Errorf("Expected '#' in 0th part of pointer %v", pointer)
+	if len(parts) != 4 ||
+			parts[0] != "#" ||
+			parts[1] != "components" ||
+			parts[2] != "schemas" {
+		return "", fmt.Errorf("Expected '#/components/schemas/...' but got '%v'", pointer)
 	}
 
-	if parts[1] != "definitions" {
-		return "", fmt.Errorf("Expected 'definitions' in 1st part of pointer %v",
-			pointer)
-	}
-
-	if len(parts) > 3 {
-		return "", fmt.Errorf("Pointer too long to be handle %v", pointer)
-	}
-
-	return parts[2], nil
+	return parts[3], nil
 }

@@ -6,10 +6,10 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-var chargeAllMethod *spec.Method
-var chargeCreateMethod *spec.Method
-var chargeDeleteMethod *spec.Method
-var chargeGetMethod *spec.Method
+var chargeAllMethod *spec.Operation
+var chargeCreateMethod *spec.Operation
+var chargeDeleteMethod *spec.Operation
+var chargeGetMethod *spec.Operation
 
 // Try to avoid using the real spec as much as possible because it's more
 // complicated and slower. A test spec is provided below. If you do use it,
@@ -27,7 +27,7 @@ func init() {
 
 func initRealSpec() {
 	// Load the spec information from go-bindata
-	data, err := Asset("openapi/openapi/spec2.json")
+	data, err := Asset("openapi/openapi/spec3.json")
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func initRealSpec() {
 	}
 
 	// And do the same for fixtures
-	data, err = Asset("openapi/openapi/fixtures.json")
+	data, err = Asset("openapi/openapi/fixtures3.json")
 	if err != nil {
 		panic(err)
 	}
@@ -51,42 +51,45 @@ func initRealSpec() {
 }
 
 func initTestSpec() {
-	chargeAllMethod = &spec.Method{}
-	chargeCreateMethod = &spec.Method{
-		Parameters: []*spec.Parameter{
-			{
-				In: "body",
-				Schema: &spec.JSONSchema{
-					Properties: map[string]*spec.JSONSchema{
-						"amount": {
-							Type: []string{"integer"},
-						},
-					},
-					RawFields: map[string]interface{}{
-						"properties": map[string]interface{}{
-							"amount": map[string]interface{}{
-								"type": []interface{}{
-									"integer",
-								},
+	chargeAllMethod = &spec.Operation{}
+	chargeCreateMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": spec.MediaType{
+					Schema: &spec.JSONSchema{
+						Properties: map[string]*spec.JSONSchema{
+							"amount": {
+								Type: "integer",
 							},
 						},
-						"required": []interface{}{
-							"amount",
+						RawFields: map[string]interface{}{
+							"properties": map[string]interface{}{
+								"amount": map[string]interface{}{
+									"type": []interface{}{
+										"integer",
+									},
+								},
+							},
+							"required": []interface{}{
+								"amount",
+							},
 						},
 					},
 				},
 			},
 		},
 		Responses: map[spec.StatusCode]spec.Response{
-			"200": {
-				Schema: &spec.JSONSchema{
-					Ref: "#/definitions/customer",
+			"200": spec.Response{
+				Content: map[string]*spec.JSONSchema{
+					"application/x-www-form-urlencoded": &spec.JSONSchema{
+						Ref: "#/components/schemas/customer",
+					},
 				},
 			},
 		},
 	}
-	chargeDeleteMethod = &spec.Method{}
-	chargeGetMethod = &spec.Method{}
+	chargeDeleteMethod = &spec.Operation{}
+	chargeGetMethod = &spec.Operation{}
 
 	testFixtures =
 		spec.Fixtures{
@@ -100,28 +103,30 @@ func initTestSpec() {
 		}
 
 	testSpec = spec.Spec{
-		Definitions: map[string]*spec.JSONSchema{
-			"charge": {
-				Properties: map[string]*spec.JSONSchema{
-					// Normally a customer ID, but expandable to a full
-					// customer resource
-					"customer": {
-						Type: []string{"string"},
-						XExpansionResources: &spec.JSONSchema{
-							OneOf: []*spec.JSONSchema{
-								{Ref: "#/definitions/customer"},
+		Components: spec.Components{
+			Schemas: map[string]*spec.JSONSchema{
+				"charge": {
+					Properties: map[string]*spec.JSONSchema{
+						// Normally a customer ID, but expandable to a full
+						// customer resource
+						"customer": {
+							Type: "string",
+							XExpansionResources: &spec.ExpansionResources{
+								OneOf: []*spec.JSONSchema{
+									{Ref: "#/components/schemas/customer"},
+								},
 							},
 						},
 					},
+					XExpandableFields: []string{"customer"},
+					XResourceID:       "charge",
 				},
-				XExpandableFields: []string{"customer"},
-				XResourceID:       "charge",
-			},
-			"customer": {
-				XResourceID: "customer",
+				"customer": {
+					XResourceID: "customer",
+				},
 			},
 		},
-		Paths: map[spec.Path]map[spec.HTTPVerb]*spec.Method{
+		Paths: map[spec.Path]map[spec.HTTPVerb]*spec.Operation{
 			spec.Path("/v1/charges"): {
 				"get":  chargeAllMethod,
 				"post": chargeCreateMethod,

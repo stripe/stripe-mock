@@ -29,21 +29,21 @@ func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) {
 		valStr, ok := val.(string)
 		if ok {
 			switch {
-			case hasType(subSchema, booleanType):
+			case subSchema.Type == booleanType:
 				valBool, err := strconv.ParseBool(valStr)
 				if err != nil {
 					valBool = false
 				}
 				data[key] = valBool
 
-			case hasType(subSchema, integerType):
+			case subSchema.Type == integerType:
 				valInt, err := strconv.Atoi(valStr)
 				if err != nil {
 					valInt = 0
 				}
 				data[key] = valInt
 
-			case hasType(subSchema, numberType):
+			case subSchema.Type == numberType:
 				valFloat, err := strconv.ParseFloat(valStr, 64)
 				if err != nil {
 					valFloat = 0.0
@@ -65,12 +65,3 @@ const booleanType = "boolean"
 const integerType = "integer"
 
 const numberType = "number"
-
-func hasType(schema *spec.JSONSchema, targetTypeStr string) bool {
-	for _, typeStr := range schema.Type {
-		if typeStr == targetTypeStr {
-			return true
-		}
-	}
-	return false
-}
