@@ -55,7 +55,7 @@ func initTestSpec() {
 	chargeCreateMethod = &spec.Operation{
 		RequestBody: &spec.RequestBody{
 			Content: map[string]spec.MediaType{
-				"application/x-www-form-urlencoded": spec.MediaType{
+				"application/x-www-form-urlencoded": {
 					Schema: &spec.Schema{
 						Properties: map[string]*spec.Schema{
 							"amount": {
@@ -68,9 +68,9 @@ func initTestSpec() {
 			},
 		},
 		Responses: map[spec.StatusCode]spec.Response{
-			"200": spec.Response{
+			"200": {
 				Content: map[string]spec.MediaType{
-					"application/x-www-form-urlencoded": spec.MediaType{
+					"application/x-www-form-urlencoded": {
 						Schema: &spec.Schema{
 							Ref: "#/components/schemas/customer",
 						},

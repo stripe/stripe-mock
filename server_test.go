@@ -126,10 +126,10 @@ func TestCompilePath(t *testing.T) {
 func TestGetValidator(t *testing.T) {
 	operation := &spec.Operation{RequestBody: &spec.RequestBody{
 		Content: map[string]spec.MediaType{
-			"application/x-www-form-urlencoded": spec.MediaType{
+			"application/x-www-form-urlencoded": {
 				Schema: &spec.Schema{
 					Properties: map[string]*spec.Schema{
-						"name": &spec.Schema{
+						"name": {
 							Type: "string",
 						},
 					},

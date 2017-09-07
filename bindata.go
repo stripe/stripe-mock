@@ -206,10 +206,10 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"openapi": &bintree{nil, map[string]*bintree{
-		"openapi": &bintree{nil, map[string]*bintree{
-			"fixtures3.json": &bintree{openapiOpenapiFixtures3Json, map[string]*bintree{}},
-			"spec3.json":     &bintree{openapiOpenapiSpec3Json, map[string]*bintree{}},
+	"openapi": {nil, map[string]*bintree{
+		"openapi": {nil, map[string]*bintree{
+			"fixtures3.json": {openapiOpenapiFixtures3Json, map[string]*bintree{}},
+			"spec3.json":     {openapiOpenapiSpec3Json, map[string]*bintree{}},
 		}},
 	}},
 }}

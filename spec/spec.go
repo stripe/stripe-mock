@@ -54,7 +54,7 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	for _, supportedField := range supportedFields {
 		delete(rawFields, supportedField)
 	}
-	for unsupportedField, _ := range rawFields {
+	for unsupportedField := range rawFields {
 		return fmt.Errorf(
 			"unsupported field in JSON schema: '%s'", unsupportedField)
 	}
