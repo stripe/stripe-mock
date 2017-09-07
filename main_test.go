@@ -62,7 +62,7 @@ func initTestSpec() {
 								Type: "integer",
 							},
 						},
-						Required: []string{"amount",},
+						Required: []string{"amount"},
 					},
 				},
 			},

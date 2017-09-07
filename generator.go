@@ -251,9 +251,9 @@ func definitionFromJSONPointer(pointer string) (string, error) {
 	parts := strings.Split(pointer, "/")
 
 	if len(parts) != 4 ||
-			parts[0] != "#" ||
-			parts[1] != "components" ||
-			parts[2] != "schemas" {
+		parts[0] != "#" ||
+		parts[1] != "components" ||
+		parts[2] != "schemas" {
 		return "", fmt.Errorf("Expected '#/components/schemas/...' but got '%v'", pointer)
 	}
 
