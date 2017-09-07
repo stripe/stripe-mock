@@ -46,7 +46,7 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 
 	// If you update this, be sure to also update getJSONSchemaForOpenAPI3Schema
 	// to pass the fields through to the JSON validator
-	supportedFields := []string {
+	supportedFields := []string{
 		"anyOf", "enum", "items", "nullable", "properties", "required", "type",
 		"x-expandableFields", "x-expansionResources", "x-resourceId", "$ref",
 		"title", "description",
@@ -59,15 +59,15 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 			"unsupported field in JSON schema: '%s'", unsupportedField)
 	}
 
-  type schema2 Schema
-  var inner schema2
-  err = json.Unmarshal(data, &inner)
-  if err != nil {
-    return err
-  }
-  *s = Schema(inner)
+	type schema2 Schema
+	var inner schema2
+	err = json.Unmarshal(data, &inner)
+	if err != nil {
+		return err
+	}
+	*s = Schema(inner)
 
-  return nil
+	return nil
 }
 
 type MediaType struct {
@@ -105,8 +105,8 @@ type Response struct {
 type ResourceID string
 
 type Spec struct {
-	Components  Components                       `json:"components" yaml:"components"`
-	Paths       map[Path]map[HTTPVerb]*Operation `json:"paths" yaml:"paths"`
+	Components Components                       `json:"components" yaml:"components"`
+	Paths      map[Path]map[HTTPVerb]*Operation `json:"paths" yaml:"paths"`
 }
 
 type StatusCode string
