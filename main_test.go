@@ -70,7 +70,7 @@ func initTestSpec() {
 		Responses: map[spec.StatusCode]spec.Response{
 			"200": {
 				Content: map[string]spec.MediaType{
-					"application/x-www-form-urlencoded": {
+					"application/json": {
 						Schema: &spec.Schema{
 							Ref: "#/components/schemas/customer",
 						},

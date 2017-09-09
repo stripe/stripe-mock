@@ -20,21 +20,21 @@ type Fixtures struct {
 type HTTPVerb string
 
 type Schema struct {
-	AnyOf      []*Schema          `json:"anyOf" yaml:"anyOf"`
-	Enum       []string           `json:"enum" yaml:"enum"`
-	Items      *Schema            `json:"items" yaml:"items"`
-	Nullable   bool               `json:"nullable" yaml:"nullable"`
-	Properties map[string]*Schema `json:"properties" yaml:"properties"`
-	Required   []string           `json:"required" yaml:"required"`
-	Type       string             `json:"type" yaml:"type"`
+	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
+	Enum       []string           `json:"enum,omitempty" yaml:"enum"`
+	Items      *Schema            `json:"items,omitempty" yaml:"items"`
+	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
+	Properties map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
+	Required   []string           `json:"required,omitempty" yaml:"required"`
+	Type       string             `json:"type,omitempty" yaml:"type"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
-	Ref string `json:"$ref" yaml:"$ref"`
+	Ref string `json:"$ref,omitempty" yaml:"$ref"`
 
-	XExpandableFields   []string            `json:"x-expandableFields" yaml:"x-expandableFields"`
-	XExpansionResources *ExpansionResources `json:"x-expansionResources" yaml:"x-expansionResources"`
-	XResourceID         string              `json:"x-resourceId" yaml:"x-resourceId"`
+	XExpandableFields   []string            `json:"x-expandableFields,omitempty" yaml:"x-expandableFields"`
+	XExpansionResources *ExpansionResources `json:"x-expansionResources,omitempty" yaml:"x-expansionResources"`
+	XResourceID         string              `json:"x-resourceId,omitempty" yaml:"x-resourceId"`
 }
 
 func (s *Schema) UnmarshalJSON(data []byte) error {

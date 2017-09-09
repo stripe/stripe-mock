@@ -104,12 +104,19 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
+	responseContent, ok := response.Content["application/json"]
+	if !ok || responseContent.Schema == nil {
+		fmt.Printf("Couldn't find application/json in response\n")
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		return
+	}
 
 	if verbose {
-		fmt.Printf("Response: %+v\n", response)
-		schema := response.Content["application/x-www-form-urlencoded"].Schema
-		fmt.Printf("Response schema: %+v\n", schema)
-		fmt.Printf("Response schema ref: '%+v'\n", schema.Ref)
+		responseContentSchema, err := json.MarshalIndent(responseContent.Schema, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Response schema: %s\n", responseContentSchema)
 	}
 
 	var formString string
@@ -133,7 +140,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
-		fmt.Printf("Request data: %+v\n", requestData)
+		if formString != "" {
+			fmt.Printf("Request data: %s\n", formString)
+		} else {
+			fmt.Printf("Request data: (none)\n")
+		}
 	}
 
 	// Currently we only validate parameters in the request body, but we should
@@ -159,7 +170,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
 	responseData, err := generator.Generate(
-		response.Content["application/x-www-form-urlencoded"].Schema,
+		responseContent.Schema,
 		r.URL.Path,
 		expansions)
 	if err != nil {
@@ -168,7 +179,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if verbose {
-		fmt.Printf("Response data: %+v\n", responseData)
+		responseDataJson, err := json.MarshalIndent(responseData, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Response data: %s\n", responseDataJson)
 	}
 	writeResponse(w, r, start, http.StatusOK, responseData)
 }
@@ -312,10 +327,11 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	var encodedData []byte
 	var err error
 
-	if isCurl(r.Header.Get("User-Agent")) {
+	if !isCurl(r.Header.Get("User-Agent")) {
 		encodedData, err = json.Marshal(&data)
 	} else {
 		encodedData, err = json.MarshalIndent(&data, "", "  ")
+		encodedData = append(encodedData, '\n')
 	}
 
 	if err != nil {

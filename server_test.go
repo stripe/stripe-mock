@@ -72,6 +72,7 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
 		bytes.NewBufferString("amount=123&currency=usd"))
 	req.Header.Set("Authorization", "Bearer sk_test_123")
+	req.Header.Set("User-Agent", "curl/1.2.3")
 	w := httptest.NewRecorder()
 	server.HandleRequest(w, req)
 
