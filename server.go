@@ -144,9 +144,15 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// support validation all verbs, and much more simply.
 	requestSchema := bodyParameterSchema(route.method)
 	if requestSchema != nil {
-		coercer.CoerceParams(requestSchema, requestData)
+		err := coercer.CoerceParams(requestSchema, requestData)
+		if err != nil {
+			fmt.Printf("Coercion error: %v\n", err)
+			responseData := fmt.Sprintf("Request error: %v", err)
+			writeResponse(w, r, start, http.StatusBadRequest, responseData)
+			return
+		}
 
-		err := route.validator.Validate(requestData)
+		err = route.validator.Validate(requestData)
 		if err != nil {
 			fmt.Printf("Validation error: %v\n", err)
 			responseData := fmt.Sprintf("Request error: %v", err)
