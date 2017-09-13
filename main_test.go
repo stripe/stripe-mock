@@ -117,7 +117,7 @@ func initTestSpec() {
 					XResourceID:       "charge",
 				},
 				"customer": {
-					Type: "object",
+					Type:        "object",
 					XResourceID: "customer",
 				},
 			},

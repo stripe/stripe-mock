@@ -75,8 +75,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer":
-			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["customer"].(map[string]interface{})["id"],
@@ -87,8 +86,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id":
-			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// bad nested expansion
@@ -96,8 +94,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id":
-			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// wildcard expansion

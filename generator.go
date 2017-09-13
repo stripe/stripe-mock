@@ -122,14 +122,14 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 
 	if example.value == nil {
 		if expansions != nil {
-			panic(fmt.Sprintf("%sWe were asked to expand a key, but our example " +
+			panic(fmt.Sprintf("%sWe were asked to expand a key, but our example "+
 				"has null for that key.", context))
 		}
 		return nil, nil
 	}
 
-	if (schema.Type == "boolean" || schema.Type == "integer" ||
-		schema.Type == "number" || schema.Type == "string") {
+	if schema.Type == "boolean" || schema.Type == "integer" ||
+		schema.Type == "number" || schema.Type == "string" {
 		return example.value, nil
 	}
 
@@ -162,9 +162,9 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 				if subExpansions == nil && expansions.wildcard {
 					// No expansion was provided for this key but the wildcard bit is set,
 					// so make a fake expansion
-					subExpansions = &ExpansionLevel {
+					subExpansions = &ExpansionLevel{
 						expansions: make(map[string]*ExpansionLevel),
-						wildcard: false,
+						wildcard:   false,
 					}
 				}
 			}
@@ -289,13 +289,13 @@ func isListResource(schema *spec.Schema) bool {
 // take a certain shape. If this gets too hacky, it will be better to put a more
 // legitimate JSON schema parser in place.
 func definitionFromJSONPointer(pointer string) string {
-       parts := strings.Split(pointer, "/")
+	parts := strings.Split(pointer, "/")
 
-       if len(parts) != 4 ||
-               parts[0] != "#" ||
-               parts[1] != "components" ||
-               parts[2] != "schemas" {
-               panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
-			 }
-			 return parts[3]
+	if len(parts) != 4 ||
+		parts[0] != "#" ||
+		parts[1] != "components" ||
+		parts[2] != "schemas" {
+		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
+	}
+	return parts[3]
 }
