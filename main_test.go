@@ -43,8 +43,7 @@ func initRealSpec() {
 		panic(err)
 	}
 
-	var fixtures spec.Fixtures
-	err = json.Unmarshal(data, &fixtures)
+	err = json.Unmarshal(data, &realFixtures)
 	if err != nil {
 		panic(err)
 	}
@@ -97,11 +96,16 @@ func initTestSpec() {
 		Components: spec.Components{
 			Schemas: map[string]*spec.Schema{
 				"charge": {
+					Type: "object",
 					Properties: map[string]*spec.Schema{
+						"id": {Type: "string"},
 						// Normally a customer ID, but expandable to a full
 						// customer resource
 						"customer": {
-							Type: "string",
+							AnyOf: []*spec.Schema{
+								{Type: "string"},
+								{Ref: "#/components/schemas/customer"},
+							},
 							XExpansionResources: &spec.ExpansionResources{
 								OneOf: []*spec.Schema{
 									{Ref: "#/components/schemas/customer"},
@@ -109,10 +113,11 @@ func initTestSpec() {
 							},
 						},
 					},
-					XExpandableFields: []string{"customer"},
+					XExpandableFields: &[]string{"customer"},
 					XResourceID:       "charge",
 				},
 				"customer": {
+					Type: "object",
 					XResourceID: "customer",
 				},
 			},

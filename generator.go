@@ -6,11 +6,9 @@ import (
 	"strings"
 
 	"github.com/stripe/stripe-mock/spec"
-	"github.com/stripe/stripe-mock/util"
 )
 
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
-var errNotSupported = fmt.Errorf("Expected response to be a list or include $ref")
 
 // DataGenerator generates fixture response data based off a response schema, a
 // set of definitions, and a fixture store.
@@ -21,141 +19,214 @@ type DataGenerator struct {
 
 // Generate generates a fixture response.
 func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
-	return g.generateInternal(schema, requestPath, expansions, nil)
+	return g.generateInternal(schema, requestPath, expansions, nil, fmt.Sprintf("Responding to %s:\n", requestPath))
 }
 
-func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, existingData interface{}) (interface{}, error) {
-	schema, err := g.maybeDereference(schema)
+// The purpose of this simple wrapper is so that we can write "example = nil"
+// to indicate that no example is provided, as distinct from
+// "example = &Example{value: nil}" for an example which is a null value.
+type Example struct {
+	value interface{}
+}
+
+func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+	// This is a bit of a mess. We don't have an elegant fully-general approach to
+	// generating examples, just a bunch of specific cases that we know how to
+	// handle. If we find ourselves in a situation that doesn't match any of the
+	// cases, then we fall through to the end of the function and panic().
+	// Obviously this is fragile, so we have a unit test that makes sure it works
+	// correctly on every resource; hopefully this will at least allow us to catch
+	// any errors in advance.
+
+	schema, context, err := g.maybeDereference(schema, context)
 	if err != nil {
 		return nil, err
 	}
 
 	// Determine if the requested expansions are possible
-	if expansions != nil {
+	if expansions != nil && schema.XExpandableFields != nil {
 		for key := range expansions.expansions {
-			if sort.SearchStrings(schema.XExpandableFields, key) ==
-				len(schema.XExpandableFields) {
+			if sort.SearchStrings(*schema.XExpandableFields, key) ==
+				len(*schema.XExpandableFields) {
 				return nil, errExpansionNotSupported
 			}
 		}
 	}
 
-	data, err := g.generateResource(schema)
-	if err != nil {
-		return nil, err
+	if (example == nil || example.value == nil) && schema.XResourceID != "" {
+		// Use the fixture as our example. (Note that if the caller gave us a
+		// non-trivial example, we prefer it instead, because it's probably more
+		// relevant in context.)
+		fixture, ok := g.fixtures.Resources[spec.ResourceID(schema.XResourceID)]
+		if !ok {
+			panic(fmt.Sprintf("%sMissing fixture for: %s", context, schema.XResourceID))
+		}
+		example = &Example{value: fixture}
+		context = fmt.Sprintf("%sUsing fixture '%s':\n", context, schema.XResourceID)
 	}
 
-	if schema.Properties != nil {
-		listData, err := g.maybeGenerateList(
-			schema.Properties, existingData, requestPath, expansions)
-		if err != nil {
-			return nil, err
+	if schema.XExpansionResources != nil {
+		if expansions != nil {
+			// We're expanding this specific object
+			result, err := g.generateInternal(
+				schema.XExpansionResources.OneOf[0], requestPath, expansions, nil,
+				fmt.Sprintf("%sExpanding optional expandable field:\n", context))
+			return result, err
+		} else {
+			// We're not expanding this specific object. Our example should be of the
+			// unexpanded form, which is the first branch of the AnyOf
+			result, err := g.generateInternal(
+				schema.AnyOf[0], requestPath, expansions, example,
+				fmt.Sprintf("%sNot expanding optional expandable field:\n", context))
+			return result, err
 		}
-		if listData != nil {
-			return listData, nil
+	}
+
+	if len(schema.AnyOf) == 1 && schema.Nullable {
+		if example != nil && example.value == nil {
+			if expansions == nil {
+				return nil, nil
+			}
+		} else {
+			// Since there's only one subschema, we can confidently recurse into it
+			result, err := g.generateInternal(
+				schema.AnyOf[0], requestPath, expansions, example,
+				fmt.Sprintf("%sChoosing only branch of anyOf:\n", context))
+			return result, err
+		}
+	}
+
+	if len(schema.AnyOf) != 0 {
+		// Just generate an example of the first subschema. Note that we don't pass
+		// in any example, even if we have an example available, because we don't
+		// know which branch of the AnyOf the example corresponds to.
+		result, err := g.generateInternal(
+			schema.AnyOf[0], requestPath, expansions, nil,
+			fmt.Sprintf("%sChoosing first branch of anyOf:\n", context))
+		return result, err
+	}
+
+	if isListResource(schema) {
+		// We special-case list resources and always fill in the list with at least
+		// one item of data, regardless of what was present in the example
+		listData, err := g.generateListResource(
+			schema, requestPath, expansions, example, context)
+		return listData, err
+	}
+
+	if example == nil {
+		// If none of the above conditions met, we've run out of ways of generating
+		// examples from scratch, so we can only raise an error.
+		panic(fmt.Sprintf("%sCannot find or generate example for: %s", context, schema))
+	}
+
+	if example.value == nil {
+		if expansions != nil {
+			panic(fmt.Sprintf("%sWe were asked to expand a key, but our example " +
+				"has null for that key.", context))
+		}
+		return nil, nil
+	}
+
+	if (schema.Type == "boolean" || schema.Type == "integer" ||
+		schema.Type == "number" || schema.Type == "string") {
+		return example.value, nil
+	}
+
+	if schema.Type == "object" && schema.Properties == nil {
+		// For a generic object type with no particular properties specified, we
+		// assume it must not contain any expandable fields or list resources
+		return example.value, nil
+	}
+
+	if schema.Type == "array" {
+		// For lists that aren't contained in a list-object, we assume they do not
+		// contain any expandable fields or list resources
+		return example.value, nil
+	}
+
+	if schema.Type == "object" && schema.Properties != nil {
+		exampleMap, ok := example.value.(map[string]interface{})
+		if !ok {
+			panic(fmt.Sprintf("%sSchema is an object:\n%s\nBut example is:\n%s",
+				context, schema, example.value))
 		}
 
-		for key, property := range schema.Properties {
-			dataMap := data.(map[string]interface{})
+		resultMap := make(map[string]interface{})
 
-			subSchema := property
+		for key, subSchema := range schema.Properties {
 
 			var subExpansions *ExpansionLevel
 			if expansions != nil {
-				var ok bool
-				subExpansions, ok = expansions.expansions[key]
-
-				var expansion *spec.Schema
-				if property.XExpansionResources != nil {
-					expansion = property.XExpansionResources.OneOf[0]
-				}
-
-				// Point to the expanded schema in either the case that an
-				// expansion was requested on this field or we have a wildcard
-				// expansion active.
-				if expansion != nil && (ok || expansions.wildcard) {
-					subSchema = expansion
+				subExpansions = expansions.expansions[key]
+				if subExpansions == nil && expansions.wildcard {
+					// No expansion was provided for this key but the wildcard bit is set,
+					// so make a fake expansion
+					subExpansions = &ExpansionLevel {
+						expansions: make(map[string]*ExpansionLevel),
+						wildcard: false,
+					}
 				}
 			}
 
-			keyData, err := g.generateInternal(
-				subSchema, requestPath, subExpansions, dataMap[key])
-			if err == errNotSupported {
+			var subExample *Example
+			subExampleValue, exampleHasKey := exampleMap[key]
+			if exampleHasKey {
+				subExample = &Example{value: subExampleValue}
+			}
+
+			if !exampleHasKey && subExpansions == nil {
+				// If the example omitted this key, then so do we; unless we were asked
+				// to expand the key, in which case we'll have to generate an example
+				// from scratch.
 				continue
 			}
+
+			subValue, err := g.generateInternal(
+				subSchema, requestPath, subExpansions, subExample,
+				fmt.Sprintf("%sIn property '%s' of object:\n", context, key))
 			if err != nil {
 				return nil, err
 			}
-			dataMap[key] = keyData
+			resultMap[key] = subValue
 		}
+
+		return resultMap, nil
 	}
 
-	return data, nil
+	// If the schema is of the format we expect, this shouldn't ever happen.
+	panic(fmt.Sprintf(
+		"%sEncountered unusual scenario:\nschema=%s\nexample=%+v",
+		context, schema, example))
 }
 
-func (g *DataGenerator) generateResource(schema *spec.Schema) (interface{}, error) {
-	if schema.XResourceID == "" {
-		if schema.Type == "" || schema.Type == "object" {
-			return map[string]interface{}{}, nil
-		} else {
-			return nil, errNotSupported
-		}
-	}
-
-	fixture, ok := g.fixtures.Resources[spec.ResourceID(schema.XResourceID)]
-	if !ok {
-		util.Warningf("No fixture for: %s", spec.ResourceID(schema.XResourceID))
-		return map[string]interface{}{}, nil
-	}
-
-	return duplicateMap(fixture.(map[string]interface{})), nil
-}
-
-func (g *DataGenerator) maybeDereference(schema *spec.Schema) (*spec.Schema, error) {
+func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*spec.Schema, string, error) {
 	if schema.Ref != "" {
-		definition, err := definitionFromJSONPointer(schema.Ref)
-		if err != nil {
-			return nil, err
-		}
+		definition := definitionFromJSONPointer(schema.Ref)
 
 		newSchema, ok := g.definitions[definition]
 		if !ok {
-			return nil, fmt.Errorf("Couldn't dereference: %v", schema.Ref)
+			panic(fmt.Sprintf("Couldn't dereference: %v", schema.Ref))
 		}
+		context = fmt.Sprintf("%sDereferencing '%s':\n", context, schema.Ref)
 		schema = newSchema
 	}
-	return schema, nil
+	return schema, context, nil
 }
 
-func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.Schema, existingData interface{}, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
-	object, ok := properties["object"]
-	if !ok {
-		return nil, nil
+func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+
+	var itemExpansions *ExpansionLevel
+	if expansions != nil {
+		itemExpansions = expansions.expansions["data"]
 	}
 
-	if object.Enum == nil {
-		return nil, nil
-	}
-
-	if object.Enum[0] != "list" {
-		return nil, nil
-	}
-
-	data, ok := properties["data"]
-	if !ok {
-		return nil, nil
-	}
-
-	if data.Items == nil {
-		return nil, nil
-	}
-
-	itemsSchema, err := g.maybeDereference(data.Items)
-	if err != nil {
-		return nil, err
-	}
-
-	itemsData, err := g.generateInternal(itemsSchema, requestPath, expansions, nil)
+	itemData, err := g.generateInternal(
+		schema.Properties["data"].Items,
+		requestPath,
+		itemExpansions,
+		nil,
+		fmt.Sprintf("%sPopulating list resource:\n", context))
 	if err != nil {
 		return nil, err
 	}
@@ -164,11 +235,11 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.Schema, ex
 	// it respects the list properties dictated by the included schema rather
 	// than assuming its own.
 	listData := make(map[string]interface{})
-	for key := range properties {
+	for key := range schema.Properties {
 		var val interface{}
 		switch key {
 		case "data":
-			val = []interface{}{itemsData}
+			val = []interface{}{itemData}
 		case "has_more":
 			val = false
 		case "object":
@@ -176,10 +247,10 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.Schema, ex
 		case "total_count":
 			val = 1
 		case "url":
-			existingDataMap, ok := existingData.(map[string]interface{})
-			if ok {
-				// Reuse a URL that came from fixture data if one is available
-				val = existingDataMap["url"]
+			if example != nil {
+				// If an example was provided, we can assume it has the correct format
+				example := example.value.(map[string]interface{})
+				val = example["url"]
 			} else {
 				val = requestPath
 			}
@@ -193,52 +264,22 @@ func (g *DataGenerator) maybeGenerateList(properties map[string]*spec.Schema, ex
 
 // ---
 
-// duplicateArr is a helper method for duplicateMap.
-func duplicateArr(dataArr []interface{}) []interface{} {
-	copyArr := make([]interface{}, len(dataArr))
-
-	for i, v := range dataArr {
-		vMap, ok := v.(map[string]interface{})
-		if ok {
-			copyArr[i] = duplicateMap(vMap)
-			continue
-		}
-
-		vArr, ok := v.([]interface{})
-		if ok {
-			copyArr[i] = duplicateArr(vArr)
-			continue
-		}
-
-		copyArr[i] = v
+func isListResource(schema *spec.Schema) bool {
+	if schema.Type != "object" || schema.Properties == nil {
+		return false
 	}
 
-	return copyArr
-}
-
-// duplicateMap is a hacky way around the fact that there's no way to copy
-// something like a map in Go. We need to copy a fixture so that we can modify
-// and return it, which is why this exists.
-func duplicateMap(dataMap map[string]interface{}) map[string]interface{} {
-	copyMap := make(map[string]interface{})
-
-	for k, v := range dataMap {
-		vMap, ok := v.(map[string]interface{})
-		if ok {
-			copyMap[k] = duplicateMap(vMap)
-			continue
-		}
-
-		vArr, ok := v.([]interface{})
-		if ok {
-			copyMap[k] = duplicateArr(vArr)
-			continue
-		}
-
-		copyMap[k] = v
+	object, ok := schema.Properties["object"]
+	if !ok || object.Enum == nil || object.Enum[0] != "list" {
+		return false
 	}
 
-	return copyMap
+	data, ok := schema.Properties["data"]
+	if !ok || data.Items == nil {
+		return false
+	}
+
+	return true
 }
 
 // definitionFromJSONPointer extracts the name of a JSON schema definition from
@@ -247,15 +288,14 @@ func duplicateMap(dataMap map[string]interface{}) map[string]interface{} {
 // infrastructure because we can guarantee that the spec we're producing will
 // take a certain shape. If this gets too hacky, it will be better to put a more
 // legitimate JSON schema parser in place.
-func definitionFromJSONPointer(pointer string) (string, error) {
-	parts := strings.Split(pointer, "/")
+func definitionFromJSONPointer(pointer string) string {
+       parts := strings.Split(pointer, "/")
 
-	if len(parts) != 4 ||
-		parts[0] != "#" ||
-		parts[1] != "components" ||
-		parts[2] != "schemas" {
-		return "", fmt.Errorf("Expected '#/components/schemas/...' but got '%v'", pointer)
-	}
-
-	return parts[3], nil
+       if len(parts) != 4 ||
+               parts[0] != "#" ||
+               parts[1] != "components" ||
+               parts[2] != "schemas" {
+               panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
+			 }
+			 return parts[3]
 }

@@ -32,9 +32,17 @@ type Schema struct {
 	// it defines the location of the actual schema definition.
 	Ref string `json:"$ref,omitempty" yaml:"$ref"`
 
-	XExpandableFields   []string            `json:"x-expandableFields,omitempty" yaml:"x-expandableFields"`
+	XExpandableFields   *[]string           `json:"x-expandableFields,omitempty" yaml:"x-expandableFields"`
 	XExpansionResources *ExpansionResources `json:"x-expansionResources,omitempty" yaml:"x-expansionResources"`
 	XResourceID         string              `json:"x-resourceId,omitempty" yaml:"x-resourceId"`
+}
+
+func (s *Schema) String() string {
+	js, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(js)
 }
 
 func (s *Schema) UnmarshalJSON(data []byte) error {

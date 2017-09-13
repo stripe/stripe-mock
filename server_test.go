@@ -185,6 +185,9 @@ func TestIsCurl(t *testing.T) {
 }
 
 func TestParseExpansionLevel(t *testing.T) {
+	emptyExpansionLevel := &ExpansionLevel{
+		expansions: make(map[string]*ExpansionLevel),
+	}
 	testCases := []struct {
 		expansions []string
 		want       *ExpansionLevel
@@ -192,18 +195,18 @@ func TestParseExpansionLevel(t *testing.T) {
 		{
 			[]string{"charge", "customer"},
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-				"charge":   nil,
-				"customer": nil,
+				"charge":   emptyExpansionLevel,
+				"customer": emptyExpansionLevel,
 			}},
 		},
 		{
 			[]string{"charge.customer", "customer", "charge.source"},
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
 				"charge": {expansions: map[string]*ExpansionLevel{
-					"customer": nil,
-					"source":   nil,
+					"customer": emptyExpansionLevel,
+					"source":   emptyExpansionLevel,
 				}},
-				"customer": nil,
+				"customer": emptyExpansionLevel,
 			}},
 		},
 		{
@@ -211,7 +214,7 @@ func TestParseExpansionLevel(t *testing.T) {
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
 				"charge": {expansions: map[string]*ExpansionLevel{
 					"customer": {expansions: map[string]*ExpansionLevel{
-						"default_source": nil,
+						"default_source": emptyExpansionLevel,
 					}},
 				}},
 			}},

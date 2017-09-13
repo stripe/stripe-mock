@@ -49,7 +49,8 @@ func ParseExpansionLevel(raw []string) *ExpansionLevel {
 			if parts[0] == "*" {
 				level.wildcard = true
 			} else {
-				level.expansions[parts[0]] = nil
+				level.expansions[parts[0]] =
+					&ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
 			}
 		} else {
 			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
@@ -112,11 +113,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
-		responseContentSchema, err := json.MarshalIndent(responseContent.Schema, "", "  ")
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("Response schema: %s\n", responseContentSchema)
+		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
 
 	var formString string

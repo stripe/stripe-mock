@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 
@@ -13,6 +12,7 @@ var listSchema *spec.Schema
 
 func init() {
 	listSchema = &spec.Schema{
+		Type: "object",
 		Properties: map[string]*spec.Schema{
 			"data": {
 				Items: &spec.Schema{
@@ -29,7 +29,7 @@ func init() {
 	}
 }
 
-func TestConcurrentAcccess(t *testing.T) {
+func TestConcurrentAccess(t *testing.T) {
 	var generator DataGenerator
 
 	// We use the real spec here because when there was a concurrency problem,
@@ -75,7 +75,8 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer":
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["customer"].(map[string]interface{})["id"],
@@ -86,7 +87,8 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id":
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// bad nested expansion
@@ -94,7 +96,8 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id":
+			&ExpansionLevel{expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// wildcard expansion
@@ -134,6 +137,7 @@ func TestGenerateResponseData(t *testing.T) {
 	}
 	data, err = generator.Generate(
 		&spec.Schema{
+			Type: "object",
 			Properties: map[string]*spec.Schema{
 				"charges_list": listSchema,
 			},
@@ -146,64 +150,11 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
-
-	// no fixture (returns an empty object)
-	generator = DataGenerator{
-		testSpec.Components.Schemas,
-		// this is an empty set of fixtures
-		&spec.Fixtures{
-			Resources: map[spec.ResourceID]interface{}{},
-		},
-	}
-	data, err = generator.Generate(
-		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, map[string]interface{}{}, data)
-
-	// error: unhandled JSON schema type
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(
-		&spec.Schema{Type: "string"}, "", nil)
-	assert.Equal(t,
-		fmt.Errorf("Expected response to be a list or include $ref"),
-		err)
-
-	// error: no definition in OpenAPI
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(
-		&spec.Schema{Ref: "#/components/schemas/doesnt-exist"}, "", nil)
-	assert.Equal(t,
-		fmt.Errorf("Couldn't dereference: #/components/schemas/doesnt-exist"),
-		err)
 }
 
 // ---
 
-func TestDuplicateMap(t *testing.T) {
-	data := map[string]interface{}{
-		"key1": "foo",
-		"key2": 123,
-		"key3": true,
-		"key4": []interface{}{
-			"bar",
-			"456",
-			true,
-			[]interface{}{
-				"baz",
-				"789",
-			},
-		},
-		"key5": map[string]interface{}{
-			"keyA": "abc",
-			"keyB": 999,
-			"keyC": true,
-		},
-	}
-	assert.Equal(t, data, duplicateMap(data))
-}
-
 func TestDefinitionFromJSONPointer(t *testing.T) {
-	definition, err := definitionFromJSONPointer("#/components/schemas/charge")
-	assert.Nil(t, err)
+	definition := definitionFromJSONPointer("#/components/schemas/charge")
 	assert.Equal(t, "charge", definition)
 }
