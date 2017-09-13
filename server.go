@@ -149,9 +149,15 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// transitioned to OpenAPI 3.0
 	bodySchema := getRequestBodySchema(route.operation)
 	if bodySchema != nil {
-		coercer.CoerceParams(bodySchema, requestData)
+		err := coercer.CoerceParams(bodySchema, requestData)
+		if err != nil {
+			fmt.Printf("Coercion error: %v\n", err)
+			responseData := fmt.Sprintf("Request error: %v", err)
+			writeResponse(w, r, start, http.StatusBadRequest, responseData)
+			return
+		}
 
-		err := route.requestBodyValidator.Validate(requestData)
+		err = route.requestBodyValidator.Validate(requestData)
 		if err != nil {
 			fmt.Printf("Validation error: %v\n", err)
 			responseData := fmt.Sprintf("Request error: %v", err)

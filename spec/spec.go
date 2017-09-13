@@ -6,7 +6,7 @@ import (
 )
 
 type Components struct {
-	Schemas map[string]*Schema `json:"schemas"`
+	Schemas map[string]*Schema `json:"schemas" yaml:"schemas"`
 }
 
 type ExpansionResources struct {
@@ -14,10 +14,29 @@ type ExpansionResources struct {
 }
 
 type Fixtures struct {
-	Resources map[ResourceID]interface{} `json:"resources"`
+	Resources map[ResourceID]interface{} `json:"resources" yaml:"resources"`
 }
 
 type HTTPVerb string
+
+// This is a list of fields that either we handle properly or we're confident
+// it's safe to ignore. If a field not in this list appears in the OpenAPI spec,
+// then we'll get an error so we remember to update stripe-mock to support it.
+var supportedSchemaFields = []string{
+	"anyOf",
+	"description",
+	"enum",
+	"items",
+	"nullable",
+	"properties",
+	"required",
+	"title",
+	"type",
+	"x-expandableFields",
+	"x-expansionResources",
+	"x-resourceId",
+	"$ref",
+}
 
 type Schema struct {
 	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
@@ -52,14 +71,7 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// If you update this, be sure to also update getJSONSchemaForOpenAPI3Schema
-	// to pass the fields through to the JSON validator
-	supportedFields := []string{
-		"anyOf", "enum", "items", "nullable", "properties", "required", "type",
-		"x-expandableFields", "x-expansionResources", "x-resourceId", "$ref",
-		"title", "description",
-	}
-	for _, supportedField := range supportedFields {
+	for _, supportedField := range supportedSchemaFields {
 		delete(rawFields, supportedField)
 	}
 	for unsupportedField := range rawFields {
@@ -67,8 +79,12 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 			"unsupported field in JSON schema: '%s'", unsupportedField)
 	}
 
-	type schema2 Schema
-	var inner schema2
+	// Define a second type that's identical to Schema, but distinct, so that when
+	// we call json.Unmarshal it will call the default implementation of
+	// unmarshalling a Schema object instead of recursively calling this
+	// UnmarshalJSON function again.
+	type schemaAlias Schema
+	var inner schemaAlias
 	err = json.Unmarshal(data, &inner)
 	if err != nil {
 		return err
