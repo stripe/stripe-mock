@@ -6,7 +6,11 @@ import (
 	"github.com/lestrrat/go-jsval/builder"
 )
 
-func GetValidatorForOpenAPI3Schema(oaiSchema *Schema) (*jsval.JSVal, error) {
+type ComponentsForValidation struct {
+	root interface{}
+}
+
+func GetValidatorForOpenAPI3Schema(oaiSchema *Schema, components *ComponentsForValidation) (*jsval.JSVal, error) {
 	jsonSchemaAsJSON := getJSONSchemaForOpenAPI3Schema(oaiSchema)
 
 	jsonSchema := schema.New()
@@ -15,13 +19,31 @@ func GetValidatorForOpenAPI3Schema(oaiSchema *Schema) (*jsval.JSVal, error) {
 		return nil, err
 	}
 
+	if components == nil {
+		components = &ComponentsForValidation{root: make(map[string]interface{})}
+	}
+
 	validatorBuilder := builder.New()
-	validator, err := validatorBuilder.Build(jsonSchema)
+	validator, err := validatorBuilder.BuildWithCtx(jsonSchema, components.root)
 	if err != nil {
 		return nil, err
 	}
 
 	return validator, nil
+}
+
+func GetComponentsForValidation(components *Components) *ComponentsForValidation {
+	jsonSchemas := make(map[string]interface{})
+	for name, oaiSchema := range components.Schemas {
+		jsonSchemas[name] = getJSONSchemaForOpenAPI3Schema(oaiSchema)
+	}
+	return &ComponentsForValidation{
+		root: map[string]interface{}{
+			"components": map[string]interface{}{
+				"schemas": jsonSchemas,
+			},
+		},
+	}
 }
 
 // Given an OpenAPI 3 schema represented as JSON, returns an equivalent JSON

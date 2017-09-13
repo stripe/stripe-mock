@@ -198,6 +198,8 @@ func (s *StubServer) initializeRouter() error {
 
 	s.routes = make(map[spec.HTTPVerb][]stubServerRoute)
 
+	componentsForValidation := spec.GetComponentsForValidation(&s.spec.Components)
+
 	for path, verbs := range s.spec.Paths {
 		numPaths++
 
@@ -214,8 +216,8 @@ func (s *StubServer) initializeRouter() error {
 			var requestBodyValidator *jsval.JSVal
 			if requestBodySchema != nil {
 				var err error
-				requestBodyValidator, err =
-					spec.GetValidatorForOpenAPI3Schema(requestBodySchema)
+				requestBodyValidator, err = spec.GetValidatorForOpenAPI3Schema(
+					requestBodySchema, componentsForValidation)
 				if err != nil {
 					return err
 				}

@@ -140,7 +140,7 @@ func TestGetValidator(t *testing.T) {
 	}}
 	schema := getRequestBodySchema(operation)
 	assert.NotNil(t, schema)
-	validator, err := spec.GetValidatorForOpenAPI3Schema(schema)
+	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, validator)
 

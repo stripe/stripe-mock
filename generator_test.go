@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"testing"
 
@@ -147,6 +148,23 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+}
+
+func TestValidFixtures(t *testing.T) {
+	// Every fixture should validate according to the schema it's a fixture for
+	componentsForValidation := spec.GetComponentsForValidation(&realSpec.Components)
+	for name, schema := range realSpec.Components.Schemas {
+		if schema.XResourceID == "" {
+			continue
+		}
+		fixture, ok := realFixtures.Resources[spec.ResourceID(schema.XResourceID)]
+		assert.True(t, ok)
+		validator, err := spec.GetValidatorForOpenAPI3Schema(schema, componentsForValidation)
+		assert.NoError(t, err)
+		err = validator.Validate(fixture)
+		assert.NoError(t, err,
+			fmt.Sprintf("Resource schema '%s' does not match its own fixture", name))
+	}
 }
 
 // ---
