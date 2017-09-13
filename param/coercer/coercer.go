@@ -1,6 +1,8 @@
 package coercer
 
 import (
+	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/stripe/stripe-mock/spec"
@@ -13,7 +15,7 @@ import (
 // integers.
 //
 // Currently only the coercion of strings to bool and int64 is supported.
-func CoerceParams(schema *spec.Schema, data map[string]interface{}) {
+func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 	for key, subSchema := range schema.Properties {
 		val, ok := data[key]
 		if !ok {
@@ -23,6 +25,18 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) {
 		valMap, ok := val.(map[string]interface{})
 		if ok {
 			CoerceParams(subSchema, valMap)
+
+			if subSchema.Type == arrayType {
+				valSlice, err := parseIntegerIndexedMap(valMap)
+				if err != nil {
+					return err
+				}
+
+				if valSlice != nil {
+					data[key] = valSlice
+				}
+			}
+
 			continue
 		}
 
@@ -52,16 +66,71 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) {
 			}
 		}
 	}
+
+	return nil
 }
 
 //
 // ---
 //
 
-// booleanType is the name of the boolean type in a JSON schema.
-const booleanType = "boolean"
+// Various identifiers for types in JSON schema.
+const (
+	arrayType   = "array"
+	booleanType = "boolean"
+	integerType = "integer"
+	numberType  = "number"
+	objectType  = "object"
+)
 
-// integerType is the name of the integer type in a JSON schema.
-const integerType = "integer"
+// maxSliceSize defines a somewhat arbitrary maximum size on an incoming
+// integer-indexed map that we're willing to parse so that we don't run out of
+// memory trying to allocate a slice.
+const maxSliceSize = 1000
 
-const numberType = "number"
+// numberPattern simply checks to see if an input string looks like a number.
+var numberPattern = regexp.MustCompile(`\A\d+\z`)
+
+// parseIntegerIndexedMap tries to parse a map that has all integer-indexed
+// keys (e.g. { "0": ..., "1": "...", "2": "..." }) as a slice. We only try to
+// do this when we know that the target schema requires an array.
+func parseIntegerIndexedMap(valMap map[string]interface{}) ([]interface{}, error) {
+	allNumberedIndexes := true
+	biggestIndex := 0
+
+	for index := range valMap {
+		matched := numberPattern.MatchString(index)
+		if !matched {
+			allNumberedIndexes = false
+			break
+		}
+
+		valInt, err := strconv.Atoi(index)
+		if err != nil {
+			allNumberedIndexes = false
+			break
+		}
+
+		if valInt > biggestIndex {
+			biggestIndex = valInt
+		}
+	}
+
+	if !allNumberedIndexes {
+		return nil, nil
+	}
+
+	if biggestIndex > maxSliceSize {
+		return nil, fmt.Errorf("Index %v is too large, won't parse as slice", biggestIndex)
+	}
+
+	valSlice := make([]interface{}, biggestIndex+1)
+
+	for index, val := range valMap {
+		// Already checked error above
+		indexInt, _ := strconv.Atoi(index)
+		valSlice[indexInt] = val
+	}
+
+	return valSlice, nil
+}
