@@ -22,26 +22,3 @@ func TestUnmarshal_UnsupportedField(t *testing.T) {
 	err := json.Unmarshal(data, &schema)
 	assert.Error(t, err)
 }
-
-func TestValidator_Simple(t *testing.T) {
-	schema := Schema{
-		Type: "string",
-	}
-	v, err := GetValidatorForOpenAPI3Schema(&schema)
-	assert.NoError(t, err)
-	assert.NoError(t, v.Validate("hello"))
-	assert.Error(t, v.Validate(nil))
-	assert.Error(t, v.Validate(123))
-}
-
-func TestValidator_Nullable(t *testing.T) {
-	schema := Schema{
-		Type:     "string",
-		Nullable: true,
-	}
-	v, err := GetValidatorForOpenAPI3Schema(&schema)
-	assert.NoError(t, err)
-	assert.NoError(t, v.Validate("hello"))
-	assert.NoError(t, v.Validate(nil))
-	assert.Error(t, v.Validate(123))
-}
