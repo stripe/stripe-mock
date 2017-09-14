@@ -16,6 +16,7 @@ var chargeGetMethod *spec.Operation
 // don't mutate it.
 var realSpec spec.Spec
 var realFixtures spec.Fixtures
+var realComponentsForValidation *spec.ComponentsForValidation
 
 var testSpec spec.Spec
 var testFixtures spec.Fixtures
@@ -36,6 +37,9 @@ func initRealSpec() {
 	if err != nil {
 		panic(err)
 	}
+
+	realComponentsForValidation =
+		spec.GetComponentsForValidation(&realSpec.Components)
 
 	// And do the same for fixtures
 	data, err = Asset("openapi/openapi/fixtures3.json")
