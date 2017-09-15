@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"testing"
@@ -20,12 +21,19 @@ func init() {
 					Ref: "#/components/schemas/charge",
 				},
 			},
-			"has_more": nil,
+			"has_more": {
+				Type: "boolean",
+			},
 			"object": {
 				Enum: []string{"list"},
 			},
-			"total_count": nil,
-			"url":         nil,
+			"total_count": {
+				Type: "integer",
+			},
+			"url": {
+				Type: "string",
+				Enum: []string{"/v1/charges"},
+			},
 		},
 	}
 }
@@ -127,7 +135,7 @@ func TestGenerateResponseData(t *testing.T) {
 				spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
 				spec.ResourceID("with_charges_list"): map[string]interface{}{
 					"charges_list": map[string]interface{}{
-						"url": "/v1/from_charges_list",
+						"url": "/v1/charges",
 					},
 				},
 			},
@@ -144,7 +152,7 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/from_charges_list", chargesList.(map[string]interface{})["url"])
+	assert.Equal(t, "/v1/charges", chargesList.(map[string]interface{})["url"])
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
@@ -169,6 +177,8 @@ func TestValidFixtures(t *testing.T) {
 // Tests that DataGenerator can generate an example of the given schema, and
 // that the example validates against the schema correctly
 func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
+	assert.NotNil(t, schema)
+
 	generator := DataGenerator{
 		definitions: realSpec.Components.Schemas,
 		fixtures:    &realFixtures,
@@ -187,22 +197,29 @@ func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
 	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
 	assert.NoError(t, err)
 	err = validator.Validate(example)
+	if err != nil {
+		t.Logf("Schema is: %s", schema)
+		exampleJson, err := json.MarshalIndent(example, "", "  ")
+		assert.NoError(t, err)
+		t.Logf("Example is: %s", exampleJson)
+	}
 	assert.NoError(t, err)
 }
 
 func TestResourcesCanBeGenerated(t *testing.T) {
-	for name, schema := range realSpec.Components.Schemas {
-		t.Logf("Generating resource '%s' without expansions", name)
-		testCanGenerate(t, schema, false)
-		t.Logf("Generating resource '%s' with expansions", name)
-		testCanGenerate(t, schema, true)
-	}
-
 	for url, operations := range realSpec.Paths {
 		for method, operation := range operations {
-			schema := operation.Responses[spec.StatusCode(200)].Content["application/json"].Schema
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
 			t.Logf("Generating operation '%s %s' without expansions", method, url)
 			testCanGenerate(t, schema, false)
+		}
+	}
+}
+
+func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
+	for url, operations := range realSpec.Paths {
+		for method, operation := range operations {
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
 			t.Logf("Generating operation '%s %s' with expansion", method, url)
 			testCanGenerate(t, schema, true)
 		}

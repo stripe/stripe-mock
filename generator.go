@@ -235,7 +235,7 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 	// it respects the list properties dictated by the included schema rather
 	// than assuming its own.
 	listData := make(map[string]interface{})
-	for key := range schema.Properties {
+	for key, subSchema := range schema.Properties {
 		var val interface{}
 		switch key {
 		case "data":
@@ -247,7 +247,9 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 		case "total_count":
 			val = 1
 		case "url":
-			if example != nil {
+			if len(subSchema.Enum) == 1 {
+				val = subSchema.Enum[0]
+			} else if example != nil {
 				// If an example was provided, we can assume it has the correct format
 				example := example.value.(map[string]interface{})
 				val = example["url"]
