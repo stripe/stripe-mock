@@ -35,8 +35,8 @@ func TestCoerceParams_IntegerCoercion(t *testing.T) {
 
 func TestCoerceParams_IntegerIndexedMapCoercion(t *testing.T) {
 	{
-		schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-			"arraykey": {Type: []string{arrayType}},
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {Type: arrayType},
 		}}
 		data := map[string]interface{}{
 			"arraykey": map[string]interface{}{
@@ -58,8 +58,8 @@ func TestCoerceParams_IntegerIndexedMapCoercion(t *testing.T) {
 
 	// Value was not a map
 	{
-		schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-			"arraykey": {Type: []string{arrayType}},
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {Type: arrayType},
 		}}
 		data := map[string]interface{}{
 			"arraykey": "not-map",
@@ -72,8 +72,8 @@ func TestCoerceParams_IntegerIndexedMapCoercion(t *testing.T) {
 
 	// Not all indexes were integers
 	{
-		schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-			"arraykey": {Type: []string{arrayType}},
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {Type: arrayType},
 		}}
 		data := map[string]interface{}{
 			"arraykey": map[string]interface{}{
@@ -89,8 +89,8 @@ func TestCoerceParams_IntegerIndexedMapCoercion(t *testing.T) {
 
 	// Index too big
 	{
-		schema := &spec.JSONSchema{Properties: map[string]*spec.JSONSchema{
-			"arraykey": {Type: []string{arrayType}},
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {Type: arrayType},
 		}}
 		data := map[string]interface{}{
 			"arraykey": map[string]interface{}{
