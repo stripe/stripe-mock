@@ -164,13 +164,14 @@ func TestValidFixtures(t *testing.T) {
 		if schema.XResourceID == "" {
 			continue
 		}
-		fixture, ok := realFixtures.Resources[spec.ResourceID(schema.XResourceID)]
-		assert.True(t, ok)
-		validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
-		assert.NoError(t, err)
-		err = validator.Validate(fixture)
-		assert.NoError(t, err,
-			fmt.Sprintf("Resource schema '%s' does not match its own fixture", name))
+		t.Run(name, func(t2 *testing.T) {
+			fixture, ok := realFixtures.Resources[spec.ResourceID(schema.XResourceID)]
+			assert.True(t2, ok)
+			validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
+			assert.NoError(t2, err)
+			err = validator.Validate(fixture)
+			assert.NoError(t2, err)
+		})
 	}
 }
 
@@ -192,8 +193,13 @@ func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
 		}
 	}
 
-	example, err := generator.Generate(schema, "<test request path>", expansions)
+	var example interface{}
+	var err error
+	assert.NotPanics(t, func() {
+		example, err = generator.Generate(schema, "<test request path>", expansions)
+	})
 	assert.NoError(t, err)
+
 	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
 	assert.NoError(t, err)
 	err = validator.Validate(example)
@@ -210,8 +216,10 @@ func TestResourcesCanBeGenerated(t *testing.T) {
 	for url, operations := range realSpec.Paths {
 		for method, operation := range operations {
 			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Logf("Generating operation '%s %s' without expansions", method, url)
-			testCanGenerate(t, schema, false)
+			t.Run(
+				fmt.Sprintf("%s %s (without expansions)", method, url),
+				func (t2 *testing.T) { testCanGenerate(t2, schema, false) },
+			)
 		}
 	}
 }
@@ -220,8 +228,10 @@ func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
 	for url, operations := range realSpec.Paths {
 		for method, operation := range operations {
 			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Logf("Generating operation '%s %s' with expansion", method, url)
-			testCanGenerate(t, schema, true)
+			t.Run(
+				fmt.Sprintf("%s %s (with expansions)", method, url),
+				func (t2 *testing.T) { testCanGenerate(t2, schema, true) },
+			)
 		}
 	}
 }
