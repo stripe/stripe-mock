@@ -11,9 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lestrrat/go-jsschema"
 	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-jsval/builder"
 	"github.com/stripe/stripe-mock/param/coercer"
 	"github.com/stripe/stripe-mock/param/parser"
 	"github.com/stripe/stripe-mock/spec"
@@ -51,7 +49,8 @@ func ParseExpansionLevel(raw []string) *ExpansionLevel {
 			if parts[0] == "*" {
 				level.wildcard = true
 			} else {
-				level.expansions[parts[0]] = nil
+				level.expansions[parts[0]] =
+					&ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
 			}
 		} else {
 			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
@@ -77,9 +76,9 @@ type StubServer struct {
 // pattern to match an incoming path and a description of the method that would
 // be executed in the event of a match.
 type stubServerRoute struct {
-	pattern   *regexp.Regexp
-	method    *spec.Method
-	validator *jsval.JSVal
+	pattern              *regexp.Regexp
+	operation            *spec.Operation
+	requestBodyValidator *jsval.JSVal
 }
 
 // HandleRequest handes an HTTP request directed at the API stub.
@@ -100,17 +99,21 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, ok := route.method.Responses["200"]
+	response, ok := route.operation.Responses["200"]
 	if !ok {
 		fmt.Printf("Couldn't find 200 response in spec\n")
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
+	responseContent, ok := response.Content["application/json"]
+	if !ok || responseContent.Schema == nil {
+		fmt.Printf("Couldn't find application/json in response\n")
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		return
+	}
 
 	if verbose {
-		fmt.Printf("Response: %+v\n", response)
-		fmt.Printf("Response schema: %+v\n", response.Schema)
-		fmt.Printf("Response schema ref: '%+v'\n", response.Schema.Ref)
+		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
 
 	var formString string
@@ -134,17 +137,19 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
-		fmt.Printf("Request data: %+v\n", requestData)
+		if formString != "" {
+			fmt.Printf("Request data: %s\n", formString)
+		} else {
+			fmt.Printf("Request data: (none)\n")
+		}
 	}
 
-	// OpenAPI 2.0 stores a possible JSON schema in a special parameter that's
-	// identifiable with "in: body". Currently I'm only doing parameter
-	// validation if we have one of these (which is usually POST verbs).
-	// Everything goes to JSON Schema for OpenAPI 3.0, so we'll be able to
-	// support validation all verbs, and much more simply.
-	requestSchema := bodyParameterSchema(route.method)
-	if requestSchema != nil {
-		err := coercer.CoerceParams(requestSchema, requestData)
+	// Currently we only validate parameters in the request body, but we should
+	// really validate query and URL parameters as well now that we've
+	// transitioned to OpenAPI 3.0
+	bodySchema := getRequestBodySchema(route.operation)
+	if bodySchema != nil {
+		err := coercer.CoerceParams(bodySchema, requestData)
 		if err != nil {
 			fmt.Printf("Coercion error: %v\n", err)
 			responseData := fmt.Sprintf("Request error: %v", err)
@@ -152,7 +157,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = route.validator.Validate(requestData)
+		err = route.requestBodyValidator.Validate(requestData)
 		if err != nil {
 			fmt.Printf("Validation error: %v\n", err)
 			responseData := fmt.Sprintf("Request error: %v", err)
@@ -166,15 +171,22 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Expansions: %+v\n", rawExpansions)
 	}
 
-	generator := DataGenerator{s.spec.Definitions, s.fixtures}
-	responseData, err := generator.Generate(response.Schema, r.URL.Path, expansions)
+	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
+	responseData, err := generator.Generate(
+		responseContent.Schema,
+		r.URL.Path,
+		expansions)
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
 		writeResponse(w, r, start, http.StatusInternalServerError, nil)
 		return
 	}
 	if verbose {
-		fmt.Printf("Response data: %+v\n", responseData)
+		responseDataJson, err := json.MarshalIndent(responseData, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Response data: %s\n", responseDataJson)
 	}
 	writeResponse(w, r, start, http.StatusOK, responseData)
 }
@@ -186,6 +198,8 @@ func (s *StubServer) initializeRouter() error {
 
 	s.routes = make(map[spec.HTTPVerb][]stubServerRoute)
 
+	componentsForValidation := spec.GetComponentsForValidation(&s.spec.Components)
+
 	for path, verbs := range s.spec.Paths {
 		numPaths++
 
@@ -195,24 +209,30 @@ func (s *StubServer) initializeRouter() error {
 			fmt.Printf("Compiled path: %v\n", pathPattern.String())
 		}
 
-		for verb, method := range verbs {
+		for verb, operation := range verbs {
 			numEndpoints++
 
-			validator, err := getValidator(method)
-			if err != nil {
-				return err
+			requestBodySchema := getRequestBodySchema(operation)
+			var requestBodyValidator *jsval.JSVal
+			if requestBodySchema != nil {
+				var err error
+				requestBodyValidator, err = spec.GetValidatorForOpenAPI3Schema(
+					requestBodySchema, componentsForValidation)
+				if err != nil {
+					return err
+				}
 			}
 
 			// Note that this may be nil if no suitable validator could be
 			// generated.
-			if validator != nil {
+			if requestBodyValidator != nil {
 				numValidators++
 			}
 
 			route := stubServerRoute{
-				pattern:   pathPattern,
-				method:    method,
-				validator: validator,
+				pattern:              pathPattern,
+				operation:            operation,
+				requestBodyValidator: requestBodyValidator,
 			}
 
 			// net/http will always give us verbs in uppercase, so build our
@@ -240,13 +260,16 @@ func (s *StubServer) routeRequest(r *http.Request) *stubServerRoute {
 
 // ---
 
-func bodyParameterSchema(method *spec.Method) *spec.JSONSchema {
-	for _, param := range method.Parameters {
-		if param.In == "body" {
-			return param.Schema
-		}
+func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
+	if operation.RequestBody == nil {
+		return nil
 	}
-	return nil
+	mediaType, mediaTypePresent :=
+		operation.RequestBody.Content["application/x-www-form-urlencoded"]
+	if !mediaTypePresent {
+		return nil
+	}
+	return mediaType.Schema
 }
 
 var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
@@ -297,27 +320,6 @@ func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) 
 	return nil, nil
 }
 
-func getValidator(method *spec.Method) (*jsval.JSVal, error) {
-	for _, parameter := range method.Parameters {
-		if parameter.Schema != nil {
-			schema := schema.New()
-			err := schema.Extract(parameter.Schema.RawFields)
-			if err != nil {
-				return nil, err
-			}
-
-			validatorBuilder := builder.New()
-			validator, err := validatorBuilder.Build(schema)
-			if err != nil {
-				return nil, err
-			}
-
-			return validator, nil
-		}
-	}
-	return nil, nil
-}
-
 func isCurl(userAgent string) bool {
 	return strings.HasPrefix(userAgent, "curl/")
 }
@@ -330,10 +332,11 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	var encodedData []byte
 	var err error
 
-	if isCurl(r.Header.Get("User-Agent")) {
+	if !isCurl(r.Header.Get("User-Agent")) {
 		encodedData, err = json.Marshal(&data)
 	} else {
 		encodedData, err = json.MarshalIndent(&data, "", "  ")
+		encodedData = append(encodedData, '\n')
 	}
 
 	if err != nil {

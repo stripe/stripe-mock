@@ -15,7 +15,7 @@ import (
 // integers.
 //
 // Currently only the coercion of strings to bool and int64 is supported.
-func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) error {
+func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 	for key, subSchema := range schema.Properties {
 		val, ok := data[key]
 		if !ok {
@@ -26,7 +26,7 @@ func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) error {
 		if ok {
 			CoerceParams(subSchema, valMap)
 
-			if hasType(subSchema, arrayType) && !hasType(subSchema, objectType) {
+			if subSchema.Type == arrayType {
 				valSlice, err := parseIntegerIndexedMap(valMap)
 				if err != nil {
 					return err
@@ -43,21 +43,21 @@ func CoerceParams(schema *spec.JSONSchema, data map[string]interface{}) error {
 		valStr, ok := val.(string)
 		if ok {
 			switch {
-			case hasType(subSchema, booleanType):
+			case subSchema.Type == booleanType:
 				valBool, err := strconv.ParseBool(valStr)
 				if err != nil {
 					valBool = false
 				}
 				data[key] = valBool
 
-			case hasType(subSchema, integerType):
+			case subSchema.Type == integerType:
 				valInt, err := strconv.Atoi(valStr)
 				if err != nil {
 					valInt = 0
 				}
 				data[key] = valInt
 
-			case hasType(subSchema, numberType):
+			case subSchema.Type == numberType:
 				valFloat, err := strconv.ParseFloat(valStr, 64)
 				if err != nil {
 					valFloat = 0.0
@@ -90,15 +90,6 @@ const maxSliceSize = 1000
 
 // numberPattern simply checks to see if an input string looks like a number.
 var numberPattern = regexp.MustCompile(`\A\d+\z`)
-
-func hasType(schema *spec.JSONSchema, targetTypeStr string) bool {
-	for _, typeStr := range schema.Type {
-		if typeStr == targetTypeStr {
-			return true
-		}
-	}
-	return false
-}
 
 // parseIntegerIndexedMap tries to parse a map that has all integer-indexed
 // keys (e.g. { "0": ..., "1": "...", "2": "..." }) as a slice. We only try to

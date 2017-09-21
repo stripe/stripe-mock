@@ -72,6 +72,7 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
 		bytes.NewBufferString("amount=123&currency=usd"))
 	req.Header.Set("Authorization", "Bearer sk_test_123")
+	req.Header.Set("User-Agent", "curl/1.2.3")
 	w := httptest.NewRecorder()
 	server.HandleRequest(w, req)
 
@@ -92,22 +93,22 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeAllMethod, route.method)
+	assert.Equal(t, chargeAllMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeCreateMethod, route.method)
+	assert.Equal(t, chargeCreateMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeGetMethod, route.method)
+	assert.Equal(t, chargeGetMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
-	assert.Equal(t, chargeDeleteMethod, route.method)
+	assert.Equal(t, chargeDeleteMethod, route.operation)
 
 	route = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/doesnt-exist"}})
@@ -124,18 +125,22 @@ func TestCompilePath(t *testing.T) {
 }
 
 func TestGetValidator(t *testing.T) {
-	method := &spec.Method{Parameters: []*spec.Parameter{
-		{Schema: &spec.JSONSchema{
-			RawFields: map[string]interface{}{
-				"properties": map[string]interface{}{
-					"name": map[string]interface{}{
-						"type": "string",
+	operation := &spec.Operation{RequestBody: &spec.RequestBody{
+		Content: map[string]spec.MediaType{
+			"application/x-www-form-urlencoded": {
+				Schema: &spec.Schema{
+					Properties: map[string]*spec.Schema{
+						"name": {
+							Type: "string",
+						},
 					},
 				},
 			},
-		}},
+		},
 	}}
-	validator, err := getValidator(method)
+	schema := getRequestBodySchema(operation)
+	assert.NotNil(t, schema)
+	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, validator)
 
@@ -151,12 +156,11 @@ func TestGetValidator(t *testing.T) {
 }
 
 func TestGetValidator_NoSuitableParameter(t *testing.T) {
-	method := &spec.Method{Parameters: []*spec.Parameter{
+	method := &spec.Operation{Parameters: []*spec.Parameter{
 		{Schema: nil},
 	}}
-	validator, err := getValidator(method)
-	assert.NoError(t, err)
-	assert.Nil(t, validator)
+	schema := getRequestBodySchema(method)
+	assert.Nil(t, schema)
 }
 
 func TestIsCurl(t *testing.T) {
@@ -181,6 +185,9 @@ func TestIsCurl(t *testing.T) {
 }
 
 func TestParseExpansionLevel(t *testing.T) {
+	emptyExpansionLevel := &ExpansionLevel{
+		expansions: make(map[string]*ExpansionLevel),
+	}
 	testCases := []struct {
 		expansions []string
 		want       *ExpansionLevel
@@ -188,18 +195,18 @@ func TestParseExpansionLevel(t *testing.T) {
 		{
 			[]string{"charge", "customer"},
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
-				"charge":   nil,
-				"customer": nil,
+				"charge":   emptyExpansionLevel,
+				"customer": emptyExpansionLevel,
 			}},
 		},
 		{
 			[]string{"charge.customer", "customer", "charge.source"},
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
 				"charge": {expansions: map[string]*ExpansionLevel{
-					"customer": nil,
-					"source":   nil,
+					"customer": emptyExpansionLevel,
+					"source":   emptyExpansionLevel,
 				}},
-				"customer": nil,
+				"customer": emptyExpansionLevel,
 			}},
 		},
 		{
@@ -207,7 +214,7 @@ func TestParseExpansionLevel(t *testing.T) {
 			&ExpansionLevel{expansions: map[string]*ExpansionLevel{
 				"charge": {expansions: map[string]*ExpansionLevel{
 					"customer": {expansions: map[string]*ExpansionLevel{
-						"default_source": nil,
+						"default_source": emptyExpansionLevel,
 					}},
 				}},
 			}},

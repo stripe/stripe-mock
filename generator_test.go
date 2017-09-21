@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
 	"testing"
@@ -9,32 +10,40 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-var listSchema *spec.JSONSchema
+var listSchema *spec.Schema
 
 func init() {
-	listSchema = &spec.JSONSchema{
-		Properties: map[string]*spec.JSONSchema{
+	listSchema = &spec.Schema{
+		Type: "object",
+		Properties: map[string]*spec.Schema{
 			"data": {
-				Items: &spec.JSONSchema{
-					Ref: "#/definitions/charge",
+				Items: &spec.Schema{
+					Ref: "#/components/schemas/charge",
 				},
 			},
-			"has_more": nil,
+			"has_more": {
+				Type: "boolean",
+			},
 			"object": {
 				Enum: []string{"list"},
 			},
-			"total_count": nil,
-			"url":         nil,
+			"total_count": {
+				Type: "integer",
+			},
+			"url": {
+				Type: "string",
+				Enum: []string{"/v1/charges"},
+			},
 		},
 	}
 }
 
-func TestConcurrentAcccess(t *testing.T) {
+func TestConcurrentAccess(t *testing.T) {
 	var generator DataGenerator
 
 	// We use the real spec here because when there was a concurrency problem,
 	// it wasn't revealed due to the test spec being oversimplistic.
-	generator = DataGenerator{realSpec.Definitions, &realFixtures}
+	generator = DataGenerator{realSpec.Components.Schemas, &realFixtures}
 
 	var wg sync.WaitGroup
 
@@ -43,7 +52,7 @@ func TestConcurrentAcccess(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			_, err := generator.Generate(
-				&spec.JSONSchema{Ref: "#/definitions/subscription"}, "", nil)
+				&spec.Schema{Ref: "#/components/schemas/subscription"}, "", nil)
 			assert.NoError(t, err)
 		}()
 	}
@@ -57,9 +66,9 @@ func TestGenerateResponseData(t *testing.T) {
 	var generator DataGenerator
 
 	// basic reference
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
+		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil)
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
@@ -71,36 +80,36 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"])
 
 	// expansion
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["customer"].(map[string]interface{})["id"],
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// bad expansion
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// bad nested expansion
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
-		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": nil}})
+		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
 	// wildcard expansion
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"},
+		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
 		&ExpansionLevel{wildcard: true})
 	assert.Nil(t, err)
@@ -109,7 +118,7 @@ func TestGenerateResponseData(t *testing.T) {
 		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
 
 	// list
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
+	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(listSchema, "/v1/charges", nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "list", data.(map[string]interface{})["object"])
@@ -120,21 +129,22 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// nested list
 	generator = DataGenerator{
-		testSpec.Definitions,
+		testSpec.Components.Schemas,
 		&spec.Fixtures{
 			Resources: map[spec.ResourceID]interface{}{
 				spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
 				spec.ResourceID("with_charges_list"): map[string]interface{}{
 					"charges_list": map[string]interface{}{
-						"url": "/v1/from_charges_list",
+						"url": "/v1/charges",
 					},
 				},
 			},
 		},
 	}
 	data, err = generator.Generate(
-		&spec.JSONSchema{
-			Properties: map[string]*spec.JSONSchema{
+		&spec.Schema{
+			Type: "object",
+			Properties: map[string]*spec.Schema{
 				"charges_list": listSchema,
 			},
 			XResourceID: "with_charges_list",
@@ -142,68 +152,95 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/from_charges_list", chargesList.(map[string]interface{})["url"])
+	assert.Equal(t, "/v1/charges", chargesList.(map[string]interface{})["url"])
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+}
 
-	// no fixture (returns an empty object)
-	generator = DataGenerator{
-		testSpec.Definitions,
-		// this is an empty set of fixtures
-		&spec.Fixtures{
-			Resources: map[spec.ResourceID]interface{}{},
-		},
+func TestValidFixtures(t *testing.T) {
+	// Every fixture should validate according to the schema it's a fixture for
+	for name, schema := range realSpec.Components.Schemas {
+		if schema.XResourceID == "" {
+			continue
+		}
+		t.Run(name, func(t2 *testing.T) {
+			fixture, ok := realFixtures.Resources[spec.ResourceID(schema.XResourceID)]
+			assert.True(t2, ok)
+			validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
+			assert.NoError(t2, err)
+			err = validator.Validate(fixture)
+			assert.NoError(t2, err)
+		})
 	}
-	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/charge"}, "", nil)
-	assert.Nil(t, err)
-	assert.Equal(t, map[string]interface{}{}, data)
+}
 
-	// error: unhandled JSON schema type
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
-	data, err = generator.Generate(
-		&spec.JSONSchema{Type: []string{"string"}}, "", nil)
-	assert.Equal(t,
-		fmt.Errorf("Expected response to be a list or include $ref"),
-		err)
+// Tests that DataGenerator can generate an example of the given schema, and
+// that the example validates against the schema correctly
+func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
+	assert.NotNil(t, schema)
 
-	// error: no definition in OpenAPI
-	generator = DataGenerator{testSpec.Definitions, &testFixtures}
-	data, err = generator.Generate(
-		&spec.JSONSchema{Ref: "#/definitions/doesnt-exist"}, "", nil)
-	assert.Equal(t,
-		fmt.Errorf("Couldn't dereference: #/definitions/doesnt-exist"),
-		err)
+	generator := DataGenerator{
+		definitions: realSpec.Components.Schemas,
+		fixtures:    &realFixtures,
+	}
+
+	var expansions *ExpansionLevel
+	if expand {
+		expansions = &ExpansionLevel{
+			expansions: make(map[string]*ExpansionLevel),
+			wildcard:   true,
+		}
+	}
+
+	var example interface{}
+	var err error
+	assert.NotPanics(t, func() {
+		example, err = generator.Generate(schema, "<test request path>", expansions)
+	})
+	assert.NoError(t, err)
+
+	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, realComponentsForValidation)
+	assert.NoError(t, err)
+	err = validator.Validate(example)
+	if err != nil {
+		t.Logf("Schema is: %s", schema)
+		exampleJson, err := json.MarshalIndent(example, "", "  ")
+		assert.NoError(t, err)
+		t.Logf("Example is: %s", exampleJson)
+	}
+	assert.NoError(t, err)
+}
+
+func TestResourcesCanBeGenerated(t *testing.T) {
+	for url, operations := range realSpec.Paths {
+		for method, operation := range operations {
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
+			t.Run(
+				fmt.Sprintf("%s %s (without expansions)", method, url),
+				func(t2 *testing.T) { testCanGenerate(t2, schema, false) },
+			)
+		}
+	}
+}
+
+func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
+	t.Skip("This test is known to fail because fixtures are missing for some " +
+		"expandable subresources.")
+	for url, operations := range realSpec.Paths {
+		for method, operation := range operations {
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
+			t.Run(
+				fmt.Sprintf("%s %s (with expansions)", method, url),
+				func(t2 *testing.T) { testCanGenerate(t2, schema, true) },
+			)
+		}
+	}
 }
 
 // ---
 
-func TestDuplicateMap(t *testing.T) {
-	data := map[string]interface{}{
-		"key1": "foo",
-		"key2": 123,
-		"key3": true,
-		"key4": []interface{}{
-			"bar",
-			"456",
-			true,
-			[]interface{}{
-				"baz",
-				"789",
-			},
-		},
-		"key5": map[string]interface{}{
-			"keyA": "abc",
-			"keyB": 999,
-			"keyC": true,
-		},
-	}
-	assert.Equal(t, data, duplicateMap(data))
-}
-
 func TestDefinitionFromJSONPointer(t *testing.T) {
-	definition, err := definitionFromJSONPointer("#/definitions/charge")
-	assert.Nil(t, err)
+	definition := definitionFromJSONPointer("#/components/schemas/charge")
 	assert.Equal(t, "charge", definition)
 }
