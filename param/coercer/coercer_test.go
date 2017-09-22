@@ -7,6 +7,99 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+func TestCoerceParams_ArrayCoercion(t *testing.T) {
+	// Array of primitive values
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {
+				Items: &spec.Schema{
+					Type: integerType,
+				},
+				Type: arrayType,
+			},
+		}}
+		data := map[string]interface{}{
+			"arraykey": []interface{}{
+				"123",
+				nil,
+				"124",
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["arraykey"].([]interface{})
+		assert.True(t, ok)
+
+		assert.Equal(t, 123, sliceVal[0])
+		assert.Equal(t, nil, sliceVal[1])
+		assert.Equal(t, 124, sliceVal[2])
+	}
+
+	// Array of objects
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {
+				Items: &spec.Schema{
+					Properties: map[string]*spec.Schema{
+						"intkey": {Type: integerType},
+					},
+				},
+				Type: arrayType,
+			},
+		}}
+		data := map[string]interface{}{
+			"arraykey": []interface{}{
+				map[string]interface{}{"intkey": "123"},
+				map[string]interface{}{"intkey": nil},
+				map[string]interface{}{"intkey": "124"},
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["arraykey"].([]interface{})
+		assert.True(t, ok)
+
+		assert.Equal(t, 123, sliceVal[0].(map[string]interface{})["intkey"])
+		assert.Equal(t, nil, sliceVal[1].(map[string]interface{})["intkey"])
+		assert.Equal(t, 124, sliceVal[2].(map[string]interface{})["intkey"])
+	}
+
+	// Integer-indexed map array
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"arraykey": {
+				Items: &spec.Schema{
+					Properties: map[string]*spec.Schema{
+						"intkey": {Type: integerType},
+					},
+				},
+				Type: arrayType,
+			},
+		}}
+		data := map[string]interface{}{
+			"arraykey": map[string]interface{}{
+				"0": map[string]interface{}{"intkey": "123"},
+				"1": map[string]interface{}{"intkey": nil},
+				"2": map[string]interface{}{"intkey": "124"},
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["arraykey"].([]interface{})
+		assert.True(t, ok)
+
+		assert.Equal(t, 123, sliceVal[0].(map[string]interface{})["intkey"])
+		assert.Equal(t, nil, sliceVal[1].(map[string]interface{})["intkey"])
+		assert.Equal(t, 124, sliceVal[2].(map[string]interface{})["intkey"])
+	}
+}
+
 func TestCoerceParams_BooleanCoercion(t *testing.T) {
 	schema := &spec.Schema{Properties: map[string]*spec.Schema{
 		"boolkey": {Type: booleanType},

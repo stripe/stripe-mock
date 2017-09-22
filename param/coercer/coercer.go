@@ -13,8 +13,6 @@ import (
 // input format like form-encoding doesn't support anything but strings, and
 // we'd like to work with a slightly wider variety of types like booleans and
 // integers.
-//
-// Currently only the coercion of strings to bool and int64 is supported.
 func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 	for key, subSchema := range schema.Properties {
 		val, ok := data[key]
@@ -34,36 +32,38 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 
 				if valSlice != nil {
 					data[key] = valSlice
+					val = valSlice
+				}
+			}
+
+			// May fall through to the next segment where we iterate an array
+			// and coerce it
+		}
+
+		valArr, ok := val.([]interface{})
+		if ok {
+			if subSchema.Items != nil {
+				for i, itemVal := range valArr {
+					itemValMap, ok := itemVal.(map[string]interface{})
+					if ok {
+						// Handles the case of an array of generic objects
+						CoerceParams(subSchema.Items, itemValMap)
+					} else if subSchema.Items.Type != "" {
+						// Handles the case of an array of primitive types
+						itemValCoerced, ok := coercePrimitiveType(itemVal, subSchema.Items.Type)
+						if ok {
+							valArr[i] = itemValCoerced
+						}
+					}
 				}
 			}
 
 			continue
 		}
 
-		valStr, ok := val.(string)
+		valCoerced, ok := coercePrimitiveType(val, subSchema.Type)
 		if ok {
-			switch {
-			case subSchema.Type == booleanType:
-				valBool, err := strconv.ParseBool(valStr)
-				if err != nil {
-					valBool = false
-				}
-				data[key] = valBool
-
-			case subSchema.Type == integerType:
-				valInt, err := strconv.Atoi(valStr)
-				if err != nil {
-					valInt = 0
-				}
-				data[key] = valInt
-
-			case subSchema.Type == numberType:
-				valFloat, err := strconv.ParseFloat(valStr, 64)
-				if err != nil {
-					valFloat = 0.0
-				}
-				data[key] = valFloat
-			}
+			data[key] = valCoerced
 		}
 	}
 
@@ -90,6 +90,42 @@ const maxSliceSize = 1000
 
 // numberPattern simply checks to see if an input string looks like a number.
 var numberPattern = regexp.MustCompile(`\A\d+\z`)
+
+// coercePrimitiveType tries to coerce a primitive type (e.g. bool, int, etc.)
+// from the given generic interface{} value. On success it returns a coerced
+// value with a boolean true. On failure (say the value wasn't a type that
+// could be coerced) it returns nil and a boolean false.
+func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bool) {
+	valStr, ok := val.(string)
+	if !ok {
+		return nil, false
+	}
+
+	switch {
+	case primitiveType == booleanType:
+		valBool, err := strconv.ParseBool(valStr)
+		if err != nil {
+			valBool = false
+		}
+		return valBool, true
+
+	case primitiveType == integerType:
+		valInt, err := strconv.Atoi(valStr)
+		if err != nil {
+			valInt = 0
+		}
+		return valInt, true
+
+	case primitiveType == numberType:
+		valFloat, err := strconv.ParseFloat(valStr, 64)
+		if err != nil {
+			valFloat = 0.0
+		}
+		return valFloat, true
+	}
+
+	return nil, false
+}
 
 // parseIntegerIndexedMap tries to parse a map that has all integer-indexed
 // keys (e.g. { "0": ..., "1": "...", "2": "..." }) as a slice. We only try to
