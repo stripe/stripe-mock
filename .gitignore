@@ -1,3 +1,4 @@
 .env
+.envrc
 dist/
 stripe-mock
