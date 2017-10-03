@@ -114,6 +114,15 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 
 	if isYAML {
 		err = yaml.Unmarshal(data, &fixtures)
+		if err == nil {
+			// To support boolean keys, the `yaml` package unmarshals maps to
+			// map[interface{}]interface{}. Here we recurse through the result
+			// and change all maps to map[string]interface{} like we would've
+			// gotten from `json`.
+			for k, v := range fixtures.Resources {
+				fixtures.Resources[k] = stringifyKeysMapValue(v)
+			}
+		}
 	} else {
 		err = json.Unmarshal(data, &fixtures)
 	}

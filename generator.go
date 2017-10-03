@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -148,8 +149,9 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	if schema.Type == "object" && schema.Properties != nil {
 		exampleMap, ok := example.value.(map[string]interface{})
 		if !ok {
-			panic(fmt.Sprintf("%sSchema is an object:\n%s\nBut example is:\n%s",
-				context, schema, example.value))
+			panic(fmt.Sprintf(
+				"%sSchema is an object:\n%s\n\nBut example is (type: %v):\n%s",
+				context, schema, reflect.TypeOf(example.value), example.value))
 		}
 
 		resultMap := make(map[string]interface{})
