@@ -36,7 +36,11 @@ func stringifyKeysInterfaceArray(in []interface{}) []interface{} {
 func stringifyKeysInterfaceMap(in map[interface{}]interface{}) map[string]interface{} {
 	res := make(map[string]interface{})
 	for k, v := range in {
-		res[fmt.Sprintf("%v", k)] = stringifyKeysMapValue(v)
+		kStr, ok := k.(string)
+		if !ok {
+			panic(fmt.Sprintf("Expected all keys in maps to be strings. Got: %v", k))
+		}
+		res[kStr] = stringifyKeysMapValue(v)
 	}
 	return res
 }
