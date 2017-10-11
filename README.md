@@ -1,6 +1,16 @@
 # stripe-mock [![Build Status](https://travis-ci.org/stripe/stripe-mock.svg?branch=master)](https://travis-ci.org/stripe/stripe-mock)
 
-stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle.
+stripe-mock is a mock HTTP server that responds like the real Stripe API. It
+can be used instead of Stripe's testmode to make test suites integrating with
+Stripe faster and less brittle.
+
+stripe-mock is powered by [the Stripe OpenAPI specification][openapi], which is
+generated from within the backend API implementation. It operates statelessly
+(i.e. it won't remember new resources that are created with it) and responds
+with sample data that's generated using a similar scheme to the one found [in
+the API reference][apiref].
+
+## Usage
 
 Get it from Homebrew or download it [from the releases page][releases]:
 
@@ -29,7 +39,7 @@ stripe-mock
 Then from another terminal:
 
 ``` sh
-curl -i http://localhost:12111/v1/charges
+curl -i http://localhost:12111/v1/charges -H "Authorization: Bearer sk_test_123"
 ```
 
 By default, stripe-mock runs on port 12111, but is configurable with the
@@ -88,8 +98,10 @@ Homebrew tap).
 goreleaser
 ```
 
+[apiref]: https://stripe.com/docs/api
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
+[openapi]: https://github.com/stripe/openapi
 [releases]: https://github.com/stripe/stripe-mock/releases
 
 <!--
