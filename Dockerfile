@@ -8,6 +8,7 @@ RUN go install github.com/stripe/stripe-mock
 FROM alpine
 COPY --from=0 /go/bin/stripe-mock /usr/bin
 ADD ./versions /versions
+EXPOSE 12111
 CMD ["stripe-mock"]
 
 # Run older versions like this:
