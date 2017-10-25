@@ -1,0 +1,1387 @@
+---
+resources:
+  account:
+    business_name: Stripe.com
+    charges_enabled: false
+    country: US
+    debit_negative_balances: true
+    decline_charge_on:
+      avs_failure: true
+      cvc_failure: false
+    default_currency: usd
+    details_submitted: false
+    display_name: Stripe.com
+    email: site@stripe.com
+    external_accounts:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/accounts/acct_1032D82eZvKYlo2C/external_accounts"
+    id: acct_1032D82eZvKYlo2C
+    legal_entity:
+      additional_owners: []
+      address:
+        city: 
+        country: US
+        line1: 
+        line2: 
+        postal_code: 
+        state: 
+      business_name: 
+      business_tax_id_provided: false
+      dob:
+        day: 
+        month: 
+        year: 
+      first_name: 
+      last_name: 
+      personal_address:
+        city: 
+        country: US
+        line1: 
+        line2: 
+        postal_code: 
+        state: 
+      ssn_last_4_provided: false
+      type: 
+      verification:
+        details: 
+        details_code: failed_other
+        document: 
+        status: unverified
+    metadata: {}
+    object: account
+    payout_schedule:
+      delay_days: 7
+      interval: daily
+    payouts_enabled: false
+    timezone: US/Pacific
+    tos_acceptance:
+      date: 
+      ip: 
+      user_agent: 
+    type: standard
+    verification:
+      disabled_reason: fields_needed
+      due_by: 
+      fields_needed:
+      - business_url
+      - external_account
+      - product_description
+      - support_phone
+      - tos_acceptance.date
+      - tos_acceptance.ip
+  account_debit_account:
+    id: acct_1032D82eZvKYlo2C
+    object: account
+  account_with_keys:
+    business_name: Stripe.com
+    charges_enabled: false
+    country: US
+    debit_negative_balances: false
+    decline_charge_on:
+      avs_failure: false
+      cvc_failure: false
+    default_currency: usd
+    details_submitted: false
+    display_name: Stripe.com
+    email: site@stripe.com
+    external_accounts:
+      data: []
+      has_more: false
+      object: list
+      url: ''
+    id: acct_1032D82eZvKYlo2C
+    keys: {}
+    legal_entity:
+      additional_owners: 
+      address:
+        city: 
+        country: 
+        line1: 
+        line2: 
+        postal_code: 
+        state: 
+      address_kana: 
+      address_kanji: 
+      business_name: 
+      business_name_kana: 
+      business_name_kanji: 
+      business_tax_id_provided: false
+      business_vat_id_provided: false
+      dob:
+        day: 
+        month: 
+        year: 
+      first_name: 
+      first_name_kana: 
+      first_name_kanji: 
+      gender: 
+      last_name: 
+      last_name_kana: 
+      last_name_kanji: 
+      maiden_name: 
+      personal_address:
+        city: 
+        country: 
+        line1: 
+        line2: 
+        postal_code: 
+        state: 
+      personal_address_kana: 
+      personal_address_kanji: 
+      personal_id_number_provided: false
+      phone_number: 
+      ssn_last_4_provided: false
+      tax_id_registrar: ''
+      type: 
+      verification:
+        details: 
+        details_code: 
+        document: 
+        status: ''
+    object: account
+    payout_schedule:
+      delay_days: 0
+      interval: ''
+      monthly_anchor: 0
+      weekly_anchor: ''
+    payouts_enabled: false
+    timezone: US/Pacific
+    tos_acceptance:
+      date: 
+      ip: 
+      user_agent: 
+    type: standard
+    verification:
+      disabled_reason: 
+      due_by: 
+      fields_needed: []
+  alipay_account:
+    created: 1234567890
+    fingerprint: nBWSAr7nR0RE5MlB
+    id: aliacc_19Dwb32eZvKYlo2CP1h2vDbf
+    livemode: false
+    metadata: {}
+    object: alipay_account
+    reusable: true
+    used: false
+    username: maidongxi@example.com
+  apple_pay_domain:
+    created: 1234567890
+    domain_name: 0.0.0.0
+    id: apwc_1ADPOH2eZvKYlo2C18DQwFZI
+    livemode: false
+    object: apple_pay_domain
+  balance:
+    available:
+    - amount: 23222652558
+      currency: usd
+      source_types:
+        bank_account: 108476658
+        bitcoin_receiver: 1545182
+        card: 23112645102
+    - amount: -40320
+      currency: jpy
+      source_types:
+        card: -40320
+    - amount: -88
+      currency: aud
+      source_types:
+        card: -88
+    - amount: -81147
+      currency: gbp
+      source_types:
+        card: -81147
+    - amount: -17109
+      currency: eur
+      source_types:
+        card: -17109
+    - amount: 181590
+      currency: nzd
+      source_types:
+        card: 181590
+    - amount: 24184133559
+      currency: usd
+      source_types:
+        card: 24074121639
+    connect_reserved:
+    - amount: 14900
+      currency: usd
+    - amount: 0
+      currency: jpy
+    - amount: 0
+      currency: aud
+    - amount: 0
+      currency: gbp
+    - amount: 0
+      currency: eur
+    - amount: 0
+      currency: nzd
+    - amount: 74900
+      currency: usd
+    livemode: false
+    object: balance
+    pending:
+    - amount: 20166973968
+      currency: usd
+      source_types:
+        bank_account: 0
+        bitcoin_receiver: 6944
+        card: 20166967024
+    - amount: 0
+      currency: jpy
+      source_types:
+        card: 0
+    - amount: 0
+      currency: aud
+      source_types:
+        card: 0
+    - amount: 0
+      currency: gbp
+      source_types:
+        card: 0
+    - amount: 0
+      currency: eur
+      source_types:
+        card: 0
+    - amount: 0
+      currency: nzd
+      source_types:
+        card: 0
+    - amount: 21377826778
+      currency: usd
+      source_types:
+        card: 21377819834
+  balance_transaction:
+    amount: 999
+    available_on: 1234567890
+    created: 1234567890
+    currency: usd
+    fee: 59
+    fee_details:
+    - amount: 59
+      application: 
+      currency: usd
+      description: Stripe processing fees
+      type: stripe_fee
+    id: txn_1B3kCO2eZvKYlo2CQHzTvqYJ
+    net: 940
+    object: balance_transaction
+    source: ch_1B3kCO2eZvKYlo2CEopluyNM
+    status: pending
+    type: charge
+  bank_account:
+    account: acct_1032D82eZvKYlo2C
+    account_holder_name: Jane Austen
+    account_holder_type: individual
+    bank_name: STRIPE TEST BANK
+    country: US
+    currency: usd
+    fingerprint: 1JWtPxqbdX5Gamtc
+    id: ba_1B3xSU2eZvKYlo2CDAgYCVfe
+    last4: '6789'
+    metadata: {}
+    object: bank_account
+    routing_number: '110000000'
+    status: new
+  bitcoin_receiver:
+    active: true
+    amount: 300
+    amount_received: 600
+    bitcoin_amount: 3000000
+    bitcoin_amount_received: 6000000
+    bitcoin_uri: bitcoin:test_uSU0bsgz6Tgzi3fAD4KLxBtJ2ndCx?amount=0.03000000
+    created: 1234567890
+    currency: usd
+    description: Test
+    email: dima.shirokoff@rapidapi.com
+    filled: true
+    id: btcrcv_1B2J9N2eZvKYlo2C9nVfoiuu
+    inbound_address: test_uSU0bsgz6Tgzi3fAD4KLxBtJ2ndCx
+    livemode: false
+    metadata: {}
+    object: bitcoin_receiver
+    transactions:
+      data:
+      - amount: 300
+        bitcoin_amount: 3000000
+        created: 1505479353
+        currency: usd
+        id: btctxn_1B2J9R2eZvKYlo2CLMYy7kTb
+        object: bitcoin_transaction
+        receiver: btcrcv_1B2J9N2eZvKYlo2C9nVfoiuu
+      - amount: 300
+        bitcoin_amount: 3000000
+        created: 1505479353
+        currency: usd
+        id: btctxn_1B2J9R2eZvKYlo2CSQbg8kPJ
+        object: bitcoin_transaction
+        receiver: btcrcv_1B2J9N2eZvKYlo2C9nVfoiuu
+      has_more: false
+      object: list
+      total_count: 2
+      url: "/v1/bitcoin/receivers/btcrcv_1B2J9N2eZvKYlo2C9nVfoiuu/transactions"
+    uncaptured_funds: true
+  bitcoin_transaction:
+    amount: 300
+    bitcoin_amount: 3000000
+    created: 1234567890
+    currency: usd
+    id: btctxn_1B2J9R2eZvKYlo2CLMYy7kTb
+    object: bitcoin_transaction
+    receiver: btcrcv_1B2J9N2eZvKYlo2C9nVfoiuu
+  card:
+    brand: Visa
+    country: US
+    exp_month: 8
+    exp_year: 2018
+    fingerprint: Xt5EWLLDS7FJjR1c
+    funding: credit
+    id: card_1B3xSU2eZvKYlo2CB4hHWxFm
+    last4: '4242'
+    metadata: {}
+    object: card
+  charge:
+    amount: 2000
+    amount_refunded: 0
+    balance_transaction: txn_1B3kCO2eZvKYlo2CQHzTvqYJ
+    captured: false
+    created: 1234567890
+    currency: usd
+    customer: cus_BXK3eAs7g1dYod
+    fraud_details: {}
+    id: ch_1B3q3s2eZvKYlo2CLdghKZFC
+    livemode: false
+    metadata: {}
+    object: charge
+    outcome:
+      network_status: approved_by_network
+      reason: 
+      risk_level: normal
+      seller_message: Payment complete.
+      type: authorized
+    paid: false
+    refunded: false
+    refunds:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/charges/ch_1B3q3s2eZvKYlo2CLdghKZFC/refunds"
+    source:
+      address_city: 
+      address_country: 
+      address_line1: 
+      address_line1_check: 
+      address_line2: 
+      address_state: 
+      address_zip: 
+      address_zip_check: 
+      brand: Visa
+      country: US
+      customer: cus_4RyfB7rZrl0I4D
+      cvc_check: pass
+      dynamic_last4: 
+      exp_month: 3
+      exp_year: 2016
+      fingerprint: Xt5EWLLDS7FJjR1c
+      funding: credit
+      id: card_14J4iT2eZvKYlo2C8wutJ5Do
+      last4: '4242'
+      metadata: {}
+      name: 
+      object: card
+      tokenization_method: 
+    status: failed
+  country_spec:
+    default_currency: usd
+    id: US
+    object: country_spec
+    supported_bank_account_currencies:
+      usd:
+      - US
+    supported_payment_currencies:
+    - "..."
+    - aed
+    - afn
+    - usd
+    supported_payment_methods:
+    - card
+    - stripe
+    verification_fields:
+      company:
+        additional:
+        - legal_entity.personal_id_number
+        - legal_entity.verification.document
+        minimum:
+        - external_account
+        - legal_entity.address.city
+        - legal_entity.address.line1
+        - legal_entity.address.postal_code
+        - legal_entity.address.state
+        - legal_entity.business_name
+        - legal_entity.business_tax_id
+        - legal_entity.dob.day
+        - legal_entity.dob.month
+        - legal_entity.dob.year
+        - legal_entity.first_name
+        - legal_entity.last_name
+        - legal_entity.ssn_last_4
+        - legal_entity.type
+        - tos_acceptance.date
+        - tos_acceptance.ip
+      individual:
+        additional:
+        - legal_entity.personal_id_number
+        - legal_entity.verification.document
+        minimum:
+        - external_account
+        - legal_entity.address.city
+        - legal_entity.address.line1
+        - legal_entity.address.postal_code
+        - legal_entity.address.state
+        - legal_entity.dob.day
+        - legal_entity.dob.month
+        - legal_entity.dob.year
+        - legal_entity.first_name
+        - legal_entity.last_name
+        - legal_entity.ssn_last_4
+        - legal_entity.type
+        - tos_acceptance.date
+        - tos_acceptance.ip
+  coupon:
+    created: 1234567890
+    duration: repeating
+    duration_in_months: 3
+    id: 25OFF
+    livemode: false
+    metadata: {}
+    object: coupon
+    percent_off: 25
+    redeem_by: 1234567890
+    times_redeemed: 0
+    valid: true
+  customer:
+    account_balance: 0
+    created: 1234567890
+    currency: usd
+    id: cus_BPRjIOgTsY2CRb
+    livemode: false
+    metadata: {}
+    object: customer
+    sources:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/customers/cus_BPRjIOgTsY2CRb/sources"
+    subscriptions:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/customers/cus_BPRjIOgTsY2CRb/subscriptions"
+  customer_source:
+    account: acct_1032D82eZvKYlo2C
+    account_holder_name: Jane Austen
+    account_holder_type: individual
+    bank_name: STRIPE TEST BANK
+    country: US
+    currency: usd
+    fingerprint: 1JWtPxqbdX5Gamtc
+    id: ba_1B3xSU2eZvKYlo2CDAgYCVfe
+    last4: '6789'
+    metadata: {}
+    object: bank_account
+    routing_number: '110000000'
+    status: new
+  customer_source_create:
+    account: acct_1032D82eZvKYlo2C
+    account_holder_name: Jane Austen
+    account_holder_type: individual
+    bank_name: STRIPE TEST BANK
+    country: US
+    currency: usd
+    fingerprint: 1JWtPxqbdX5Gamtc
+    id: ba_1B3xSU2eZvKYlo2CDAgYCVfe
+    last4: '6789'
+    metadata: {}
+    object: bank_account
+    routing_number: '110000000'
+    status: new
+  discount:
+    coupon:
+      amount_off: 
+      created: 1391694467
+      currency: 
+      duration: repeating
+      duration_in_months: 3
+      id: 35OFF
+      livemode: false
+      max_redemptions: 
+      metadata: {}
+      object: coupon
+      percent_off: 25
+      redeem_by: 
+      times_redeemed: 1
+      valid: true
+    customer: cus_BPRjIOgTsY2CRb
+    end: 1234567890
+    object: discount
+    start: 1234567890
+  dispute:
+    amount: 1500
+    balance_transactions:
+    - amount: -1500
+      available_on: 1506124800
+      created: 1505544177
+      currency: usd
+      description: Chargeback withdrawal for ch_1B2a0z2eZvKYlo2CFTMoeepo
+      fee: 1500
+      fee_details:
+      - amount: 1500
+        application: 
+        currency: usd
+        description: Dispute fee
+        type: stripe_fee
+      id: txn_1B2a0z2eZvKYlo2C5s59j1qr
+      net: -3000
+      object: balance_transaction
+      source: dp_1B2a0z2eZvKYlo2CWGIcsL6j
+      status: pending
+      type: adjustment
+    charge: ch_1B2a0z2eZvKYlo2CFTMoeepo
+    created: 1234567890
+    currency: usd
+    evidence:
+      access_activity_log: 
+      billing_address: 
+      cancellation_policy: 
+      cancellation_policy_disclosure: 
+      cancellation_rebuttal: 
+      customer_communication: 
+      customer_email_address: 
+      customer_name: 
+      customer_purchase_ip: 
+      customer_signature: 
+      duplicate_charge_documentation: 
+      duplicate_charge_explanation: 
+      duplicate_charge_id: 
+      product_description: 
+      receipt: 
+      refund_policy: 
+      refund_policy_disclosure: 
+      refund_refusal_explanation: 
+      service_date: 
+      service_documentation: 
+      shipping_address: 
+      shipping_carrier: 
+      shipping_date: 
+      shipping_documentation: 
+      shipping_tracking_number: 
+      uncategorized_file: 
+      uncategorized_text: 
+    evidence_details:
+      due_by: 1506988799
+      has_evidence: false
+      past_due: false
+      submission_count: 0
+    id: dp_1B2a0z2eZvKYlo2CWGIcsL6j
+    is_charge_refundable: false
+    livemode: false
+    metadata: {}
+    object: dispute
+    reason: fraudulent
+    status: needs_response
+  ephemeral_key:
+    created: 1234567890
+    expires: 1234567890
+    id: ephkey_1AeOsX2eZvKYlo2Cf2L4jyMe
+    livemode: false
+    object: ephemeral_key
+  ephemeral_key_with_secret:
+    created: 1234567890
+    expires: 1234567890
+    id: ephkey_1AeOsX2eZvKYlo2Cf2L4jyMe
+    livemode: false
+    object: ephemeral_key
+    secret: ''
+  event:
+    api_version: '2017-06-05'
+    created: 1234567890
+    data:
+      object:
+        available:
+        - amount: 24708168122
+          currency: usd
+          source_types:
+            bank_account: 108476658
+            bitcoin_receiver: 1545182
+            card: 24598146282
+        - amount: -4976
+          currency: cad
+          source_types:
+            card: -4976
+        - amount: -17109
+          currency: eur
+          source_types:
+            card: -17109
+        - amount: 181603
+          currency: nzd
+          source_types:
+            card: 181603
+        - amount: -40320
+          currency: jpy
+          source_types:
+            card: -40320
+        - amount: -88
+          currency: aud
+          source_types:
+            card: -88
+        - amount: -81147
+          currency: gbp
+          source_types:
+            card: -81147
+        connect_reserved:
+        - amount: 34900
+          currency: usd
+        - amount: 0
+          currency: cad
+        - amount: 0
+          currency: eur
+        - amount: 0
+          currency: nzd
+        - amount: 0
+          currency: jpy
+        - amount: 0
+          currency: aud
+        - amount: 0
+          currency: gbp
+        livemode: false
+        object: invoice
+        pending:
+        - amount: 21658319934
+          currency: usd
+          source_types:
+            bank_account: 0
+            bitcoin_receiver: 6944
+            card: 21658312990
+        - amount: -7138
+          currency: cad
+          source_types:
+            card: -7138
+        - amount: 0
+          currency: eur
+          source_types:
+            card: 0
+        - amount: 0
+          currency: nzd
+          source_types:
+            card: 0
+        - amount: 0
+          currency: jpy
+          source_types:
+            card: 0
+        - amount: 0
+          currency: aud
+          source_types:
+            card: 0
+        - amount: 0
+          currency: gbp
+          source_types:
+            card: 0
+    id: evt_1B3xLN2eZvKYlo2C2WEIt1bx
+    livemode: false
+    object: event
+    pending_webhooks: 0
+    request:
+      id: 
+      idempotency_key: 
+    type: invoice.upcoming
+  external_account_source:
+    account: acct_1032D82eZvKYlo2C
+    account_holder_name: Jane Austen
+    account_holder_type: individual
+    bank_name: STRIPE TEST BANK
+    country: US
+    currency: usd
+    fingerprint: 1JWtPxqbdX5Gamtc
+    id: ba_1B3xSU2eZvKYlo2CDAgYCVfe
+    last4: '6789'
+    metadata: {}
+    object: bank_account
+    routing_number: '110000000'
+    status: new
+  fee_refund:
+    amount: 100
+    created: 1234567890
+    currency: usd
+    fee: fee_1B3xSU2eZvKYlo2CGSN17ITN
+    id: fr_BQp6gu2YFvpSMm
+    metadata: {}
+    object: fee_refund
+  invoice:
+    amount_due: 1000
+    attempt_count: 1
+    attempted: true
+    charge: ch_15km242eZvKYlo2CimRI6rsA
+    closed: true
+    currency: usd
+    customer: cus_BPRjIOgTsY2CRb
+    date: 1234567890
+    ending_balance: 0
+    forgiven: false
+    id: in_15kkGj2eZvKYlo2ChUKAUXNz
+    lines:
+      data:
+      - amount: 999
+        currency: usd
+        description: 
+        discountable: true
+        id: sub_BQp6MLuprKbRgM
+        livemode: true
+        metadata: {}
+        object: line_item
+        period:
+          end: 1511143021
+          start: 1508464621
+        plan:
+          amount: 999
+          created: 1505549157
+          currency: usd
+          id: ruby-express-932
+          interval: month
+          interval_count: 1
+          livemode: false
+          metadata: {}
+          name: Ruby Express
+          object: plan
+          statement_descriptor: 
+          trial_period_days: 
+        proration: false
+        quantity: 1
+        subscription: 
+        subscription_item: si_1B3xST2eZvKYlo2CDlwmPL16
+        type: subscription
+      has_more: false
+      object: list
+      url: "/v1/invoices/in_15kkGj2eZvKYlo2ChUKAUXNz/lines"
+    livemode: false
+    metadata: {}
+    next_payment_attempt: 1234567890
+    object: invoice
+    paid: true
+    period_end: 1234567890
+    period_start: 1234567890
+    starting_balance: 0
+    subscription: sub_3jtkr4OHgFoV5k
+    subtotal: 1000
+    total: 1000
+    webhooks_delivered_at: 1234567890
+  invoice_item:
+    amount: 2500
+    currency: usd
+    customer: cus_BPRjIOgTsY2CRb
+    date: 1234567890
+    description: One-time setup fee
+    discountable: true
+    id: ii_1B2a1d2eZvKYlo2C5qKkQmsz
+    invoice: in_1B2a1g2eZvKYlo2CJK11kqB5
+    livemode: false
+    metadata: {}
+    object: invoiceitem
+    period:
+      end: 1505544217
+      start: 1505544217
+    plan:
+      amount: 4500
+      created: 1507193902
+      currency: usd
+      id: Starter-monthly-1507193901
+      interval: month
+      interval_count: 1
+      livemode: false
+      metadata: {}
+      name: Starter (Monthly)
+      object: plan
+      statement_descriptor: 
+      trial_period_days: 7
+    proration: false
+    quantity: 1
+    subscription: sub_BWYHrX5ZSZBd3A
+    subscription_item: si_1B9VBG2eZvKYlo2CxaeSHbhU
+  invoice_line_item:
+    amount: 2500
+    currency: usd
+    description: One-time setup fee
+    discountable: true
+    id: ii_1B2a1d2eZvKYlo2C5qKkQmsz
+    livemode: false
+    metadata: {}
+    object: line_item
+    period:
+      end: 1505544217
+      start: 1505544217
+    plan:
+      amount: 4500
+      created: 1507193902
+      currency: usd
+      id: Starter-monthly-1507193901
+      interval: month
+      interval_count: 1
+      livemode: false
+      metadata: {}
+      name: Starter (Monthly)
+      object: plan
+      statement_descriptor: 
+      trial_period_days: 7
+    proration: false
+    quantity: 1
+    subscription: sub_BWYHrX5ZSZBd3A
+    subscription_item: si_1B9VBG2eZvKYlo2CxaeSHbhU
+    type: invoiceitem
+  login_link:
+    created: 1234567890
+    object: login_link
+    url: http://qa-dev5.northwest.stripe.io:6090/express/Be9L0SnNw11F
+  order:
+    amount: 1500
+    amount_returned: 1500
+    charge: ch_1B2a0z2eZvKYlo2CFTMoeepo
+    created: 1234567890
+    currency: usd
+    email: anthony.anderson@example.com
+    id: or_1B2a0s2eZvKYlo2C9CUh8JwG
+    items:
+    - amount: 1500
+      currency: usd
+      description: T-shirt
+      object: order_item
+      parent: sku_BPOovVRNhXMshq
+      quantity: 1
+      type: sku
+    - amount: 0
+      currency: usd
+      description: Taxes (included)
+      object: order_item
+      parent: 
+      quantity: 
+      type: tax
+    - amount: 0
+      currency: usd
+      description: Free shipping
+      object: order_item
+      parent: ship_free-shipping
+      quantity: 
+      type: shipping
+    livemode: false
+    metadata: {}
+    object: order
+    returns:
+      data:
+      - amount: 1500
+        created: 1505544181
+        currency: usd
+        id: orret_1B2a132eZvKYlo2CQw5Cp2zS
+        items:
+        - amount: 1500
+          currency: usd
+          description: T-shirt
+          object: order_item
+          parent: sku_BPOovVRNhXMshq
+          quantity: 1
+          type: sku
+        - amount: 0
+          currency: usd
+          description: Taxes (included)
+          object: order_item
+          parent: 
+          quantity: 
+          type: tax
+        - amount: 0
+          currency: usd
+          description: Free shipping
+          object: order_item
+          parent: ship_free-shipping
+          quantity: 
+          type: shipping
+        livemode: false
+        object: order_return
+        order: or_1B2a0s2eZvKYlo2C9CUh8JwG
+        refund: 
+      has_more: false
+      object: list
+      total_count: 1
+      url: "/v1/order_returns?order=or_1B2a0s2eZvKYlo2C9CUh8JwG"
+    selected_shipping_method: ship_free-shipping
+    shipping:
+      address:
+        city: San Francisco
+        country: US
+        line1: 1234 Main Street
+        line2: 
+        postal_code: '94111'
+        state: 
+      carrier: 
+      name: Jacob Taylor
+      phone: 
+      tracking_number: 
+    shipping_methods:
+    - amount: 0
+      currency: usd
+      delivery_estimate: 
+      description: Free shipping
+      id: ship_free-shipping
+    status: canceled
+    status_transitions:
+      canceled: 1505544181
+      fulfiled: 
+      paid: 1505544178
+      returned: 
+    updated: 1234567890
+  order_return:
+    amount: 1500
+    created: 1234567890
+    currency: usd
+    id: orret_1B2a132eZvKYlo2CQw5Cp2zS
+    items:
+    - amount: 1500
+      currency: usd
+      description: T-shirt
+      object: order_item
+      parent: sku_BPOovVRNhXMshq
+      quantity: 1
+      type: sku
+    - amount: 0
+      currency: usd
+      description: Taxes (included)
+      object: order_item
+      parent: 
+      quantity: 
+      type: tax
+    - amount: 0
+      currency: usd
+      description: Free shipping
+      object: order_item
+      parent: ship_free-shipping
+      quantity: 
+      type: shipping
+    livemode: false
+    object: order_return
+    order: or_1B2a0s2eZvKYlo2C9CUh8JwG
+  payout:
+    amount: 200
+    arrival_date: 1234567890
+    balance_transaction: txn_1B3kCO2eZvKYlo2CQHzTvqYJ
+    created: 1234567890
+    currency: usd
+    destination: acct_164wxjKbnvuxQXGu
+    failure_balance_transaction: txn_1AF3y32eZvKYlo2CSgDInbEk
+    id: tr_164xRv2eZvKYlo2CZxJZWm1E
+    livemode: false
+    metadata: {}
+    method: standard
+    object: payout
+    source_type: card
+    status: paid
+    type: stripe_account
+  plan:
+    amount: 999
+    created: 1234567890
+    currency: usd
+    id: ruby-express-932
+    interval: month
+    interval_count: 1
+    livemode: false
+    metadata: {}
+    name: Ruby Express
+    object: plan
+  platform_earning:
+    account: acct_1032D82eZvKYlo2C
+    amount: 100
+    amount_refunded: 0
+    application: ca_BQp6u63dJnxcX88hIP8xNAc0sxLTxczE
+    balance_transaction: txn_1B3kCO2eZvKYlo2CQHzTvqYJ
+    charge: ch_1B3q3s2eZvKYlo2CLdghKZFC
+    created: 1234567890
+    currency: usd
+    id: fee_1B3xSU2eZvKYlo2CGSN17ITN
+    livemode: false
+    object: application_fee
+    originating_transaction: ch_1BA2iq2eZvKYlo2ChpuYJK1N
+    refunded: false
+    refunds:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/application_fees/fee_1B3xSU2eZvKYlo2CGSN17ITN/refunds"
+  product:
+    active: true
+    attributes:
+    - gender
+    - size
+    created: 1234567890
+    deactivate_on: []
+    description: Comfortable cotton t-shirt
+    id: prod_AJ7gAXvktPRvvh
+    images: []
+    livemode: false
+    metadata: {}
+    name: Test
+    object: product
+    shippable: true
+    skus:
+      data:
+      - active: true
+        attributes:
+          gender: Unisex
+          size: Medium
+        created: 1489796923
+        currency: usd
+        id: sku_AJ7g98gPhCjas3
+        image: 
+        inventory:
+          quantity: 499
+          type: finite
+          value: 
+        livemode: false
+        metadata: {}
+        object: sku
+        package_dimensions: 
+        price: 1500
+        product: prod_AJ7gAXvktPRvvh
+        updated: 1489796941
+      has_more: false
+      object: list
+      total_count: 1
+      url: "/v1/skus?product=prod_AJ7gAXvktPRvvh&active=true"
+    updated: 1234567890
+  refund:
+    amount: 1000
+    balance_transaction: txn_1B2aHR2eZvKYlo2CKsk58ayK
+    charge: ch_1B2aHQ2eZvKYlo2CeUg9DBV6
+    created: 1234567890
+    currency: usd
+    id: re_1B2aHR2eZvKYlo2ClqiWjlI2
+    metadata: {}
+    object: refund
+    status: succeeded
+  sku:
+    active: true
+    attributes:
+      gender: Unisex
+      size: Medium
+    created: 1234567890
+    currency: usd
+    id: sku_BPOovVRNhXMshq
+    inventory:
+      quantity: 499
+      type: finite
+      value: 
+    livemode: false
+    metadata: {}
+    object: sku
+    price: 1500
+    product: prod_AJ7gAXvktPRvvh
+    updated: 1234567890
+  source:
+    amount: 1000
+    bitcoin:
+      address: test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N
+      amount: 2371000
+      amount_charged: 0
+      amount_received: 0
+      amount_returned: 0
+      uri: bitcoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000
+    client_secret: src_client_secret_BQp65YD6eXk9NLfGKOwigCoK
+    created: 1234567890
+    currency: usd
+    flow: receiver
+    id: src_1B3xSU2eZvKYlo2CYdL110Ll
+    livemode: false
+    metadata: {}
+    object: source
+    owner:
+      address: 
+      email: jenny.rosen@example.com
+      name: 
+      phone: 
+      verified_address: 
+      verified_email: 
+      verified_name: 
+      verified_phone: 
+    receiver:
+      address: test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N
+      amount_charged: 0
+      amount_received: 0
+      amount_returned: 0
+      refund_attributes_method: email
+      refund_attributes_status: missing
+    status: pending
+    type: bitcoin
+    usage: single_use
+  subscription:
+    cancel_at_period_end: false
+    canceled_at: 1234567890
+    created: 1234567890
+    current_period_end: 1234567890
+    current_period_start: 1234567890
+    customer: cus_BPRjIOgTsY2CRb
+    ended_at: 1234567890
+    id: sub_BQp6MLuprKbRgM
+    items:
+      data:
+      - created: 1505872622
+        id: si_1B3xST2eZvKYlo2CDlwmPL16
+        metadata: {}
+        object: subscription_item
+        plan:
+          amount: 999
+          created: 1505549157
+          currency: usd
+          id: ruby-express-932
+          interval: month
+          interval_count: 1
+          livemode: false
+          metadata: {}
+          name: Ruby Express
+          object: plan
+          statement_descriptor: 
+          trial_period_days: 
+        quantity: 1
+      has_more: false
+      object: list
+      total_count: 1
+      url: "/v1/subscription_items?subscription=sub_BQp6MLuprKbRgM"
+    livemode: false
+    metadata: {}
+    object: subscription
+    plan:
+      amount: 999
+      created: 1505549157
+      currency: usd
+      id: ruby-express-932
+      interval: month
+      interval_count: 1
+      livemode: false
+      metadata: {}
+      name: Ruby Express
+      object: plan
+      statement_descriptor: 
+      trial_period_days: 
+    quantity: 1
+    start: 1234567890
+    status: active
+    trial_end: 1234567890
+    trial_start: 1234567890
+  subscription_item:
+    created: 1505872622
+    id: si_1B3xSU2eZvKYlo2CqzlJzdwa
+    metadata: {}
+    object: subscription_item
+    plan:
+      amount: 999
+      created: 1505549157
+      currency: usd
+      id: ruby-express-932
+      interval: month
+      interval_count: 1
+      livemode: false
+      metadata: {}
+      name: Ruby Express
+      object: plan
+      statement_descriptor: 
+      trial_period_days: 
+    quantity: 1
+  three_d_secure:
+    amount: 1500
+    authenticated: false
+    card:
+      address_city: 
+      address_country: 
+      address_line1: 
+      address_line1_check: 
+      address_line2: 
+      address_state: 
+      address_zip: 
+      address_zip_check: 
+      brand: Visa
+      country: US
+      customer: 
+      cvc_check: 
+      dynamic_last4: 
+      exp_month: 8
+      exp_year: 2018
+      fingerprint: Xt5EWLLDS7FJjR1c
+      funding: credit
+      id: card_1B3xSU2eZvKYlo2CEuPvMF3E
+      last4: '4242'
+      metadata: {}
+      name: 
+      object: card
+      tokenization_method: 
+    created: 1234567890
+    currency: usd
+    id: tdsrc_BQp6qnBOYCpT7a
+    livemode: false
+    object: three_d_secure
+    redirect_url: http://qa-dev5.northwest.stripe.io:6080/3d_secure/authenticate/tdsrc_BQp6qnBOYCpT7a
+    status: redirect_pending
+  token:
+    card:
+      address_city: 
+      address_country: 
+      address_line1: 
+      address_line1_check: 
+      address_line2: 
+      address_state: 
+      address_zip: 
+      address_zip_check: 
+      brand: Visa
+      country: US
+      cvc_check: 
+      dynamic_last4: 
+      exp_month: 8
+      exp_year: 2018
+      fingerprint: Xt5EWLLDS7FJjR1c
+      funding: credit
+      id: card_1B3xSU2eZvKYlo2CEuPvMF3E
+      last4: '4242'
+      metadata: {}
+      name: 
+      object: card
+      tokenization_method: 
+    created: 1234567890
+    id: tok_1B3xSU2eZvKYlo2Cj8aaqtGj
+    livemode: false
+    object: token
+    type: card
+    used: false
+  transfer:
+    amount: 200
+    amount_reversed: 100
+    balance_transaction: txn_1B3kCO2eZvKYlo2CQHzTvqYJ
+    created: 1234567890
+    currency: usd
+    destination: acct_164wxjKbnvuxQXGu
+    destination_payment: py_164xRvKbnvuxQXGuVFV2pZo1
+    id: tr_164xRv2eZvKYlo2CZxJZWm1E
+    livemode: false
+    metadata: {}
+    object: transfer
+    reversals:
+      data:
+      - amount: 100
+        balance_transaction: txn_1AF3y32eZvKYlo2CSgDInbEk
+        created: 1493742915
+        currency: usd
+        id: trr_1AF3y32eZvKYlo2CtkDXeobp
+        metadata: {}
+        object: transfer_reversal
+        transfer: tr_164xRv2eZvKYlo2CZxJZWm1E
+      has_more: false
+      object: list
+      total_count: 1
+      url: "/v1/transfers/tr_164xRv2eZvKYlo2CZxJZWm1E/reversals"
+    reversed: false
+    source_transaction: ch_164xRv2eZvKYlo2Clu1sIJWB
+    source_type: card
+    transfer_group: group_ch_164xRv2eZvKYlo2Clu1sIJWB
+  transfer_recipient:
+    active_account:
+      account_holder_name: 
+      account_holder_type: 
+      bank_name: STRIPE TEST BANK
+      country: US
+      currency: usd
+      customer: 
+      fingerprint: 1JWtPxqbdX5Gamtc
+      id: ba_19p5Ze2eZvKYlo2C1fs6Ar4u
+      last4: '6789'
+      metadata: {}
+      object: bank_account
+      routing_number: '110000000'
+      status: new
+    cards:
+      data: []
+      has_more: false
+      object: list
+      total_count: 0
+      url: "/v1/recipients/rp_19p5Zf2eZvKYlo2CipXKLoSU/cards"
+    created: 1234567890
+    id: rp_19p5Zf2eZvKYlo2CipXKLoSU
+    livemode: false
+    metadata: {}
+    migrated_to: acct_1AIQkLDw6ebINMj3
+    name: John Doe
+    object: recipient
+    type: individual
+  transfer_reversal:
+    amount: 400
+    balance_transaction: txn_1B2a072eZvKYlo2CzB7UPcr4
+    created: 1234567890
+    currency: usd
+    id: trr_1B2a072eZvKYlo2CgXENUl8i
+    metadata: {}
+    object: transfer_reversal
+    transfer: tr_1B2Zzt2eZvKYlo2CPA3wjZ8o
+  upcoming_invoice:
+    amount_due: 1000
+    attempt_count: 1
+    attempted: true
+    charge: ch_15km242eZvKYlo2CimRI6rsA
+    closed: true
+    currency: usd
+    customer: cus_BPRjIOgTsY2CRb
+    date: 1234567890
+    ending_balance: 0
+    forgiven: false
+    lines:
+      data:
+      - amount: 1000
+        currency: usd
+        description: 
+        discountable: true
+        id: sub_3jtkr4OHgFoV5k
+        livemode: false
+        metadata: {}
+        object: line_item
+        period:
+          end: 1430089038
+          start: 1427410638
+        plan:
+          amount: 1000
+          created: 1391206393
+          currency: usd
+          id: monthly
+          interval: month
+          interval_count: 1
+          livemode: false
+          metadata: {}
+          name: Monthly Plan
+          object: plan
+          statement_descriptor: 
+          trial_period_days: 
+        proration: false
+        quantity: 1
+        subscription: 
+        type: subscription
+      has_more: false
+      object: list
+      total_count: 1
+      url: "/v1/invoices/in_15kkGj2eZvKYlo2ChUKAUXNz/lines"
+    livemode: false
+    metadata: {}
+    next_payment_attempt: 1234567890
+    object: invoice
+    paid: true
+    period_end: 1234567890
+    period_start: 1234567890
+    starting_balance: 0
+    subscription: sub_3jtkr4OHgFoV5k
+    subtotal: 1000
+    total: 1000
+    webhooks_delivered_at: 1234567890
