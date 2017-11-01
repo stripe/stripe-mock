@@ -2,3 +2,5 @@
 .envrc
 dist/
 stripe-mock
+*.aes
+*.env

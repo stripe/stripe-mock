@@ -1,0 +1,9 @@
+stripe:
+  build:
+    image: gcr.io/kindrid-stage/stripe-mock
+    dockerfile: Dockerfile
+gcr_dockercfg_staging:
+  image: codeship/gcr-dockercfg-generator
+  add_docker: true
+  encrypted_env_file: gcr_staging.env.encrypted
+  cached: true
