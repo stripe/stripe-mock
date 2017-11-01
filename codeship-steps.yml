@@ -1,4 +1,5 @@
-- service: stripe
+- name: push_image
+  service: stripe
   type: push
   tag: codeship-setup
   image_name: gcr.io/kindrid-stage/stripe-mock
