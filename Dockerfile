@@ -1,9 +1,10 @@
 # Stage[0], build the Alpine Executable
 FROM golang:alpine
-COPY . /go/src/github.com/stripe/stripe-mock
 RUN apk update; apk add git
-RUN go install github.com/stripe/stripe-mock
-
+COPY . /go/src/github.com/stripe/stripe-mock
+WORKDIR /go/src/github.com/stripe/stripe-mock
+RUN go test ./...
+RUN go install .
 # Stage[1], build the reduced-size image using Stage[0]'s executable
 FROM alpine
 COPY --from=0 /go/bin/stripe-mock /usr/bin

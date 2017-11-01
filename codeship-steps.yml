@@ -1,6 +1,6 @@
 - service: stripe
   type: push
-  tag: kindrid-master
+  tag: codeship-setup
   image_name: gcr.io/kindrid-stage/stripe-mock
   registry: https://gcr.io
   dockercfg_service: gcr_dockercfg_staging
