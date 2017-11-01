@@ -2,4 +2,5 @@
 .envrc
 dist/
 stripe-mock
-codeship.aes
+*.aes
+*.env
