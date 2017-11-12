@@ -48,6 +48,13 @@ func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	resp, _ := sendRequest(t, "POST", "/", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
+	_, present := resp.Header["Request-Id"]
+	assert.False(t, present)
+
+	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders())
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
+	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
+	assert.Equal(t, "req_123", resp.Header.Get("Request-Id"))
 }
 
 func TestStubServer_ParameterValidation(t *testing.T) {

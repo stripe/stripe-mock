@@ -114,6 +114,9 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Every response needs a Request-Id header except the invalid authorization
+	w.Header().Set("Request-Id", "req_123")
+
 	route := s.routeRequest(r)
 	if route == nil {
 		stripeError.ErrorInfo.Message = fmt.Sprintf(invalidRoute,
