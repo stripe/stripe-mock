@@ -24,6 +24,15 @@ const (
 		"Authorization was '%s'."
 )
 
+type ErrorInfo struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+}
+
+type ResponseError struct {
+	ErrorInfo ErrorInfo `json:"error"`
+}
+
 // ExpansionLevel represents expansions on a single "level" of resource. It may
 // have subexpansions that are meant to take effect on resources that are
 // nested below it (on other levels).
@@ -86,10 +95,17 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
 
+	// Prepare error response as needed for all failures
+	stripeError := &ResponseError{
+		ErrorInfo: ErrorInfo{
+			Type: "invalid_request_error",
+		},
+	}
+
 	auth := r.Header.Get("Authorization")
 	if !validateAuth(auth) {
-		writeResponse(w, r, start, http.StatusUnauthorized,
-			fmt.Sprintf(invalidAuthorization, auth))
+		stripeError.ErrorInfo.Message = fmt.Sprintf(invalidAuthorization, auth)
+		writeResponse(w, r, start, http.StatusUnauthorized, stripeError)
 		return
 	}
 
