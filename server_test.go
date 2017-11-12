@@ -16,69 +16,51 @@ import (
 )
 
 func TestStubServer(t *testing.T) {
-	server := getStubServer(t)
-
-	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
-		bytes.NewBufferString("amount=123&currency=usd"))
-	req.Header.Set("Authorization", "Bearer sk_test_123")
-	w := httptest.NewRecorder()
-	server.HandleRequest(w, req)
-
-	resp := w.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&currency=usd", getDefaultHeaders())
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var data map[string]interface{}
-	err = json.Unmarshal(body, &data)
+	err := json.Unmarshal(body, &data)
 	assert.NoError(t, err)
 	_, ok := data["id"]
 	assert.True(t, ok)
+
+	// Ensure error response has the correct shape
+
+	resp, body = sendRequest(t, "GET", "/a", "", nil)
+
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+
+	err = json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, present := data["error"].(map[string]interface{})
+	assert.True(t, present)
+	errorType, present := errorInfo["type"]
+	assert.Equal(t, errorType, "invalid_request_error")
+	assert.True(t, present)
+	_, present = errorInfo["message"]
+	assert.True(t, present)
 }
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
-	server := getStubServer(t)
-
-	// Does this regardless of endpoint
-	req := httptest.NewRequest("GET", "https://stripe.com/", nil)
-	w := httptest.NewRecorder()
-	server.HandleRequest(w, req)
-
-	resp := w.Result()
+	resp, _ := sendRequest(t, "POST", "/", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
 }
 
 func TestStubServer_ParameterValidation(t *testing.T) {
-	server := getStubServer(t)
-
-	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges", nil)
-	req.Header.Set("Authorization", "Bearer sk_test_123")
-	w := httptest.NewRecorder()
-	server.HandleRequest(w, req)
-
-	resp := w.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
-
+	resp, body := sendRequest(t, "POST", "/v1/charges", "", getDefaultHeaders())
 	assert.Contains(t, string(body), "property 'amount' is required")
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
 
 func TestStubServer_FormatsForCurl(t *testing.T) {
-	server := getStubServer(t)
-
-	req := httptest.NewRequest("POST", "https://stripe.com/v1/charges",
-		bytes.NewBufferString("amount=123&currency=usd"))
-	req.Header.Set("Authorization", "Bearer sk_test_123")
-	req.Header.Set("User-Agent", "curl/1.2.3")
-	w := httptest.NewRecorder()
-	server.HandleRequest(w, req)
-
-	resp := w.Result()
-	body, err := ioutil.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	headers := getDefaultHeaders()
+	headers["User-Agent"] = "curl/1.2.3"
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&currency=usd", headers)
 
 	// Note the two spaces in front of "id" which indicate that our JSON is
 	// pretty printed.
@@ -274,4 +256,28 @@ func getStubServer(t *testing.T) *StubServer {
 	err := server.initializeRouter()
 	assert.NoError(t, err)
 	return server
+}
+
+func getDefaultHeaders() map[string]string {
+	headers := make(map[string]string)
+	headers["Authorization"] = "Bearer sk_test_123"
+	return headers
+}
+
+func sendRequest(t *testing.T, method string, url string, params string,
+	headers map[string]string) (*http.Response, []byte) {
+	server := getStubServer(t)
+
+	fullUrl := fmt.Sprintf("https://stripe.com%s", url)
+	req := httptest.NewRequest(method, fullUrl, bytes.NewBufferString(params))
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+	w := httptest.NewRecorder()
+	server.HandleRequest(w, req)
+
+	resp := w.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	return resp, body
 }

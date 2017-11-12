@@ -22,6 +22,10 @@ const (
 		"`Authorization` header with any valid looking testmode secret API " +
 		"key. For example, `Authorization: Bearer sk_test_123`. " +
 		"Authorization was '%s'."
+
+	invalidRoute = "Unrecognized request URL (%s: %s)."
+
+	internalServerError = "An internal error occurred."
 )
 
 type ErrorInfo struct {
@@ -95,10 +99,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
 
-	// Prepare error response as needed for all failures
+	// Prepare internal error as it's the most commonly used here
 	stripeError := &ResponseError{
 		ErrorInfo: ErrorInfo{
-			Type: "invalid_request_error",
+			Message: internalServerError,
+			Type:    "invalid_request_error",
 		},
 	}
 
@@ -111,20 +116,22 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	route := s.routeRequest(r)
 	if route == nil {
-		writeResponse(w, r, start, http.StatusNotFound, nil)
+		stripeError.ErrorInfo.Message = fmt.Sprintf(invalidRoute,
+			r.Method, r.URL.Path)
+		writeResponse(w, r, start, http.StatusNotFound, stripeError)
 		return
 	}
 
 	response, ok := route.operation.Responses["200"]
 	if !ok {
 		fmt.Printf("Couldn't find 200 response in spec\n")
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
 		return
 	}
 	responseContent, ok := response.Content["application/json"]
 	if !ok || responseContent.Schema == nil {
 		fmt.Printf("Couldn't find application/json in response\n")
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
 		return
 	}
 
@@ -139,7 +146,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		formBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			fmt.Printf("Couldn't read request body: %v\n", err)
-			writeResponse(w, r, start, http.StatusInternalServerError, nil)
+			writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
 			return
 		}
 		r.Body.Close()
@@ -148,7 +155,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	requestData, err := parser.ParseFormString(formString)
 	if err != nil {
 		fmt.Printf("Couldn't parse query/body: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
 		return
 	}
 
@@ -168,16 +175,16 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		err := coercer.CoerceParams(bodySchema, requestData)
 		if err != nil {
 			fmt.Printf("Coercion error: %v\n", err)
-			responseData := fmt.Sprintf("Request error: %v", err)
-			writeResponse(w, r, start, http.StatusBadRequest, responseData)
+			stripeError.ErrorInfo.Message = fmt.Sprintf("Request error: %v", err)
+			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
 		}
 
 		err = route.requestBodyValidator.Validate(requestData)
 		if err != nil {
 			fmt.Printf("Validation error: %v\n", err)
-			responseData := fmt.Sprintf("Request error: %v", err)
-			writeResponse(w, r, start, http.StatusBadRequest, responseData)
+			stripeError.ErrorInfo.Message = fmt.Sprintf("Request error: %v", err)
+			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
 		}
 	}
@@ -194,7 +201,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		expansions)
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
 		return
 	}
 	if verbose {
