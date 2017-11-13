@@ -26,6 +26,8 @@ const (
 	invalidRoute = "Unrecognized request URL (%s: %s)."
 
 	internalServerError = "An internal error occurred."
+
+	typeInvalidRequestError = "invalid_request_error"
 )
 
 type ErrorInfo struct {
@@ -99,17 +101,10 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
 
-	// Prepare internal error as it's the most commonly used here
-	stripeError := &ResponseError{
-		ErrorInfo: ErrorInfo{
-			Message: internalServerError,
-			Type:    "invalid_request_error",
-		},
-	}
-
 	auth := r.Header.Get("Authorization")
 	if !validateAuth(auth) {
-		stripeError.ErrorInfo.Message = fmt.Sprintf(invalidAuthorization, auth)
+		message := fmt.Sprintf(invalidAuthorization, auth)
+		stripeError := createStripeError(typeInvalidRequestError, message)
 		writeResponse(w, r, start, http.StatusUnauthorized, stripeError)
 		return
 	}
@@ -119,22 +114,23 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	route := s.routeRequest(r)
 	if route == nil {
-		stripeError.ErrorInfo.Message = fmt.Sprintf(invalidRoute,
-			r.Method, r.URL.Path)
+		message := fmt.Sprintf(invalidRoute, r.Method, r.URL.Path)
+		stripeError := createStripeError(typeInvalidRequestError, message)
 		writeResponse(w, r, start, http.StatusNotFound, stripeError)
 		return
 	}
 
 	response, ok := route.operation.Responses["200"]
 	if !ok {
-		fmt.Printf("Couldn't find 200 response in spec\n")
-		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
+		writeResponse(w, r, start, http.StatusInternalServerError,
+			createInternalServerError())
 		return
 	}
 	responseContent, ok := response.Content["application/json"]
 	if !ok || responseContent.Schema == nil {
 		fmt.Printf("Couldn't find application/json in response\n")
-		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
+		writeResponse(w, r, start, http.StatusInternalServerError,
+			createInternalServerError())
 		return
 	}
 
@@ -149,7 +145,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		formBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			fmt.Printf("Couldn't read request body: %v\n", err)
-			writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
+			writeResponse(w, r, start, http.StatusInternalServerError,
+				createInternalServerError())
 			return
 		}
 		r.Body.Close()
@@ -158,7 +155,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	requestData, err := parser.ParseFormString(formString)
 	if err != nil {
 		fmt.Printf("Couldn't parse query/body: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
+		writeResponse(w, r, start, http.StatusInternalServerError,
+			createInternalServerError())
 		return
 	}
 
@@ -178,7 +176,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		err := coercer.CoerceParams(bodySchema, requestData)
 		if err != nil {
 			fmt.Printf("Coercion error: %v\n", err)
-			stripeError.ErrorInfo.Message = fmt.Sprintf("Request error: %v", err)
+			message := fmt.Sprintf("Request error: %v", err)
+			stripeError := createStripeError(typeInvalidRequestError, message)
 			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
 		}
@@ -186,7 +185,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		err = route.requestBodyValidator.Validate(requestData)
 		if err != nil {
 			fmt.Printf("Validation error: %v\n", err)
-			stripeError.ErrorInfo.Message = fmt.Sprintf("Request error: %v", err)
+			message := fmt.Sprintf("Request error: %v", err)
+			stripeError := createStripeError(typeInvalidRequestError, message)
 			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
 		}
@@ -204,7 +204,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		expansions)
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, stripeError)
+		writeResponse(w, r, start, http.StatusInternalServerError,
+			createInternalServerError())
 		return
 	}
 	if verbose {
@@ -430,4 +431,21 @@ func validateAuth(auth string) bool {
 	}
 
 	return true
+}
+
+// This creates a Stripe error to return in case of API errors.
+func createStripeError(errorType string, errorMessage string) *ResponseError {
+	stripeError := &ResponseError{
+		ErrorInfo: ErrorInfo{
+			Message: errorMessage,
+			Type:    errorType,
+		},
+	}
+
+	return stripeError
+}
+
+// Helper to create an internal server error for API issues.
+func createInternalServerError() *ResponseError {
+	return createStripeError(typeInvalidRequestError, internalServerError)
 }
