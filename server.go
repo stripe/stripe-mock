@@ -122,6 +122,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	response, ok := route.operation.Responses["200"]
 	if !ok {
+		fmt.Printf("Couldn't find 200 response in spec\n")
 		writeResponse(w, r, start, http.StatusInternalServerError,
 			createInternalServerError())
 		return
