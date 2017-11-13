@@ -18,7 +18,6 @@ import (
 func TestStubServer(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
 		"amount=123&currency=usd", getDefaultHeaders())
-
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -26,14 +25,14 @@ func TestStubServer(t *testing.T) {
 	assert.NoError(t, err)
 	_, ok := data["id"]
 	assert.True(t, ok)
+}
 
-	// Ensure error response has the correct shape
-
-	resp, body = sendRequest(t, "GET", "/a", "", nil)
-
+func TestStubServerError(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/a", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
-	err = json.Unmarshal(body, &data)
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
 	assert.NoError(t, err)
 	errorInfo, present := data["error"].(map[string]interface{})
 	assert.True(t, present)
