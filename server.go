@@ -31,12 +31,13 @@ const (
 )
 
 type ErrorInfo struct {
-	Type    string `json:"type"`
-	Message string `json:"message"`
 }
 
 type ResponseError struct {
-	ErrorInfo ErrorInfo `json:"error"`
+	ErrorInfo struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
 }
 
 // ExpansionLevel represents expansions on a single "level" of resource. It may
@@ -436,14 +437,15 @@ func validateAuth(auth string) bool {
 
 // This creates a Stripe error to return in case of API errors.
 func createStripeError(errorType string, errorMessage string) *ResponseError {
-	stripeError := &ResponseError{
-		ErrorInfo: ErrorInfo{
+	return &ResponseError{
+		ErrorInfo: struct {
+			Message string `json:"message"`
+			Type    string `json:"type"`
+		}{
 			Message: errorMessage,
 			Type:    errorType,
 		},
 	}
-
-	return stripeError
 }
 
 // Helper to create an internal server error for API issues.

@@ -34,21 +34,21 @@ func TestStubServerError(t *testing.T) {
 	var data map[string]interface{}
 	err := json.Unmarshal(body, &data)
 	assert.NoError(t, err)
-	errorInfo, present := data["error"].(map[string]interface{})
-	assert.True(t, present)
-	errorType, present := errorInfo["type"]
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	errorType, ok := errorInfo["type"]
 	assert.Equal(t, errorType, "invalid_request_error")
-	assert.True(t, present)
-	_, present = errorInfo["message"]
-	assert.True(t, present)
+	assert.True(t, ok)
+	_, ok = errorInfo["message"]
+	assert.True(t, ok)
 }
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	resp, _ := sendRequest(t, "POST", "/", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
-	_, present := resp.Header["Request-Id"]
-	assert.False(t, present)
+	_, ok := resp.Header["Request-Id"]
+	assert.False(t, ok)
 
 	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders())
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
