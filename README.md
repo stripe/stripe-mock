@@ -36,6 +36,14 @@ Run it:
 stripe-mock
 ```
 
+Or with docker:
+``` sh
+# build
+docker build . -t stripe-mock
+# run
+docker run -p 12111:12111 stripe-mock
+```
+
 Then from another terminal:
 
 ``` sh
