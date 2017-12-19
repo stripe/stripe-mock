@@ -6,9 +6,17 @@ go:
 # magic word to use faster/newer container-based architecture
 sudo: false
 
+services:
+  - docker
+
 before_install:
   - go get -u github.com/golang/lint/golint
   - go get -u github.com/jteeuwen/go-bindata/...
+
+  - docker build -t stripe-mock .
+  - docker run -d -p 12111:12111 stripe-mock
+  - docker ps
+  - docker run stripe-mock /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock; go test ./..."
 
 script:
   - go generate
