@@ -14,9 +14,9 @@ before_install:
   - go get -u github.com/jteeuwen/go-bindata/...
 
   - docker build -t stripe-mock .
-  - docker run -d -p 12111:12111 stripe-mock
-  - docker ps
-  - docker run stripe-mock /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock; go test ./..."
+  - docker run -d --name stripe-mock -p 12111:12111 stripe-mock
+  - docker ps -a
+  - docker exec -it stripe-mock /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock/; go test ./..."
 
 script:
   - go generate
