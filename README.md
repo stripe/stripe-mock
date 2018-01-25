@@ -103,7 +103,7 @@ Then run goreleaser and you're done! Check [releases] (it also pushes to the
 Homebrew tap).
 
 ``` sh
-goreleaser
+goreleaser --rm-dist
 ```
 
 [apiref]: https://stripe.com/docs/api
