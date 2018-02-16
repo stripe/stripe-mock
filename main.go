@@ -40,7 +40,7 @@ func main() {
 	flag.StringVar(&specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
 	flag.StringVar(&unix, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
-	flag.BoolVar(&showVersion, "version", false, "Show version")
+	flag.BoolVar(&showVersion, "version", false, "Show version and exit")
 	flag.Parse()
 
 	fmt.Printf("stripe-mock %s\n", version)
