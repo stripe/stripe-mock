@@ -43,8 +43,8 @@ func main() {
 	flag.BoolVar(&showVersion, "version", false, "Show version")
 	flag.Parse()
 
+	fmt.Printf("stripe-mock %s\n", version)
 	if showVersion || len(flag.Args()) == 1 && flag.Arg(0) == "version" {
-		fmt.Printf("%s\n", version)
 		return
 	}
 
