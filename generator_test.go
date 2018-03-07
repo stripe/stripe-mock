@@ -25,14 +25,14 @@ func init() {
 				Type: "boolean",
 			},
 			"object": {
-				Enum: []string{"list"},
+				Enum: []interface{}{"list"},
 			},
 			"total_count": {
 				Type: "integer",
 			},
 			"url": {
 				Type: "string",
-				Enum: []string{"/v1/charges"},
+				Pattern: "^/v1/charges",
 			},
 		},
 	}

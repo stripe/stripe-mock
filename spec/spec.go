@@ -41,7 +41,7 @@ var supportedSchemaFields = []string{
 
 type Schema struct {
 	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
-	Enum       []string           `json:"enum,omitempty" yaml:"enum"`
+	Enum       []interface{}      `json:"enum,omitempty" yaml:"enum"`
 	Items      *Schema            `json:"items,omitempty" yaml:"items"`
 	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
 	Pattern    string             `json:"pattern,omitempty" yaml:"pattern"`
