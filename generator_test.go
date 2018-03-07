@@ -31,7 +31,7 @@ func init() {
 				Type: "integer",
 			},
 			"url": {
-				Type: "string",
+				Type:    "string",
 				Pattern: "^/v1/charges",
 			},
 		},
