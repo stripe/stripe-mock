@@ -28,6 +28,7 @@ var supportedSchemaFields = []string{
 	"enum",
 	"items",
 	"nullable",
+	"pattern",
 	"properties",
 	"required",
 	"title",
@@ -43,6 +44,7 @@ type Schema struct {
 	Enum       []string           `json:"enum,omitempty" yaml:"enum"`
 	Items      *Schema            `json:"items,omitempty" yaml:"items"`
 	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
+	Pattern    string             `json:"pattern,omitempty" yaml:"pattern"`
 	Properties map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
 	Required   []string           `json:"required,omitempty" yaml:"required"`
 	Type       string             `json:"type,omitempty" yaml:"type"`
