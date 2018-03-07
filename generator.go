@@ -249,8 +249,10 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 		case "total_count":
 			val = 1
 		case "url":
-			if len(subSchema.Enum) == 1 {
-				val = subSchema.Enum[0]
+			if strings.HasPrefix(subSchema.Pattern, "^") {
+				// Many list resources have a URL pattern of the form "^/v1/whatevers";
+				// we cut off the "^" to leave the URL.
+				val = subSchema.Pattern[1:]
 			} else if example != nil {
 				// If an example was provided, we can assume it has the correct format
 				example := example.value.(map[string]interface{})
