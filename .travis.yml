@@ -19,12 +19,45 @@ script:
   - make vet
   - scripts/check_gofmt.sh
 
-  # Build and test the Docker image
-  - docker build -t stripe-mock .
-  - docker run -d --name stripe-mock -p 12111:12111 stripe-mock
+  # Build and test the Docker image. It's pushed to Docker Hub as part of the
+  # deploy phase.
+  - docker build -t "$DOCKER_REPO" .
+  - docker run -d --name stripe-mock-container -p 12111:12111 "$DOCKER_REPO"
   - docker ps -a
-  - docker exec -it stripe-mock /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock/; go test ./..."
+  - docker exec -it stripe-mock-container /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock/; go test ./..."
+
+deploy:
+  provider: script
+  script: bash scripts/docker_push.sh
+  on:
+    # Note that currently on the `master` branch is pushed to Docker Hub. We
+    # may want to do tagged releases as well if this ends up being something
+    # that people use.
+    branch: master
 
 notifications:
   email:
     on_success: never
+
+# For now, we're pushing this to the repository `stripemock/stripe-mock`
+# instead of the more desirable `stripe/stripe-mock` because we had trouble
+# figuring out how to correctly add collaborators on Docker Hub's interface.
+# Once we get the latter going, we should probably still use the `stripemock`
+# user so that no one has to put their real Docker credentials in here, but we
+# should push to a repository under the `stripe` organization instead.
+#
+# You can create an encrypted variable similar to the one below using:
+#
+#     travis encrypt --org DOCKER_PASSWORD=<password>
+#
+# You'll need the `travis` gem which is correctly configured. For more
+# information:
+#
+#     https://docs.travis-ci.com/user/environment-variables/#Defining-encrypted-variables-in-.travis.yml
+#
+env:
+  global:
+    - DOCKER_REPO="stripemock/stripe-mock"
+    - DOCKER_USERNAME=stripemock
+    # DOCKER_PASSWORD
+    - secure: "fieReuTyrBKGeH1kcZRBVTx7Gj0/FOejeT+Ue/9eGJfSi1onXw4qQGrVMJ+G5P11Jt/wL9pCmqAq99DYCoge9UkcXCNTzrUvM7lVdYiTSEaumcJWHRvoe3Ew7qAf1fH9IDX0uc/9VS9OSgEextmSlLrf0/7RPTD8bWPFAkpuySSJUi6A4C+GBjyqD+X33VOXDjD0Vf0gmZwlP/e4yw1BqmpWrvV6GjSpE0ACF2asrom9bgiyQHU89KAYUR16DvFlLfuOx3V4jvlgGZaRq0HyuhMlfaWoiEdxpUp88C3tadGy/6DpXvHkYXudCs8vR53kK61HV66AUjd8qmw5jj3g+c8rP4LP85Ps6RtlLMX8s7XlHoTyyB+f1b/25VuCMptVIIpJuM/YwBSNRhputq2KbAUuRCxcHiwC3vZsAKlGEx/W4UJaxxb2CVFY+pVtnmp1rrCRxxTBwCRIDvpvlpSJzu7j7SV4+ZOQbjKu+9r6rTAdRDgDkNdANDyDDb0vbjAnmFPLQXAN7hegsftsi+3acT96G5KYCQHTK5Q7S3PaLIRGuxAA2niHUyGjWlOmj5H7NgcyMavTcBHZDXfMDMwpCTMKutC9YP8VRPq6oqCuiKfGU7ZXbxMTeO9ILQNIhnM4iVn1FZiRP5c5jdE4ADCvxn3LYezs3ZO+LGuSvkZHA1Q="
