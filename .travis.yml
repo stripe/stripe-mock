@@ -24,7 +24,6 @@ script:
   - docker build -t "$DOCKER_REPO" .
   - docker run -d --name stripe-mock-container -p 12111:12111 "$DOCKER_REPO"
   - docker ps -a
-  - docker exec -it stripe-mock-container /bin/sh -c "cd /go/src/github.com/stripe/stripe-mock/; go test ./..."
 
 deploy:
   provider: script
