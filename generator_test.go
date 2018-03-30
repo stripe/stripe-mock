@@ -177,7 +177,7 @@ func TestValidFixtures(t *testing.T) {
 
 // Tests that DataGenerator can generate an example of the given schema, and
 // that the example validates against the schema correctly
-func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
+func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand bool) {
 	assert.NotNil(t, schema)
 
 	generator := DataGenerator{
@@ -196,7 +196,7 @@ func testCanGenerate(t *testing.T, schema *spec.Schema, expand bool) {
 	var example interface{}
 	var err error
 	assert.NotPanics(t, func() {
-		example, err = generator.Generate(schema, "<test request path>", expansions)
+		example, err = generator.Generate(schema, string(path), expansions)
 	})
 	assert.NoError(t, err)
 
@@ -218,7 +218,7 @@ func TestResourcesCanBeGenerated(t *testing.T) {
 			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
 			t.Run(
 				fmt.Sprintf("%s %s (without expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, schema, false) },
+				func(t2 *testing.T) { testCanGenerate(t2, url, schema, false) },
 			)
 		}
 	}
@@ -232,7 +232,7 @@ func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
 			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
 			t.Run(
 				fmt.Sprintf("%s %s (with expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, schema, true) },
+				func(t2 *testing.T) { testCanGenerate(t2, url, schema, true) },
 			)
 		}
 	}
