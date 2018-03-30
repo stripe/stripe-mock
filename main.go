@@ -35,7 +35,7 @@ func main() {
 	var specPath string
 	var unix string
 
-	flag.IntVar(&port, "port", 0, "Port to listen on")
+	flag.IntVar(&port, "port", 0, "Port to listen on (also respects PORT from environment)")
 	flag.StringVar(&fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version")
 	flag.StringVar(&specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
 	flag.StringVar(&unix, "unix", "", "Unix socket to listen on")
@@ -90,6 +90,20 @@ func abort(message string) {
 	os.Exit(1)
 }
 
+// getEnvPortOrDefault gets a port from the environment variable `PORT` or
+// falls back to the default port (`defaultPort`) if one was not present.
+func getEnvPortOrDefault() (int, error) {
+	if os.Getenv("PORT") != "" {
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err != nil {
+			return 0, err
+		}
+		return port, nil
+	}
+
+	return defaultPort, nil
+}
+
 func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	var data []byte
 	var err error
@@ -142,7 +156,10 @@ func getListener(port int, unix string) (net.Listener, error) {
 		fmt.Printf("Listening on unix socket %v\n", unix)
 	} else {
 		if port == 0 {
-			port = defaultPort
+			port, err = getEnvPortOrDefault()
+			if err != nil {
+				return nil, err
+			}
 		}
 		listener, err = net.Listen("tcp", ":"+strconv.Itoa(port))
 		fmt.Printf("Listening on port %v\n", port)
