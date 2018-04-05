@@ -76,31 +76,61 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 
 func TestStubServer_RoutesRequest(t *testing.T) {
 	server := getStubServer(t)
+	var id *string
 	var route *stubServerRoute
 
-	route = server.routeRequest(
+	route, id = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
 	assert.Equal(t, chargeAllMethod, route.operation)
+	assert.Nil(t, id)
 
-	route = server.routeRequest(
+	route, id = server.routeRequest(
 		&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
 	assert.NotNil(t, route)
 	assert.Equal(t, chargeCreateMethod, route.operation)
+	assert.Nil(t, id)
 
-	route = server.routeRequest(
+	route, id = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
 	assert.Equal(t, chargeGetMethod, route.operation)
+	assert.Equal(t, "ch_123", *id)
 
-	route = server.routeRequest(
+	route, id = server.routeRequest(
 		&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 	assert.NotNil(t, route)
 	assert.Equal(t, chargeDeleteMethod, route.operation)
+	assert.Equal(t, "ch_123", *id)
 
-	route = server.routeRequest(
+	route, id = server.routeRequest(
 		&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/doesnt-exist"}})
 	assert.Equal(t, (*stubServerRoute)(nil), route)
+	assert.Nil(t, id)
+
+	// Route with a parameter, but not an object's primary ID
+	route, id = server.routeRequest(
+		&http.Request{Method: "POST",
+			URL: &url.URL{Path: "/v1/invoices/in_123/pay"}})
+	assert.NotNil(t, route)
+	assert.Equal(t, chargeDeleteMethod, route.operation)
+	assert.Equal(t, "in_123", *id)
+
+	// Route with a parameter, but not an object's primary ID
+	route, id = server.routeRequest(
+		&http.Request{Method: "GET",
+			URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds"}})
+	assert.NotNil(t, route)
+	assert.Equal(t, invoicePayMethod, route.operation)
+	assert.Nil(t, id)
+
+	// Route with multiple parameters in its URL
+	route, id = server.routeRequest(
+		&http.Request{Method: "GET",
+			URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds/fr_123"}})
+	assert.NotNil(t, route)
+	assert.Equal(t, chargeDeleteMethod, route.operation)
+	assert.Equal(t, "fr_123", *id)
 }
 
 // ---

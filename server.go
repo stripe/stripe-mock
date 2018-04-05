@@ -92,6 +92,7 @@ type StubServer struct {
 // pattern to match an incoming path and a description of the method that would
 // be executed in the event of a match.
 type stubServerRoute struct {
+	endsWithID           bool
 	pattern              *regexp.Regexp
 	operation            *spec.Operation
 	requestBodyValidator *jsval.JSVal
@@ -113,7 +114,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// Every response needs a Request-Id header except the invalid authorization
 	w.Header().Set("Request-Id", "req_123")
 
-	route := s.routeRequest(r)
+	route, id := s.routeRequest(r)
 	if route == nil {
 		message := fmt.Sprintf(invalidRoute, r.Method, r.URL.Path)
 		stripeError := createStripeError(typeInvalidRequestError, message)
@@ -137,6 +138,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
+		fmt.Printf("ID extracted from route: %+v\n", id)
 		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
 
@@ -203,6 +205,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	responseData, err := generator.Generate(
 		responseContent.Schema,
 		r.URL.Path,
+		id,
 		expansions)
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
@@ -258,7 +261,18 @@ func (s *StubServer) initializeRouter() error {
 				numValidators++
 			}
 
+			// We use whether the route ends with a parameter as a heuristic as
+			// to whether we should expect an object's primary ID in the URL.
+			var endsWithID bool
+			for _, suffix := range endsWithIDSuffixes {
+				if strings.HasSuffix(string(path), suffix) {
+					endsWithID = true
+					break
+				}
+			}
+
 			route := stubServerRoute{
+				endsWithID:           endsWithID,
 				pattern:              pathPattern,
 				operation:            operation,
 				requestBodyValidator: requestBodyValidator,
@@ -277,17 +291,49 @@ func (s *StubServer) initializeRouter() error {
 	return nil
 }
 
-func (s *StubServer) routeRequest(r *http.Request) *stubServerRoute {
+// routeRequest tries to find a matching route for the given request. If
+// successful, it returns the matched route and where possible, an extracted ID
+// which comes from the last capture group in the URL. An ID is only returned
+// if it looks like it's supposed to be the primary identifier of the returned
+// object (i.e., the route's pattern ended with a parameter). A nil is returned
+// as the second return value when no primary ID is available.
+func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *string) {
 	verbRoutes := s.routes[spec.HTTPVerb(r.Method)]
 	for _, route := range verbRoutes {
-		if route.pattern.MatchString(r.URL.Path) {
-			return &route
+		matches := route.pattern.FindAllStringSubmatch(r.URL.Path, -1)
+
+		if len(matches) < 1 {
+			continue
 		}
+
+		// There will only ever be a single match in the string (this match
+		// contains the entire match plus all capture groups).
+		firstMatch := matches[0]
+
+		// This route doesn't appear to contain the ID of the primary object
+		// being returned. Return the route only.
+		if !route.endsWithID {
+			return &route, nil
+		}
+
+		// Return the route along with the likely ID.
+		return &route, &firstMatch[len(firstMatch)-1]
 	}
-	return nil
+	return nil, nil
 }
 
 // ---
+
+// Suffixes for which we will try to exact an object's ID from the path.
+var endsWithIDSuffixes = [...]string{
+	// The general case: we're looking for the end of an OpenAPI URL parameter.
+	"}",
+
+	// These are resource "actions". They don't take the standard form, but we
+	// can expect an object's primary ID to live right before them in a path.
+	"/close",
+	"/pay",
+}
 
 func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
 	if operation.RequestBody == nil {

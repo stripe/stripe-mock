@@ -52,7 +52,7 @@ func TestConcurrentAccess(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			_, err := generator.Generate(
-				&spec.Schema{Ref: "#/components/schemas/subscription"}, "", nil)
+				&spec.Schema{Ref: "#/components/schemas/subscription"}, "", nil, nil)
 			assert.NoError(t, err)
 		}()
 	}
@@ -68,7 +68,7 @@ func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
 	data, err = generator.Generate(
-		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil)
+		&spec.Schema{Ref: "#/components/schemas/charge"}, "", nil, nil)
 	assert.Nil(t, err)
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
@@ -84,6 +84,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
+		nil,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Nil(t, err)
 	assert.Equal(t,
@@ -95,6 +96,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
+		nil,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
@@ -103,6 +105,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
+		nil,
 		&ExpansionLevel{expansions: map[string]*ExpansionLevel{"customer.id": {expansions: map[string]*ExpansionLevel{}}}})
 	assert.Equal(t, err, errExpansionNotSupported)
 
@@ -111,6 +114,7 @@ func TestGenerateResponseData(t *testing.T) {
 	data, err = generator.Generate(
 		&spec.Schema{Ref: "#/components/schemas/charge"},
 		"",
+		nil,
 		&ExpansionLevel{wildcard: true})
 	assert.Nil(t, err)
 	assert.Equal(t,
@@ -119,7 +123,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// list
 	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(listSchema, "/v1/charges", nil)
+	data, err = generator.Generate(listSchema, "/v1/charges", nil, nil)
 	assert.Nil(t, err)
 	assert.Equal(t, "list", data.(map[string]interface{})["object"])
 	assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
@@ -148,7 +152,7 @@ func TestGenerateResponseData(t *testing.T) {
 				"charges_list": listSchema,
 			},
 			XResourceID: "with_charges_list",
-		}, "", nil)
+		}, "", nil, nil)
 	assert.Nil(t, err)
 	chargesList := data.(map[string]interface{})["charges_list"]
 	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
@@ -156,6 +160,31 @@ func TestGenerateResponseData(t *testing.T) {
 	assert.Equal(t,
 		testFixtures.Resources["charge"].(map[string]interface{})["id"],
 		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+
+	// injected ID
+	generator = DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+		Resources: map[spec.ResourceID]interface{}{
+			spec.ResourceID("charge"): map[string]interface{}{
+				// This is contrived, but we inject the value we expect to be
+				// replaced into `customer` as well so that we can verify the
+				// secondary behavior that replaces all values that look like a
+				// replaced ID (as well as the ID).
+				"customer": "ch_123",
+
+				"id": "ch_123",
+			},
+		},
+	}}
+	id := "ch_123_InjectedFromURL"
+	data, err = generator.Generate(
+		&spec.Schema{Ref: "#/components/schemas/charge"}, "", &id, nil)
+	assert.Nil(t, err)
+	assert.Equal(t,
+		id,
+		data.(map[string]interface{})["id"])
+	assert.Equal(t,
+		id,
+		data.(map[string]interface{})["customer"])
 }
 
 func TestValidFixtures(t *testing.T) {
@@ -196,7 +225,7 @@ func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand b
 	var example interface{}
 	var err error
 	assert.NotPanics(t, func() {
-		example, err = generator.Generate(schema, string(path), expansions)
+		example, err = generator.Generate(schema, string(path), nil, expansions)
 	})
 	assert.NoError(t, err)
 

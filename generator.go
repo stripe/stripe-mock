@@ -19,8 +19,8 @@ type DataGenerator struct {
 }
 
 // Generate generates a fixture response.
-func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, expansions *ExpansionLevel) (interface{}, error) {
-	return g.generateInternal(schema, requestPath, expansions, nil, fmt.Sprintf("Responding to %s:\n", requestPath))
+func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, id *string, expansions *ExpansionLevel) (interface{}, error) {
+	return g.generateInternal(schema, requestPath, id, nil, true, expansions, nil, fmt.Sprintf("Responding to %s:\n", requestPath))
 }
 
 // The purpose of this simple wrapper is so that we can write "example = nil"
@@ -30,7 +30,7 @@ type Example struct {
 	value interface{}
 }
 
-func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, id *string, replacedID *string, doReplaceID bool, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
 	// This is a bit of a mess. We don't have an elegant fully-general approach to
 	// generating examples, just a bunch of specific cases that we know how to
 	// handle. If we find ourselves in a situation that doesn't match any of the
@@ -70,14 +70,16 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		if expansions != nil {
 			// We're expanding this specific object
 			result, err := g.generateInternal(
-				schema.XExpansionResources.OneOf[0], requestPath, expansions, nil,
+				schema.XExpansionResources.OneOf[0],
+				requestPath, id, replacedID, false, expansions, nil,
 				fmt.Sprintf("%sExpanding optional expandable field:\n", context))
 			return result, err
 		} else {
 			// We're not expanding this specific object. Our example should be of the
 			// unexpanded form, which is the first branch of the AnyOf
 			result, err := g.generateInternal(
-				schema.AnyOf[0], requestPath, expansions, example,
+				schema.AnyOf[0],
+				requestPath, id, replacedID, false, expansions, example,
 				fmt.Sprintf("%sNot expanding optional expandable field:\n", context))
 			return result, err
 		}
@@ -91,7 +93,8 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		} else {
 			// Since there's only one subschema, we can confidently recurse into it
 			result, err := g.generateInternal(
-				schema.AnyOf[0], requestPath, expansions, example,
+				schema.AnyOf[0],
+				requestPath, id, replacedID, doReplaceID, expansions, example,
 				fmt.Sprintf("%sChoosing only branch of anyOf:\n", context))
 			return result, err
 		}
@@ -102,7 +105,8 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		// in any example, even if we have an example available, because we don't
 		// know which branch of the AnyOf the example corresponds to.
 		result, err := g.generateInternal(
-			schema.AnyOf[0], requestPath, expansions, nil,
+			schema.AnyOf[0],
+			requestPath, id, replacedID, doReplaceID, expansions, nil,
 			fmt.Sprintf("%sChoosing first branch of anyOf:\n", context))
 		return result, err
 	}
@@ -111,7 +115,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		// We special-case list resources and always fill in the list with at least
 		// one item of data, regardless of what was present in the example
 		listData, err := g.generateListResource(
-			schema, requestPath, expansions, example, context)
+			schema, requestPath, id, replacedID, expansions, example, context)
 		return listData, err
 	}
 
@@ -127,6 +131,20 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 				"has null for that key.", context))
 		}
 		return nil, nil
+	}
+
+	// If we replaced a primary object ID, then also replace any of values that
+	// we happen to find which had the same value as it. These will usually be
+	// IDs in child objects that reference the parent.
+	//
+	// For example, a charge may contain a sublist of refunds. If we replaced
+	// the charge's ID, we also want to replace that charge ID in every one of
+	// the child refunds.
+	if replacedID != nil && schema.Type == "string" {
+		valStr, ok := example.value.(string)
+		if ok && valStr == *replacedID {
+			example = &Example{value: *id}
+		}
 	}
 
 	if schema.Type == "boolean" || schema.Type == "integer" ||
@@ -156,7 +174,38 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 
 		resultMap := make(map[string]interface{})
 
+		// We might have obtained an ID for the object from an extracted path
+		// parameter. If we did, fill it in. Note that this only occurs at the
+		// top level of recursion because any ID fields we find at other levels
+		// are likely for other objects.
+		//
+		// If we do replace an ID, extract the old one so that we can inject it
+		// into list URLs from our fixtures.
+		//
+		// This replacement must occur before iterating through the loop below
+		// because we might also use the new ID to replace other values in the
+		// object as well.
+		if doReplaceID && id != nil {
+			_, ok := schema.Properties["id"]
+			if ok {
+				idValue, ok := exampleMap["id"]
+				if ok {
+					idValueStr := idValue.(string)
+					replacedID = &idValueStr
+					resultMap["id"] = *id
+
+					if verbose {
+						fmt.Printf("Found ID to replace; previous: '%s' new: '%s'\n", *replacedID, *id)
+					}
+				}
+			}
+		}
+
 		for key, subSchema := range schema.Properties {
+			// If these conditions are met this was handled above. Skip it.
+			if doReplaceID && key == "id" && replacedID != nil {
+				continue
+			}
 
 			var subExpansions *ExpansionLevel
 			if expansions != nil {
@@ -185,7 +234,8 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 			}
 
 			subValue, err := g.generateInternal(
-				subSchema, requestPath, subExpansions, subExample,
+				subSchema,
+				requestPath, id, replacedID, false, subExpansions, subExample,
 				fmt.Sprintf("%sIn property '%s' of object:\n", context, key))
 			if err != nil {
 				return nil, err
@@ -216,7 +266,7 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 	return schema, context, nil
 }
 
-func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, id *string, replacedID *string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
 
 	var itemExpansions *ExpansionLevel
 	if expansions != nil {
@@ -226,6 +276,9 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 	itemData, err := g.generateInternal(
 		schema.Properties["data"].Items,
 		requestPath,
+		id,
+		replacedID,
+		false,
 		itemExpansions,
 		nil,
 		fmt.Sprintf("%sPopulating list resource:\n", context))
@@ -249,16 +302,28 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 		case "total_count":
 			val = 1
 		case "url":
+			var url string
 			if strings.HasPrefix(subSchema.Pattern, "^") {
 				// Many list resources have a URL pattern of the form "^/v1/whatevers";
 				// we cut off the "^" to leave the URL.
-				val = subSchema.Pattern[1:]
+				url = subSchema.Pattern[1:]
 			} else if example != nil {
 				// If an example was provided, we can assume it has the correct format
 				example := example.value.(map[string]interface{})
-				val = example["url"]
+				url = example["url"].(string)
 			} else {
-				val = requestPath
+				url = requestPath
+			}
+
+			// Potentially replace a primary ID in the URL of a list so that
+			// requests against it may be consistent. For example, if
+			// `/v1/charges/ch_123` was requested, we'd want the refunds list
+			// within the returned object to have a URL like
+			// `/v1/charges/ch_123/refunds`.
+			if replacedID != nil {
+				val = strings.Replace(url, *replacedID, *id, 1)
+			} else {
+				val = url
 			}
 		default:
 			val = nil
