@@ -95,6 +95,7 @@ export GITHUB_TOKEN=...
 Commit changes and tag `HEAD`:
 
 ``` sh
+git pull origin --tags
 git tag v0.1.1
 git push origin --tags
 ```
