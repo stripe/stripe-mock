@@ -6,10 +6,13 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+var applicationFeeRefundCreateMethod *spec.Operation
+var applicationFeeRefundGetMethod *spec.Operation
 var chargeAllMethod *spec.Operation
 var chargeCreateMethod *spec.Operation
 var chargeDeleteMethod *spec.Operation
 var chargeGetMethod *spec.Operation
+var invoicePayMethod *spec.Operation
 
 // Try to avoid using the real spec as much as possible because it's more
 // complicated and slower. A test spec is provided below. If you do use it,
@@ -54,6 +57,11 @@ func initRealSpec() {
 }
 
 func initTestSpec() {
+	// These are basically here to give us a URL to test against that has
+	// multiple parameters in it.
+	applicationFeeRefundCreateMethod = &spec.Operation{}
+	applicationFeeRefundGetMethod = &spec.Operation{}
+
 	chargeAllMethod = &spec.Operation{}
 	chargeCreateMethod = &spec.Operation{
 		RequestBody: &spec.RequestBody{
@@ -84,6 +92,10 @@ func initTestSpec() {
 	}
 	chargeDeleteMethod = &spec.Operation{}
 	chargeGetMethod = &spec.Operation{}
+
+	// Here so we can test the relatively rare "action" operations (e.g.,
+	// `POST` to `/pay` on an invoice).
+	invoicePayMethod = &spec.Operation{}
 
 	testFixtures =
 		spec.Fixtures{
@@ -127,6 +139,12 @@ func initTestSpec() {
 			},
 		},
 		Paths: map[spec.Path]map[spec.HTTPVerb]*spec.Operation{
+			spec.Path("/v1/application_fees/{fee}/refunds"): {
+				"get": applicationFeeRefundCreateMethod,
+			},
+			spec.Path("/v1/application_fees/{fee}/refunds/{id}"): {
+				"get": applicationFeeRefundGetMethod,
+			},
 			spec.Path("/v1/charges"): {
 				"get":  chargeAllMethod,
 				"post": chargeCreateMethod,
@@ -134,6 +152,9 @@ func initTestSpec() {
 			spec.Path("/v1/charges/{id}"): {
 				"get":    chargeGetMethod,
 				"delete": chargeDeleteMethod,
+			},
+			spec.Path("/v1/invoices/{id}/pay"): {
+				"post": invoicePayMethod,
 			},
 		},
 	}
