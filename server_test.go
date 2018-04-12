@@ -137,15 +137,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	assert.Equal(t, "fr_123", *id)
 }
 
-// ---
-
-func TestCompilePath(t *testing.T) {
-	assert.Equal(t, `\A/v1/charges\z`,
-		compilePath(spec.Path("/v1/charges")).String())
-	assert.Equal(t, `\A/v1/charges/(?P<id>[\w-_.]+)\z`,
-		compilePath(spec.Path("/v1/charges/{id}")).String())
-}
-
 func TestGetValidator(t *testing.T) {
 	operation := &spec.Operation{RequestBody: &spec.RequestBody{
 		Content: map[string]spec.MediaType{
@@ -237,7 +228,21 @@ func TestValidateAuth(t *testing.T) {
 // Tests for private functions
 //
 
-func TestparseExpansionLevel(t *testing.T) {
+func TestCompilePath(t *testing.T) {
+	{
+		pattern, pathParamNames := compilePath(spec.Path("/v1/charges"))
+		assert.Equal(t, `\A/v1/charges\z`, pattern.String())
+		assert.Equal(t, []string(nil), pathParamNames)
+	}
+
+	{
+		pattern, pathParamNames := compilePath(spec.Path("/v1/charges/{id}"))
+		assert.Equal(t, `\A/v1/charges/(?P<id>[\w-_.]+)\z`, pattern.String())
+		assert.Equal(t, []string{"id"}, pathParamNames)
+	}
+}
+
+func TestParseExpansionLevel(t *testing.T) {
 	emptyExpansionLevel := &ExpansionLevel{
 		expansions: make(map[string]*ExpansionLevel),
 	}

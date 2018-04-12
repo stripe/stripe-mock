@@ -186,7 +186,7 @@ func (s *StubServer) initializeRouter() error {
 	for path, verbs := range s.spec.Paths {
 		numPaths++
 
-		pathPattern := compilePath(path)
+		pathPattern, pathParamNames := compilePath(path)
 
 		if verbose {
 			fmt.Printf("Compiled path: %v\n", pathPattern.String())
@@ -226,6 +226,7 @@ func (s *StubServer) initializeRouter() error {
 				endsWithID:           endsWithID,
 				pattern:              pathPattern,
 				operation:            operation,
+				pathParamNames:       pathParamNames,
 				requestBodyValidator: requestBodyValidator,
 			}
 
@@ -314,6 +315,7 @@ type stubServerRoute struct {
 	endsWithID           bool
 	pattern              *regexp.Regexp
 	operation            *spec.Operation
+	pathParamNames       []string
 	requestBodyValidator *jsval.JSVal
 }
 
@@ -321,9 +323,16 @@ type stubServerRoute struct {
 // Private functions
 //
 
-func compilePath(path spec.Path) *regexp.Regexp {
-	pattern := `\A`
+// compilePath compiles a path extracted from OpenAPI into a regular expression
+// that we can use for matching against incoming HTTP requests.
+//
+// The first return value is a regular expression. The second is a slice of
+// names for the parameters included in the path in order of their appearance.
+// This slice is `nil` if the path had no parameters.
+func compilePath(path spec.Path) (*regexp.Regexp, []string) {
+	var pathParamNames []string
 	parts := strings.Split(string(path), "/")
+	pattern := `\A`
 
 	for _, part := range parts {
 		if part == "" {
@@ -335,10 +344,11 @@ func compilePath(path spec.Path) *regexp.Regexp {
 			pattern += `/` + part
 		} else {
 			pattern += `/(?P<` + submatches[0][1] + `>[\w-_.]+)`
+			pathParamNames = append(pathParamNames, submatches[0][1])
 		}
 	}
 
-	return regexp.MustCompile(pattern + `\z`)
+	return regexp.MustCompile(pattern + `\z`), pathParamNames
 }
 
 // Helper to create an internal server error for API issues.
