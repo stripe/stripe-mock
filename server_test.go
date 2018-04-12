@@ -15,6 +15,10 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+//
+// Tests
+//
+
 func TestStubServer(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
 		"amount=123&currency=usd", getDefaultHeaders())
@@ -202,7 +206,38 @@ func TestIsCurl(t *testing.T) {
 	}
 }
 
-func TestParseExpansionLevel(t *testing.T) {
+func TestValidateAuth(t *testing.T) {
+	testCases := []struct {
+		auth string
+		want bool
+	}{
+		{"Basic " + encode64("sk_test_123"), true},
+		{"Bearer sk_test_123", true},
+		{"", false},
+		{"Bearer", false},
+		{"Basic", false},
+		{"Bearer ", false},
+		{"Basic ", false},
+		{"Basic 123", false}, // "123" is not a valid key when base64 decoded
+		{"Basic " + encode64("sk_test"), false},
+		{"Bearer sk_test_123 extra", false},
+		{"Bearer sk_test", false},
+		{"Bearer sk_test_123_extra", false},
+		{"Bearer sk_live_123", false},
+		{"Bearer sk_test_", false},
+	}
+	for _, tc := range testCases {
+		t.Run("Authorization: "+tc.auth, func(t *testing.T) {
+			assert.Equal(t, tc.want, validateAuth(tc.auth))
+		})
+	}
+}
+
+//
+// Tests for private functions
+//
+
+func TestparseExpansionLevel(t *testing.T) {
 	emptyExpansionLevel := &ExpansionLevel{
 		expansions: make(map[string]*ExpansionLevel),
 	}
@@ -247,44 +282,23 @@ func TestParseExpansionLevel(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%+v", tc.expansions), func(t *testing.T) {
-			assert.Equal(t, tc.want, ParseExpansionLevel(tc.expansions))
-		})
-	}
-}
-
-func TestValidateAuth(t *testing.T) {
-	testCases := []struct {
-		auth string
-		want bool
-	}{
-		{"Basic " + encode64("sk_test_123"), true},
-		{"Bearer sk_test_123", true},
-		{"", false},
-		{"Bearer", false},
-		{"Basic", false},
-		{"Bearer ", false},
-		{"Basic ", false},
-		{"Basic 123", false}, // "123" is not a valid key when base64 decoded
-		{"Basic " + encode64("sk_test"), false},
-		{"Bearer sk_test_123 extra", false},
-		{"Bearer sk_test", false},
-		{"Bearer sk_test_123_extra", false},
-		{"Bearer sk_live_123", false},
-		{"Bearer sk_test_", false},
-	}
-	for _, tc := range testCases {
-		t.Run("Authorization: "+tc.auth, func(t *testing.T) {
-			assert.Equal(t, tc.want, validateAuth(tc.auth))
+			assert.Equal(t, tc.want, parseExpansionLevel(tc.expansions))
 		})
 	}
 }
 
 //
-// ---
+// Private functions
 //
 
 func encode64(s string) string {
 	return base64.StdEncoding.EncodeToString([]byte(s))
+}
+
+func getDefaultHeaders() map[string]string {
+	headers := make(map[string]string)
+	headers["Authorization"] = "Bearer sk_test_123"
+	return headers
 }
 
 func getStubServer(t *testing.T) *StubServer {
@@ -292,12 +306,6 @@ func getStubServer(t *testing.T) *StubServer {
 	err := server.initializeRouter()
 	assert.NoError(t, err)
 	return server
-}
-
-func getDefaultHeaders() map[string]string {
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer sk_test_123"
-	return headers
 }
 
 func sendRequest(t *testing.T, method string, url string, params string,

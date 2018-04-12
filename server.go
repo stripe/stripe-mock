@@ -17,27 +17,11 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-const (
-	invalidAuthorization = "Please authenticate by specifying an " +
-		"`Authorization` header with any valid looking testmode secret API " +
-		"key. For example, `Authorization: Bearer sk_test_123`. " +
-		"Authorization was '%s'."
-
-	invalidRoute = "Unrecognized request URL (%s: %s)."
-
-	internalServerError = "An internal error occurred."
-
-	typeInvalidRequestError = "invalid_request_error"
-)
+//
+// Public types
+//
 
 type ErrorInfo struct {
-}
-
-type ResponseError struct {
-	ErrorInfo struct {
-		Message string `json:"message"`
-		Type    string `json:"type"`
-	} `json:"error"`
 }
 
 // ExpansionLevel represents expansions on a single "level" of resource. It may
@@ -50,34 +34,11 @@ type ExpansionLevel struct {
 	wildcard bool
 }
 
-// ParseExpansionLevel parses a set of raw expansions from a request query
-// string or form and produces a structure more useful for performing actual
-// expansions.
-func ParseExpansionLevel(raw []string) *ExpansionLevel {
-	sort.Strings(raw)
-
-	level := &ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
-	groups := make(map[string][]string)
-
-	for _, expansion := range raw {
-		parts := strings.Split(expansion, ".")
-		if len(parts) == 1 {
-			if parts[0] == "*" {
-				level.wildcard = true
-			} else {
-				level.expansions[parts[0]] =
-					&ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
-			}
-		} else {
-			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
-		}
-	}
-
-	for key, subexpansions := range groups {
-		level.expansions[key] = ParseExpansionLevel(subexpansions)
-	}
-
-	return level
+type ResponseError struct {
+	ErrorInfo struct {
+		Message string `json:"message"`
+		Type    string `json:"type"`
+	} `json:"error"`
 }
 
 // StubServer handles incoming HTTP requests and responds to them appropriately
@@ -86,16 +47,6 @@ type StubServer struct {
 	fixtures *spec.Fixtures
 	routes   map[spec.HTTPVerb][]stubServerRoute
 	spec     *spec.Spec
-}
-
-// stubServerRoute is a single route in a StubServer's routing table. It has a
-// pattern to match an incoming path and a description of the method that would
-// be executed in the event of a match.
-type stubServerRoute struct {
-	endsWithID           bool
-	pattern              *regexp.Regexp
-	operation            *spec.Operation
-	requestBodyValidator *jsval.JSVal
 }
 
 // HandleRequest handes an HTTP request directed at the API stub.
@@ -322,7 +273,22 @@ func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *string) {
 	return nil, nil
 }
 
-// ---
+//
+// Private values
+//
+
+const (
+	invalidAuthorization = "Please authenticate by specifying an " +
+		"`Authorization` header with any valid looking testmode secret API " +
+		"key. For example, `Authorization: Bearer sk_test_123`. " +
+		"Authorization was '%s'."
+
+	invalidRoute = "Unrecognized request URL (%s: %s)."
+
+	internalServerError = "An internal error occurred."
+
+	typeInvalidRequestError = "invalid_request_error"
+)
 
 // Suffixes for which we will try to exact an object's ID from the path.
 var endsWithIDSuffixes = [...]string{
@@ -335,19 +301,25 @@ var endsWithIDSuffixes = [...]string{
 	"/pay",
 }
 
-func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
-	if operation.RequestBody == nil {
-		return nil
-	}
-	mediaType, mediaTypePresent :=
-		operation.RequestBody.Content["application/x-www-form-urlencoded"]
-	if !mediaTypePresent {
-		return nil
-	}
-	return mediaType.Schema
+var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
+
+//
+// Private types
+//
+
+// stubServerRoute is a single route in a StubServer's routing table. It has a
+// pattern to match an incoming path and a description of the method that would
+// be executed in the event of a match.
+type stubServerRoute struct {
+	endsWithID           bool
+	pattern              *regexp.Regexp
+	operation            *spec.Operation
+	requestBodyValidator *jsval.JSVal
 }
 
-var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
+//
+// Private functions
+//
 
 func compilePath(path spec.Path) *regexp.Regexp {
 	pattern := `\A`
@@ -369,6 +341,24 @@ func compilePath(path spec.Path) *regexp.Regexp {
 	return regexp.MustCompile(pattern + `\z`)
 }
 
+// Helper to create an internal server error for API issues.
+func createInternalServerError() *ResponseError {
+	return createStripeError(typeInvalidRequestError, internalServerError)
+}
+
+// This creates a Stripe error to return in case of API errors.
+func createStripeError(errorType string, errorMessage string) *ResponseError {
+	return &ResponseError{
+		ErrorInfo: struct {
+			Message string `json:"message"`
+			Type    string `json:"type"`
+		}{
+			Message: errorMessage,
+			Type:    errorType,
+		},
+	}
+}
+
 func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) {
 	expand, ok := data["expand"]
 	if !ok {
@@ -380,7 +370,7 @@ func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) 
 	expandStr, ok := expand.(string)
 	if ok {
 		expansions = append(expansions, expandStr)
-		return ParseExpansionLevel(expansions), expansions
+		return parseExpansionLevel(expansions), expansions
 	}
 
 	expandArr, ok := expand.([]interface{})
@@ -389,45 +379,56 @@ func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) 
 			expandStr := expand.(string)
 			expansions = append(expansions, expandStr)
 		}
-		return ParseExpansionLevel(expansions), expansions
+		return parseExpansionLevel(expansions), expansions
 	}
 
 	return nil, nil
+}
+
+func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
+	if operation.RequestBody == nil {
+		return nil
+	}
+	mediaType, mediaTypePresent :=
+		operation.RequestBody.Content["application/x-www-form-urlencoded"]
+	if !mediaTypePresent {
+		return nil
+	}
+	return mediaType.Schema
 }
 
 func isCurl(userAgent string) bool {
 	return strings.HasPrefix(userAgent, "curl/")
 }
 
-func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, status int, data interface{}) {
-	if data == nil {
-		data = http.StatusText(status)
+// parseExpansionLevel parses a set of raw expansions from a request query
+// string or form and produces a structure more useful for performing actual
+// expansions.
+func parseExpansionLevel(raw []string) *ExpansionLevel {
+	sort.Strings(raw)
+
+	level := &ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
+	groups := make(map[string][]string)
+
+	for _, expansion := range raw {
+		parts := strings.Split(expansion, ".")
+		if len(parts) == 1 {
+			if parts[0] == "*" {
+				level.wildcard = true
+			} else {
+				level.expansions[parts[0]] =
+					&ExpansionLevel{expansions: make(map[string]*ExpansionLevel)}
+			}
+		} else {
+			groups[parts[0]] = append(groups[parts[0]], strings.Join(parts[1:], "."))
+		}
 	}
 
-	var encodedData []byte
-	var err error
-
-	if !isCurl(r.Header.Get("User-Agent")) {
-		encodedData, err = json.Marshal(&data)
-	} else {
-		encodedData, err = json.MarshalIndent(&data, "", "  ")
-		encodedData = append(encodedData, '\n')
+	for key, subexpansions := range groups {
+		level.expansions[key] = parseExpansionLevel(subexpansions)
 	}
 
-	if err != nil {
-		fmt.Printf("Error serializing response: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
-		return
-	}
-
-	w.Header().Set("Stripe-Mock-Version", version)
-
-	w.WriteHeader(status)
-	_, err = w.Write(encodedData)
-	if err != nil {
-		fmt.Printf("Error writing to client: %v\n", err)
-	}
-	fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
+	return level
 }
 
 func validateAuth(auth string) bool {
@@ -481,20 +482,33 @@ func validateAuth(auth string) bool {
 	return true
 }
 
-// This creates a Stripe error to return in case of API errors.
-func createStripeError(errorType string, errorMessage string) *ResponseError {
-	return &ResponseError{
-		ErrorInfo: struct {
-			Message string `json:"message"`
-			Type    string `json:"type"`
-		}{
-			Message: errorMessage,
-			Type:    errorType,
-		},
+func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, status int, data interface{}) {
+	if data == nil {
+		data = http.StatusText(status)
 	}
-}
 
-// Helper to create an internal server error for API issues.
-func createInternalServerError() *ResponseError {
-	return createStripeError(typeInvalidRequestError, internalServerError)
+	var encodedData []byte
+	var err error
+
+	if !isCurl(r.Header.Get("User-Agent")) {
+		encodedData, err = json.Marshal(&data)
+	} else {
+		encodedData, err = json.MarshalIndent(&data, "", "  ")
+		encodedData = append(encodedData, '\n')
+	}
+
+	if err != nil {
+		fmt.Printf("Error serializing response: %v\n", err)
+		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		return
+	}
+
+	w.Header().Set("Stripe-Mock-Version", version)
+
+	w.WriteHeader(status)
+	_, err = w.Write(encodedData)
+	if err != nil {
+		fmt.Printf("Error writing to client: %v\n", err)
+	}
+	fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
 }
