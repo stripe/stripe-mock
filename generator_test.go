@@ -38,6 +38,10 @@ func init() {
 	}
 }
 
+//
+// Tests
+//
+
 func TestConcurrentAccess(t *testing.T) {
 	var generator DataGenerator
 
@@ -204,6 +208,45 @@ func TestValidFixtures(t *testing.T) {
 	}
 }
 
+func TestResourcesCanBeGenerated(t *testing.T) {
+	for url, operations := range realSpec.Paths {
+		for method, operation := range operations {
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
+			t.Run(
+				fmt.Sprintf("%s %s (without expansions)", method, url),
+				func(t2 *testing.T) { testCanGenerate(t2, url, schema, false) },
+			)
+		}
+	}
+}
+
+func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
+	t.Skip("This test is known to fail because fixtures are missing for some " +
+		"expandable subresources.")
+	for url, operations := range realSpec.Paths {
+		for method, operation := range operations {
+			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
+			t.Run(
+				fmt.Sprintf("%s %s (with expansions)", method, url),
+				func(t2 *testing.T) { testCanGenerate(t2, url, schema, true) },
+			)
+		}
+	}
+}
+
+//
+// Tests for private functions
+//
+
+func TestDefinitionFromJSONPointer(t *testing.T) {
+	definition := definitionFromJSONPointer("#/components/schemas/charge")
+	assert.Equal(t, "charge", definition)
+}
+
+//
+// Private functions
+//
+
 // Tests that DataGenerator can generate an example of the given schema, and
 // that the example validates against the schema correctly
 func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand bool) {
@@ -239,37 +282,4 @@ func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand b
 		t.Logf("Example is: %s", exampleJson)
 	}
 	assert.NoError(t, err)
-}
-
-func TestResourcesCanBeGenerated(t *testing.T) {
-	for url, operations := range realSpec.Paths {
-		for method, operation := range operations {
-			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Run(
-				fmt.Sprintf("%s %s (without expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, url, schema, false) },
-			)
-		}
-	}
-}
-
-func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
-	t.Skip("This test is known to fail because fixtures are missing for some " +
-		"expandable subresources.")
-	for url, operations := range realSpec.Paths {
-		for method, operation := range operations {
-			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Run(
-				fmt.Sprintf("%s %s (with expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, url, schema, true) },
-			)
-		}
-	}
-}
-
-// ---
-
-func TestDefinitionFromJSONPointer(t *testing.T) {
-	definition := definitionFromJSONPointer("#/components/schemas/charge")
-	assert.Equal(t, "charge", definition)
 }
