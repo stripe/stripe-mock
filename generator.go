@@ -9,8 +9,6 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
-
 // DataGenerator generates fixture response data based off a response schema, a
 // set of definitions, and a fixture store.
 type DataGenerator struct {
@@ -23,14 +21,7 @@ func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, id *st
 	return g.generateInternal(schema, requestPath, id, nil, true, expansions, nil, fmt.Sprintf("Responding to %s:\n", requestPath))
 }
 
-// The purpose of this simple wrapper is so that we can write "example = nil"
-// to indicate that no example is provided, as distinct from
-// "example = &Example{value: nil}" for an example which is a null value.
-type Example struct {
-	value interface{}
-}
-
-func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, id *string, replacedID *string, doReplaceID bool, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, id *string, replacedID *string, doReplaceID bool, expansions *ExpansionLevel, example *valueWrapper, context string) (interface{}, error) {
 	// This is a bit of a mess. We don't have an elegant fully-general approach to
 	// generating examples, just a bunch of specific cases that we know how to
 	// handle. If we find ourselves in a situation that doesn't match any of the
@@ -62,7 +53,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		if !ok {
 			panic(fmt.Sprintf("%sMissing fixture for: %s", context, schema.XResourceID))
 		}
-		example = &Example{value: fixture}
+		example = &valueWrapper{value: fixture}
 		context = fmt.Sprintf("%sUsing fixture '%s':\n", context, schema.XResourceID)
 	}
 
@@ -143,7 +134,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	if replacedID != nil && schema.Type == "string" {
 		valStr, ok := example.value.(string)
 		if ok && valStr == *replacedID {
-			example = &Example{value: *id}
+			example = &valueWrapper{value: *id}
 		}
 	}
 
@@ -220,10 +211,10 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 				}
 			}
 
-			var subExample *Example
-			subExampleValue, exampleHasKey := exampleMap[key]
+			var subvalueWrapper *valueWrapper
+			subvalueWrapperValue, exampleHasKey := exampleMap[key]
 			if exampleHasKey {
-				subExample = &Example{value: subExampleValue}
+				subvalueWrapper = &valueWrapper{value: subvalueWrapperValue}
 			}
 
 			if !exampleHasKey && subExpansions == nil {
@@ -235,7 +226,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 
 			subValue, err := g.generateInternal(
 				subSchema,
-				requestPath, id, replacedID, false, subExpansions, subExample,
+				requestPath, id, replacedID, false, subExpansions, subvalueWrapper,
 				fmt.Sprintf("%sIn property '%s' of object:\n", context, key))
 			if err != nil {
 				return nil, err
@@ -266,7 +257,7 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 	return schema, context, nil
 }
 
-func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, id *string, replacedID *string, expansions *ExpansionLevel, example *Example, context string) (interface{}, error) {
+func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, id *string, replacedID *string, expansions *ExpansionLevel, example *valueWrapper, context string) (interface{}, error) {
 
 	var itemExpansions *ExpansionLevel
 	if expansions != nil {
@@ -333,7 +324,29 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 	return listData, nil
 }
 
-// ---
+//
+// Private values
+//
+
+var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
+
+//
+// Private types
+//
+
+// valueWrapper wraps an example value that we're generating.
+//
+// It exists so that we can make a distinction between an example that we don't
+// have (where `valueWrapper` itself is `nil`) from one where we have an
+// example, but it has a `null` value (where we'd have `valueWrapper{value:
+// nil}`).
+type valueWrapper struct {
+	value interface{}
+}
+
+//
+// Private functions
+//
 
 func isListResource(schema *spec.Schema) bool {
 	if schema.Type != "object" || schema.Properties == nil {
