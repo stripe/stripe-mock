@@ -66,147 +66,183 @@ func TestConcurrentAccess(t *testing.T) {
 }
 
 func TestGenerateResponseData(t *testing.T) {
-	var data interface{}
-	var err error
-	var generator DataGenerator
-
 	// basic reference
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
-	assert.Nil(t, err)
-	assert.Equal(t,
-		testFixtures.Resources["charge"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["id"])
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+		assert.Equal(t,
+			testFixtures.Resources["charge"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["id"])
 
-	// Makes sure that customer is *not* expanded
-	assert.Equal(t,
-		testFixtures.Resources["customer"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["customer"])
+		// Makes sure that customer is *not* expanded
+		assert.Equal(t,
+			testFixtures.Resources["customer"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["customer"])
+	}
 
 	// expansion
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		Expansions: &ExpansionLevel{
-			expansions: map[string]*ExpansionLevel{"customer": {
-				expansions: map[string]*ExpansionLevel{}},
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"customer": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
 			},
-		},
-		Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
 
-	assert.Nil(t, err)
-	assert.Equal(t,
-		testFixtures.Resources["customer"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
+		assert.Nil(t, err)
+		assert.Equal(t,
+			testFixtures.Resources["customer"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
+	}
 
 	// bad expansion
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		Expansions: &ExpansionLevel{
-			expansions: map[string]*ExpansionLevel{"id": {
-				expansions: map[string]*ExpansionLevel{}},
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		_, err := generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"id": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
 			},
-		},
-		Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
 
-	assert.Equal(t, err, errExpansionNotSupported)
+		assert.Equal(t, err, errExpansionNotSupported)
+	}
 
 	// bad nested expansion
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		Expansions: &ExpansionLevel{
-			expansions: map[string]*ExpansionLevel{"customer.id": {
-				expansions: map[string]*ExpansionLevel{}},
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		_, err := generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"customer.id": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
 			},
-		},
-		Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
-	assert.Equal(t, err, errExpansionNotSupported)
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Equal(t, err, errExpansionNotSupported)
+	}
 
 	// wildcard expansion
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		Expansions: &ExpansionLevel{wildcard: true},
-		Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
-	assert.Nil(t, err)
-	assert.Equal(t,
-		testFixtures.Resources["customer"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{wildcard: true},
+			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+		assert.Equal(t,
+			testFixtures.Resources["customer"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["customer"].(map[string]interface{})["id"])
+	}
 
 	// list
-	generator = DataGenerator{testSpec.Components.Schemas, &testFixtures}
-	data, err = generator.Generate(&GenerateParams{
-		RequestPath: "/v1/charges",
-		Schema:      listSchema,
-	})
-	assert.Nil(t, err)
-	assert.Equal(t, "list", data.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
-	assert.Equal(t,
-		testFixtures.Resources["charge"].(map[string]interface{})["id"],
-		data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestPath: "/v1/charges",
+			Schema:      listSchema,
+		})
+		assert.Nil(t, err)
+		assert.Equal(t, "list", data.(map[string]interface{})["object"])
+		assert.Equal(t, "/v1/charges", data.(map[string]interface{})["url"])
+		assert.Equal(t,
+			testFixtures.Resources["charge"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+	}
 
 	// nested list
-	generator = DataGenerator{
-		testSpec.Components.Schemas,
-		&spec.Fixtures{
-			Resources: map[spec.ResourceID]interface{}{
-				spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
-				spec.ResourceID("with_charges_list"): map[string]interface{}{
-					"charges_list": map[string]interface{}{
-						"url": "/v1/charges",
+	{
+		generator := DataGenerator{
+			testSpec.Components.Schemas,
+			&spec.Fixtures{
+				Resources: map[spec.ResourceID]interface{}{
+					spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
+					spec.ResourceID("with_charges_list"): map[string]interface{}{
+						"charges_list": map[string]interface{}{
+							"url": "/v1/charges",
+						},
 					},
 				},
 			},
-		},
-	}
-	data, err = generator.Generate(&GenerateParams{
-		Schema: &spec.Schema{
-			Type: "object",
-			Properties: map[string]*spec.Schema{
-				"charges_list": listSchema,
+		}
+		data, err := generator.Generate(&GenerateParams{
+			Schema: &spec.Schema{
+				Type: "object",
+				Properties: map[string]*spec.Schema{
+					"charges_list": listSchema,
+				},
+				XResourceID: "with_charges_list",
 			},
-			XResourceID: "with_charges_list",
-		},
-	})
-	assert.Nil(t, err)
-	chargesList := data.(map[string]interface{})["charges_list"]
-	assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
-	assert.Equal(t, "/v1/charges", chargesList.(map[string]interface{})["url"])
-	assert.Equal(t,
-		testFixtures.Resources["charge"].(map[string]interface{})["id"],
-		chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+		})
+		assert.Nil(t, err)
+		chargesList := data.(map[string]interface{})["charges_list"]
+		assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
+		assert.Equal(t, "/v1/charges", chargesList.(map[string]interface{})["url"])
+		assert.Equal(t,
+			testFixtures.Resources["charge"].(map[string]interface{})["id"],
+			chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+	}
 
 	// injected ID
-	generator = DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
-		Resources: map[spec.ResourceID]interface{}{
-			spec.ResourceID("charge"): map[string]interface{}{
-				// This is contrived, but we inject the value we expect to be
-				// replaced into `customer` as well so that we can verify the
-				// secondary behavior that replaces all values that look like a
-				// replaced ID (as well as the ID).
-				"customer": "ch_123",
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					// This is contrived, but we inject the value we expect to be
+					// replaced into `customer` as well so that we can verify the
+					// secondary behavior that replaces all values that look like a
+					// replaced ID (as well as the ID).
+					"customer": "ch_123",
 
-				"id": "ch_123",
+					"id": "ch_123",
+				},
 			},
-		},
-	}}
-	id := "ch_123_InjectedFromURL"
-	data, err = generator.Generate(&GenerateParams{
-		ID:     &id,
-		Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
-	})
-	assert.Nil(t, err)
-	assert.Equal(t,
-		id,
-		data.(map[string]interface{})["id"])
-	assert.Equal(t,
-		id,
-		data.(map[string]interface{})["customer"])
+		}}
+		id := "ch_123_InjectedFromURL"
+		data, err := generator.Generate(&GenerateParams{
+			ID:     &id,
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+		assert.Equal(t,
+			id,
+			data.(map[string]interface{})["id"])
+		assert.Equal(t,
+			id,
+			data.(map[string]interface{})["customer"])
+	}
+
+	// synthetic schema
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			Schema: &spec.Schema{
+				Properties: map[string]*spec.Schema{
+					"string_property": {
+						Type: spec.TypeString,
+					},
+				},
+				Required:    []string{"string_property"},
+				Type:        spec.TypeObject,
+				XResourceID: "",
+			},
+		})
+		assert.Nil(t, err)
+		assert.Equal(t,
+			map[string]interface{}{
+				"string_property": "",
+			},
+			data,
+		)
+	}
 }
 
 func TestValidFixtures(t *testing.T) {
@@ -259,6 +295,81 @@ func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
 func TestDefinitionFromJSONPointer(t *testing.T) {
 	definition := definitionFromJSONPointer("#/components/schemas/charge")
 	assert.Equal(t, "charge", definition)
+}
+
+func TestGenerateSyntheticFixture(t *testing.T) {
+	// Scalars (and an array, which is easy)
+	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, ""))
+	assert.Equal(t, true, generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, ""))
+	assert.Equal(t, 0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, ""))
+	assert.Equal(t, 0.0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeNumber}, ""))
+	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{Type: spec.TypeString}, ""))
+
+	// Nullable property
+	assert.Equal(t, nil, generateSyntheticFixture(&spec.Schema{
+		Nullable: true,
+		Type:     spec.TypeString,
+	}, ""))
+
+	// Property with enum
+	assert.Equal(t, "list", generateSyntheticFixture(&spec.Schema{
+		Enum: []interface{}{"list"},
+		Type: spec.TypeString,
+	}, ""))
+
+	// Takes the first non-reference branch of an anyOf
+	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{
+		AnyOf: []*spec.Schema{
+			{Ref: "#/components/schemas/radar_rule"},
+			{Type: spec.TypeString},
+		},
+	}, ""))
+
+	// Object
+	assert.Equal(t,
+		map[string]interface{}{
+			"has_more": true,
+			"object":   "list",
+			"url":      "",
+		},
+		generateSyntheticFixture(&spec.Schema{
+			Type: "object",
+			Properties: map[string]*spec.Schema{
+				"has_more": {
+					Type: "boolean",
+				},
+				"object": {
+					Enum: []interface{}{"list"},
+				},
+				"total_count": {
+					Type: "integer",
+				},
+				"url": {
+					Type: "string",
+				},
+			},
+			Required: []string{
+				"has_more",
+				"object",
+				"url",
+			},
+		}, ""),
+	)
+}
+
+func TestPropertyNames(t *testing.T) {
+	assert.Equal(t, "foo, bar", propertyNames(&spec.Schema{
+		Properties: map[string]*spec.Schema{
+			"foo": nil,
+			"bar": nil,
+		},
+	}))
+	assert.Equal(t, "", propertyNames(&spec.Schema{}))
+}
+
+func TestStringOrEmpty(t *testing.T) {
+	assert.Equal(t, "foo", stringOrEmpty("foo"))
+	assert.Equal(t, "(empty)", stringOrEmpty(""))
 }
 
 //
