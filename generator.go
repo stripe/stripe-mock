@@ -9,6 +9,25 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+// GenerateParams is a parameters structure that's used to invoke Generate and
+// its associated methods.
+//
+// This structure exists to avoid runaway paramete inflation for the Generate
+// function, so that we can document individual parameters in a more organized
+// way, and because it can conveniently encapsulate some unexported fields that
+// Generate uses to track its progress.
+type GenerateParams struct {
+	Expansions  *ExpansionLevel
+	ID          *string
+	RequestPath string
+	Schema      *spec.Schema
+
+	context     string
+	doReplaceID bool
+	example     *valueWrapper
+	replacedID  *string
+}
+
 // DataGenerator generates fixture response data based off a response schema, a
 // set of definitions, and a fixture store.
 type DataGenerator struct {
@@ -17,11 +36,23 @@ type DataGenerator struct {
 }
 
 // Generate generates a fixture response.
-func (g *DataGenerator) Generate(schema *spec.Schema, requestPath string, id *string, expansions *ExpansionLevel) (interface{}, error) {
-	return g.generateInternal(schema, requestPath, id, nil, true, expansions, nil, fmt.Sprintf("Responding to %s:\n", requestPath))
+func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
+	return g.generateInternal(&GenerateParams{
+		Expansions:  params.Expansions,
+		ID:          params.ID,
+		RequestPath: params.RequestPath,
+		Schema:      params.Schema,
+
+		context:     fmt.Sprintf("Responding to %s:\n", params.RequestPath),
+		doReplaceID: true,
+		example:     nil,
+		replacedID:  nil,
+	})
 }
 
-func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string, id *string, replacedID *string, doReplaceID bool, expansions *ExpansionLevel, example *valueWrapper, context string) (interface{}, error) {
+// generateInternal encompasses all the generation logic. It's separate from
+// Generate only so that Generate can seed it with a little bit of information.
+func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, error) {
 	// This is a bit of a mess. We don't have an elegant fully-general approach to
 	// generating examples, just a bunch of specific cases that we know how to
 	// handle. If we find ourselves in a situation that doesn't match any of the
@@ -30,14 +61,14 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	// correctly on every resource; hopefully this will at least allow us to catch
 	// any errors in advance.
 
-	schema, context, err := g.maybeDereference(schema, context)
+	schema, context, err := g.maybeDereference(params.Schema, params.context)
 	if err != nil {
 		return nil, err
 	}
 
 	// Determine if the requested expansions are possible
-	if expansions != nil && schema.XExpandableFields != nil {
-		for key := range expansions.expansions {
+	if params.Expansions != nil && schema.XExpandableFields != nil {
+		for key := range params.Expansions.expansions {
 			if sort.SearchStrings(*schema.XExpandableFields, key) ==
 				len(*schema.XExpandableFields) {
 				return nil, errExpansionNotSupported
@@ -45,6 +76,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		}
 	}
 
+	example := params.example
 	if (example == nil || example.value == nil) && schema.XResourceID != "" {
 		// Use the fixture as our example. (Note that if the caller gave us a
 		// non-trivial example, we prefer it instead, because it's probably more
@@ -58,36 +90,54 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	}
 
 	if schema.XExpansionResources != nil {
-		if expansions != nil {
+		if params.Expansions != nil {
 			// We're expanding this specific object
-			result, err := g.generateInternal(
-				schema.XExpansionResources.OneOf[0],
-				requestPath, id, replacedID, false, expansions, nil,
-				fmt.Sprintf("%sExpanding optional expandable field:\n", context))
-			return result, err
+			return g.generateInternal(&GenerateParams{
+				Expansions:  params.Expansions,
+				ID:          params.ID,
+				RequestPath: params.RequestPath,
+				Schema:      schema.XExpansionResources.OneOf[0],
+
+				context:     fmt.Sprintf("%sExpanding optional expandable field:\n", context),
+				doReplaceID: false,
+				example:     nil,
+				replacedID:  params.replacedID,
+			})
 		} else {
 			// We're not expanding this specific object. Our example should be of the
 			// unexpanded form, which is the first branch of the AnyOf
-			result, err := g.generateInternal(
-				schema.AnyOf[0],
-				requestPath, id, replacedID, false, expansions, example,
-				fmt.Sprintf("%sNot expanding optional expandable field:\n", context))
-			return result, err
+			return g.generateInternal(&GenerateParams{
+				Expansions:  params.Expansions,
+				ID:          params.ID,
+				RequestPath: params.RequestPath,
+				Schema:      schema.AnyOf[0],
+
+				context:     fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
+				doReplaceID: false,
+				example:     example,
+				replacedID:  params.replacedID,
+			})
 		}
 	}
 
 	if len(schema.AnyOf) == 1 && schema.Nullable {
 		if example != nil && example.value == nil {
-			if expansions == nil {
+			if params.Expansions == nil {
 				return nil, nil
 			}
 		} else {
 			// Since there's only one subschema, we can confidently recurse into it
-			result, err := g.generateInternal(
-				schema.AnyOf[0],
-				requestPath, id, replacedID, doReplaceID, expansions, example,
-				fmt.Sprintf("%sChoosing only branch of anyOf:\n", context))
-			return result, err
+			return g.generateInternal(&GenerateParams{
+				Expansions:  params.Expansions,
+				ID:          params.ID,
+				RequestPath: params.RequestPath,
+				Schema:      schema.AnyOf[0],
+
+				context:     fmt.Sprintf("%sChoosing only branch of anyOf:\n", context),
+				doReplaceID: params.doReplaceID,
+				example:     example,
+				replacedID:  params.replacedID,
+			})
 		}
 	}
 
@@ -95,18 +145,33 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		// Just generate an example of the first subschema. Note that we don't pass
 		// in any example, even if we have an example available, because we don't
 		// know which branch of the AnyOf the example corresponds to.
-		result, err := g.generateInternal(
-			schema.AnyOf[0],
-			requestPath, id, replacedID, doReplaceID, expansions, nil,
-			fmt.Sprintf("%sChoosing first branch of anyOf:\n", context))
-		return result, err
+		return g.generateInternal(&GenerateParams{
+			Expansions:  params.Expansions,
+			ID:          params.ID,
+			RequestPath: params.RequestPath,
+			Schema:      schema.AnyOf[0],
+
+			context:     fmt.Sprintf("%sChoosing first branch of anyOf:\n", context),
+			doReplaceID: params.doReplaceID,
+			example:     nil,
+			replacedID:  params.replacedID,
+		})
 	}
 
 	if isListResource(schema) {
 		// We special-case list resources and always fill in the list with at least
 		// one item of data, regardless of what was present in the example
-		listData, err := g.generateListResource(
-			schema, requestPath, id, replacedID, expansions, example, context)
+		listData, err := g.generateListResource(&GenerateParams{
+			Expansions:  params.Expansions,
+			ID:          params.ID,
+			RequestPath: params.RequestPath,
+			Schema:      schema,
+
+			context:     context,
+			doReplaceID: params.doReplaceID,
+			example:     example,
+			replacedID:  params.replacedID,
+		})
 		return listData, err
 	}
 
@@ -117,7 +182,7 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	}
 
 	if example.value == nil {
-		if expansions != nil {
+		if params.Expansions != nil {
 			panic(fmt.Sprintf("%sWe were asked to expand a key, but our example "+
 				"has null for that key.", context))
 		}
@@ -131,10 +196,10 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 	// For example, a charge may contain a sublist of refunds. If we replaced
 	// the charge's ID, we also want to replace that charge ID in every one of
 	// the child refunds.
-	if replacedID != nil && schema.Type == "string" {
+	if params.replacedID != nil && schema.Type == "string" {
 		valStr, ok := example.value.(string)
-		if ok && valStr == *replacedID {
-			example = &valueWrapper{value: *id}
+		if ok && valStr == *params.replacedID {
+			example = &valueWrapper{value: *params.ID}
 		}
 	}
 
@@ -176,17 +241,19 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 		// This replacement must occur before iterating through the loop below
 		// because we might also use the new ID to replace other values in the
 		// object as well.
-		if doReplaceID && id != nil {
+		replacedID := params.replacedID
+		if params.doReplaceID && params.ID != nil {
 			_, ok := schema.Properties["id"]
 			if ok {
 				idValue, ok := exampleMap["id"]
 				if ok {
 					idValueStr := idValue.(string)
 					replacedID = &idValueStr
-					resultMap["id"] = *id
+					resultMap["id"] = *params.ID
 
 					if verbose {
-						fmt.Printf("Found ID to replace; previous: '%s' new: '%s'\n", *replacedID, *id)
+						fmt.Printf("Found ID to replace; previous: '%s' new: '%s'\n",
+							*replacedID, *params.ID)
 					}
 				}
 			}
@@ -194,14 +261,14 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 
 		for key, subSchema := range schema.Properties {
 			// If these conditions are met this was handled above. Skip it.
-			if doReplaceID && key == "id" && replacedID != nil {
+			if params.doReplaceID && key == "id" && replacedID != nil {
 				continue
 			}
 
 			var subExpansions *ExpansionLevel
-			if expansions != nil {
-				subExpansions = expansions.expansions[key]
-				if subExpansions == nil && expansions.wildcard {
+			if params.Expansions != nil {
+				subExpansions = params.Expansions.expansions[key]
+				if subExpansions == nil && params.Expansions.wildcard {
 					// No expansion was provided for this key but the wildcard bit is set,
 					// so make a fake expansion
 					subExpansions = &ExpansionLevel{
@@ -224,10 +291,17 @@ func (g *DataGenerator) generateInternal(schema *spec.Schema, requestPath string
 				continue
 			}
 
-			subValue, err := g.generateInternal(
-				subSchema,
-				requestPath, id, replacedID, false, subExpansions, subvalueWrapper,
-				fmt.Sprintf("%sIn property '%s' of object:\n", context, key))
+			subValue, err := g.generateInternal(&GenerateParams{
+				Expansions:  subExpansions,
+				ID:          params.ID,
+				RequestPath: params.RequestPath,
+				Schema:      subSchema,
+
+				context:     fmt.Sprintf("%sIn property '%s' of object:\n", context, key),
+				doReplaceID: false,
+				example:     subvalueWrapper,
+				replacedID:  replacedID,
+			})
 			if err != nil {
 				return nil, err
 			}
@@ -257,22 +331,23 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 	return schema, context, nil
 }
 
-func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath string, id *string, replacedID *string, expansions *ExpansionLevel, example *valueWrapper, context string) (interface{}, error) {
-
+func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{}, error) {
 	var itemExpansions *ExpansionLevel
-	if expansions != nil {
-		itemExpansions = expansions.expansions["data"]
+	if params.Expansions != nil {
+		itemExpansions = params.Expansions.expansions["data"]
 	}
 
-	itemData, err := g.generateInternal(
-		schema.Properties["data"].Items,
-		requestPath,
-		id,
-		replacedID,
-		false,
-		itemExpansions,
-		nil,
-		fmt.Sprintf("%sPopulating list resource:\n", context))
+	itemData, err := g.generateInternal(&GenerateParams{
+		Expansions:  itemExpansions,
+		ID:          params.ID,
+		RequestPath: params.RequestPath,
+		Schema:      params.Schema.Properties["data"].Items,
+
+		context:     fmt.Sprintf("%sPopulating list resource:\n", params.context),
+		doReplaceID: false,
+		example:     nil,
+		replacedID:  params.replacedID,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +356,7 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 	// it respects the list properties dictated by the included schema rather
 	// than assuming its own.
 	listData := make(map[string]interface{})
-	for key, subSchema := range schema.Properties {
+	for key, subSchema := range params.Schema.Properties {
 		var val interface{}
 		switch key {
 		case "data":
@@ -298,12 +373,12 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 				// Many list resources have a URL pattern of the form "^/v1/whatevers";
 				// we cut off the "^" to leave the URL.
 				url = subSchema.Pattern[1:]
-			} else if example != nil {
+			} else if params.example != nil {
 				// If an example was provided, we can assume it has the correct format
-				example := example.value.(map[string]interface{})
+				example := params.example.value.(map[string]interface{})
 				url = example["url"].(string)
 			} else {
-				url = requestPath
+				url = params.RequestPath
 			}
 
 			// Potentially replace a primary ID in the URL of a list so that
@@ -311,8 +386,8 @@ func (g *DataGenerator) generateListResource(schema *spec.Schema, requestPath st
 			// `/v1/charges/ch_123` was requested, we'd want the refunds list
 			// within the returned object to have a URL like
 			// `/v1/charges/ch_123/refunds`.
-			if replacedID != nil {
-				val = strings.Replace(url, *replacedID, *id, 1)
+			if params.replacedID != nil {
+				val = strings.Replace(url, *params.replacedID, *params.ID, 1)
 			} else {
 				val = url
 			}
