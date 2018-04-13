@@ -17,15 +17,67 @@ import (
 // way, and because it can conveniently encapsulate some unexported fields that
 // Generate uses to track its progress.
 type GenerateParams struct {
-	Expansions  *ExpansionLevel
-	ID          *string
-	RequestPath string
-	Schema      *spec.Schema
+	// Expansions are the requested expansions for the current level of generation.
+	//
+	// nil if no expansions were requested, or we've recursed to a level where
+	// none of the original expansions applied.
+	Expansions *ExpansionLevel
 
-	context     string
+	// ID is the primary identifier for the object being generated. If one was
+	// provided, it's used to replace some information from our fixtures.
+	//
+	// nil if there is no replacement for the ID.
+	//
+	// The value of this field is expected to stay stable across all levels of
+	// recursion.
+	ID *string
+
+	// RequestPath is the path of the URL being requested which we're
+	// generating data for. It's used to populate the url property of any
+	// nested lists that we generate.
+	//
+	// The value of this field is expected to stay stable across all levels of
+	// recursion.
+	RequestPath string
+
+	//
+	// Private fields
+	//
+
+	// Schema representing the object that we're trying to generate.
+	//
+	// The value of this field will change as Generate recurses to the target
+	// schema at that level of recursion.
+	//
+	// This field is required.
+	Schema *spec.Schema
+
+	// context is a breadcrumb trail that's added to as Generate recurses. It's
+	// not important for the final result, but is very useful for debugging.
+	context string
+
+	// doReplaceID indicates that we should try to replace an ID at this level
+	// of recursion. It's useful because since we're replacing only an object's
+	// primary ID, we only want to do so at the top level of a generated object
+	// (this is falsed for most levels of recursion, except in the cases where
+	// recursion is used to follow something like an anyOf branch to generate
+	// data for the top-level object).
 	doReplaceID bool
-	example     *valueWrapper
-	replacedID  *string
+
+	// example is a valid data sample for the target schema at this level of
+	// recursion.
+	//
+	// nil means that were was no sample available. A valueWrapper instance
+	// with an embedded nil means that there is a sample, and it's nil/null.
+	example *valueWrapper
+
+	// replacedID is the old value of an ID field that's had its value replaced
+	// by ID. This is used so that we can look for other instances of this
+	// replaced ID, and also replace them (useful in case the same ID was
+	// reference in a list URL or in an embedded subresource).
+	//
+	// nil if no ID has been replaced.
+	replacedID *string
 }
 
 // DataGenerator generates fixture response data based off a response schema, a
