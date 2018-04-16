@@ -89,13 +89,20 @@ type DataGenerator struct {
 
 // Generate generates a fixture response.
 func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
+	// This just makes our context message readable in case there was no
+	// request path specified.
+	requestPathDisplay := params.RequestPath
+	if requestPathDisplay == "" {
+		requestPathDisplay = "(empty request path)"
+	}
+
 	return g.generateInternal(&GenerateParams{
 		Expansions:  params.Expansions,
 		ID:          params.ID,
 		RequestPath: params.RequestPath,
 		Schema:      params.Schema,
 
-		context:     fmt.Sprintf("Responding to %s:\n", params.RequestPath),
+		context:     fmt.Sprintf("Responding to %s:\n", requestPathDisplay),
 		doReplaceID: true,
 		example:     nil,
 		replacedID:  nil,
@@ -137,6 +144,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		if !ok {
 			panic(fmt.Sprintf("%sMissing fixture for: %s", context, schema.XResourceID))
 		}
+
 		example = &valueWrapper{value: fixture}
 		context = fmt.Sprintf("%sUsing fixture '%s':\n", context, schema.XResourceID)
 	}
@@ -225,6 +233,20 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			replacedID:  params.replacedID,
 		})
 		return listData, err
+	}
+
+	// Generate a synthethic schema as a last ditch effort
+	if example == nil && schema.XResourceID == "" {
+		example = &valueWrapper{value: generateSyntheticFixture(schema, context)}
+
+		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
+
+		if verbose {
+			// We list properties here because the schema might not have a
+			// better name to identify it with.
+			fmt.Printf("Generated synthetic fixture with properties: %s\n",
+				stringOrEmpty(propertyNames(schema)))
+		}
 	}
 
 	if example == nil {
@@ -475,6 +497,76 @@ type valueWrapper struct {
 // Private functions
 //
 
+// generateSyntheticFixture generates a synthetic fixture for the given schema
+// by examining its properties and returning default values for each.
+//
+// This is useful in cases where we don't have a valid fixture for some object.
+// That could happen for a prerelease object or in cases where an expansion has
+// been requested for an embedded object that doesn't occur at the top level of
+// the API.
+//
+// This function calls itself recursively by initially iterating through every
+// property in an object schema, then recursing and returning values for
+// embedded objects and scalars.
+func generateSyntheticFixture(schema *spec.Schema, context string) interface{} {
+	context = fmt.Sprintf("%sGenerating synthetic fixture: %+v\n", context, schema)
+
+	// Return the minimum viable object by returning nil/null for a nullable
+	// property.
+	if schema.Nullable {
+		return nil
+	}
+
+	// Return a member of an enum if one is available because it's probably
+	// going to be a more realistic value.
+	if len(schema.Enum) > 0 {
+		return schema.Enum[0]
+	}
+
+	if len(schema.AnyOf) > 0 {
+		for _, subSchema := range schema.AnyOf {
+			// We don't handle dereferencing here right now, but it's plausible
+			if subSchema.Ref != "" {
+				continue
+			}
+			return generateSyntheticFixture(subSchema, context)
+		}
+		panic(fmt.Sprintf("%sCouldn't find an anyOf branch to take", context))
+	}
+
+	switch schema.Type {
+	case spec.TypeArray:
+		return []string{}
+
+	case spec.TypeBoolean:
+		return true
+
+	case spec.TypeInteger:
+		return 0
+
+	case spec.TypeNumber:
+		return 0.0
+
+	case spec.TypeObject:
+		fixture := make(map[string]interface{})
+		for property, subSchema := range schema.Properties {
+			// Return the minimum viable object by not including properties
+			// that are not necessary for a valid object.
+			if !isRequiredProperty(schema, property) {
+				continue
+			}
+
+			fixture[property] = generateSyntheticFixture(subSchema, context)
+		}
+		return fixture
+
+	case spec.TypeString:
+		return ""
+	}
+
+	panic(fmt.Sprintf("%sUnhandled type: %s", context, stringOrEmpty(schema.Type)))
+}
+
 func isListResource(schema *spec.Schema) bool {
 	if schema.Type != "object" || schema.Properties == nil {
 		return false
@@ -493,6 +585,18 @@ func isListResource(schema *spec.Schema) bool {
 	return true
 }
 
+// isRequiredProperty checks whether the given property name is required for
+// the given schema. Note that this assumes that the schema is of type object
+// because that would be semantic nonsense for any other type.
+func isRequiredProperty(schema *spec.Schema, name string) bool {
+	for _, property := range schema.Required {
+		if name == property {
+			return true
+		}
+	}
+	return false
+}
+
 // definitionFromJSONPointer extracts the name of a JSON schema definition from
 // a JSON pointer, so "#/components/schemas/charge" would become just "charge".
 // This is a simplified workaround to avoid bringing in JSON schema
@@ -509,4 +613,29 @@ func definitionFromJSONPointer(pointer string) string {
 		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
 	}
 	return parts[3]
+}
+
+// propertyNames returns the names of all properties of a schema joined
+// together and comma-separated.
+//
+// This is useful for printing debugging information.
+func propertyNames(schema *spec.Schema) string {
+	var names []string
+	for name := range schema.Properties {
+		names = append(names, name)
+	}
+	return strings.Join(names, ", ")
+}
+
+// stringOrEmpty returns the string given as parameter, or the string "(empty)"
+// if the string was empty.
+//
+// This is useful in cases like logging to make sure that something is always
+// printed on screen (instead of a strangely truncated sentence for an empty
+// value).
+func stringOrEmpty(s string) string {
+	if s == "" {
+		return "(empty)"
+	}
+	return s
 }

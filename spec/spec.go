@@ -5,6 +5,23 @@ import (
 	"fmt"
 )
 
+//
+// Public values
+//
+
+const (
+	TypeArray   = "array"
+	TypeBoolean = "boolean"
+	TypeInteger = "integer"
+	TypeNumber  = "number"
+	TypeObject  = "object"
+	TypeString  = "string"
+)
+
+//
+// Public types
+//
+
 type Components struct {
 	Schemas map[string]*Schema `json:"schemas" yaml:"schemas"`
 }
