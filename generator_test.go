@@ -358,7 +358,7 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 }
 
 func TestPropertyNames(t *testing.T) {
-	assert.Equal(t, "foo, bar", propertyNames(&spec.Schema{
+	assert.Equal(t, "bar, foo", propertyNames(&spec.Schema{
 		Properties: map[string]*spec.Schema{
 			"foo": nil,
 			"bar": nil,
