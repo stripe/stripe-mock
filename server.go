@@ -299,8 +299,13 @@ var endsWithIDSuffixes = [...]string{
 
 	// These are resource "actions". They don't take the standard form, but we
 	// can expect an object's primary ID to live right before them in a path.
+	"/capture",
+	"/cancel",
 	"/close",
 	"/pay",
+	"/refund",
+	"/reject",
+	"/verify",
 }
 
 var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
