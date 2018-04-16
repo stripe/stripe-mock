@@ -624,6 +624,11 @@ func propertyNames(schema *spec.Schema) string {
 	for name := range schema.Properties {
 		names = append(names, name)
 	}
+
+	// Sort just so we can have stable output to test against (the order at
+	// which keys will be iterated in the map is undefined).
+	sort.Strings(names)
+
 	return strings.Join(names, ", ")
 }
 
