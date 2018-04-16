@@ -497,6 +497,24 @@ type valueWrapper struct {
 // Private functions
 //
 
+// definitionFromJSONPointer extracts the name of a JSON schema definition from
+// a JSON pointer, so "#/components/schemas/charge" would become just "charge".
+// This is a simplified workaround to avoid bringing in JSON schema
+// infrastructure because we can guarantee that the spec we're producing will
+// take a certain shape. If this gets too hacky, it will be better to put a more
+// legitimate JSON schema parser in place.
+func definitionFromJSONPointer(pointer string) string {
+	parts := strings.Split(pointer, "/")
+
+	if len(parts) != 4 ||
+		parts[0] != "#" ||
+		parts[1] != "components" ||
+		parts[2] != "schemas" {
+		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
+	}
+	return parts[3]
+}
+
 // generateSyntheticFixture generates a synthetic fixture for the given schema
 // by examining its properties and returning default values for each.
 //
@@ -595,24 +613,6 @@ func isRequiredProperty(schema *spec.Schema, name string) bool {
 		}
 	}
 	return false
-}
-
-// definitionFromJSONPointer extracts the name of a JSON schema definition from
-// a JSON pointer, so "#/components/schemas/charge" would become just "charge".
-// This is a simplified workaround to avoid bringing in JSON schema
-// infrastructure because we can guarantee that the spec we're producing will
-// take a certain shape. If this gets too hacky, it will be better to put a more
-// legitimate JSON schema parser in place.
-func definitionFromJSONPointer(pointer string) string {
-	parts := strings.Split(pointer, "/")
-
-	if len(parts) != 4 ||
-		parts[0] != "#" ||
-		parts[1] != "components" ||
-		parts[2] != "schemas" {
-		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
-	}
-	return parts[3]
 }
 
 // propertyNames returns the names of all properties of a schema joined
