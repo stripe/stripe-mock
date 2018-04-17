@@ -23,14 +23,15 @@ type GenerateParams struct {
 	// none of the original expansions applied.
 	Expansions *ExpansionLevel
 
-	// ID is the primary identifier for the object being generated. If one was
-	// provided, it's used to replace some information from our fixtures.
+	// PathParams, if set, is a collection that contains values for parameters
+	// that were extracted from a request path. This is useful so that we can
+	// reflect those values into responses for a more realistic effect.
 	//
-	// nil if there is no replacement for the ID.
+	// nil if there were no values extracted from the path.
 	//
-	// The value of this field is expected to stay stable across all levels of
-	// recursion.
-	ID *string
+	// The value of this field is considered in a post-processing step for the
+	// generator. It's not used in the generator at all.
+	PathParams *PathParamsMap
 
 	// RequestPath is the path of the URL being requested which we're
 	// generating data for. It's used to populate the url property of any
@@ -56,28 +57,12 @@ type GenerateParams struct {
 	// not important for the final result, but is very useful for debugging.
 	context string
 
-	// doReplaceID indicates that we should try to replace an ID at this level
-	// of recursion. It's useful because since we're replacing only an object's
-	// primary ID, we only want to do so at the top level of a generated object
-	// (this is falsed for most levels of recursion, except in the cases where
-	// recursion is used to follow something like an anyOf branch to generate
-	// data for the top-level object).
-	doReplaceID bool
-
 	// example is a valid data sample for the target schema at this level of
 	// recursion.
 	//
 	// nil means that were was no sample available. A valueWrapper instance
 	// with an embedded nil means that there is a sample, and it's nil/null.
 	example *valueWrapper
-
-	// replacedID is the old value of an ID field that's had its value replaced
-	// by ID. This is used so that we can look for other instances of this
-	// replaced ID, and also replace them (useful in case the same ID was
-	// reference in a list URL or in an embedded subresource).
-	//
-	// nil if no ID has been replaced.
-	replacedID *string
 }
 
 // DataGenerator generates fixture response data based off a response schema, a
@@ -96,17 +81,35 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		requestPathDisplay = "(empty request path)"
 	}
 
-	return g.generateInternal(&GenerateParams{
+	data, err := g.generateInternal(&GenerateParams{
 		Expansions:  params.Expansions,
-		ID:          params.ID,
+		PathParams:  nil,
 		RequestPath: params.RequestPath,
 		Schema:      params.Schema,
 
-		context:     fmt.Sprintf("Responding to %s:\n", requestPathDisplay),
-		doReplaceID: true,
-		example:     nil,
-		replacedID:  nil,
+		context: fmt.Sprintf("Responding to %s:\n", requestPathDisplay),
+		example: nil,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	if params.PathParams != nil {
+		// Passses through the generated data and replaces IDs that existed in
+		// the fixtures with IDs that were extracted from the request path, if
+		// and where appropriate.
+		//
+		// Note that the path params are mutated by the function, but we return
+		// them anyway to make the control flow here more clear.
+		pathParams := recordAndReplaceIDs(params.PathParams, data)
+
+		// Passes through the generated data again to replace the values of any old
+		// IDs that we replaced. This is a separate step because IDs could have
+		// been found and replace at any point in the generation process.
+		distributeReplacedIDs(pathParams, data)
+	}
+
+	return data, nil
 }
 
 // generateInternal encompasses all the generation logic. It's separate from
@@ -154,28 +157,24 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			// We're expanding this specific object
 			return g.generateInternal(&GenerateParams{
 				Expansions:  params.Expansions,
-				ID:          params.ID,
+				PathParams:  nil,
 				RequestPath: params.RequestPath,
 				Schema:      schema.XExpansionResources.OneOf[0],
 
-				context:     fmt.Sprintf("%sExpanding optional expandable field:\n", context),
-				doReplaceID: false,
-				example:     nil,
-				replacedID:  params.replacedID,
+				context: fmt.Sprintf("%sExpanding optional expandable field:\n", context),
+				example: nil,
 			})
 		} else {
 			// We're not expanding this specific object. Our example should be of the
 			// unexpanded form, which is the first branch of the AnyOf
 			return g.generateInternal(&GenerateParams{
 				Expansions:  params.Expansions,
-				ID:          params.ID,
+				PathParams:  nil,
 				RequestPath: params.RequestPath,
 				Schema:      schema.AnyOf[0],
 
-				context:     fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
-				doReplaceID: false,
-				example:     example,
-				replacedID:  params.replacedID,
+				context: fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
+				example: example,
 			})
 		}
 	}
@@ -189,14 +188,12 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			// Since there's only one subschema, we can confidently recurse into it
 			return g.generateInternal(&GenerateParams{
 				Expansions:  params.Expansions,
-				ID:          params.ID,
+				PathParams:  nil,
 				RequestPath: params.RequestPath,
 				Schema:      schema.AnyOf[0],
 
-				context:     fmt.Sprintf("%sChoosing only branch of anyOf:\n", context),
-				doReplaceID: params.doReplaceID,
-				example:     example,
-				replacedID:  params.replacedID,
+				context: fmt.Sprintf("%sChoosing only branch of anyOf:\n", context),
+				example: example,
 			})
 		}
 	}
@@ -207,14 +204,12 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		// know which branch of the AnyOf the example corresponds to.
 		return g.generateInternal(&GenerateParams{
 			Expansions:  params.Expansions,
-			ID:          params.ID,
+			PathParams:  nil,
 			RequestPath: params.RequestPath,
 			Schema:      schema.AnyOf[0],
 
-			context:     fmt.Sprintf("%sChoosing first branch of anyOf:\n", context),
-			doReplaceID: params.doReplaceID,
-			example:     nil,
-			replacedID:  params.replacedID,
+			context: fmt.Sprintf("%sChoosing first branch of anyOf:\n", context),
+			example: nil,
 		})
 	}
 
@@ -223,14 +218,12 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		// one item of data, regardless of what was present in the example
 		listData, err := g.generateListResource(&GenerateParams{
 			Expansions:  params.Expansions,
-			ID:          params.ID,
+			PathParams:  nil,
 			RequestPath: params.RequestPath,
 			Schema:      schema,
 
-			context:     context,
-			doReplaceID: params.doReplaceID,
-			example:     example,
-			replacedID:  params.replacedID,
+			context: context,
+			example: example,
 		})
 		return listData, err
 	}
@@ -263,20 +256,6 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		return nil, nil
 	}
 
-	// If we replaced a primary object ID, then also replace any of values that
-	// we happen to find which had the same value as it. These will usually be
-	// IDs in child objects that reference the parent.
-	//
-	// For example, a charge may contain a sublist of refunds. If we replaced
-	// the charge's ID, we also want to replace that charge ID in every one of
-	// the child refunds.
-	if params.replacedID != nil && schema.Type == "string" {
-		valStr, ok := example.value.(string)
-		if ok && valStr == *params.replacedID {
-			example = &valueWrapper{value: *params.ID}
-		}
-	}
-
 	if schema.Type == "boolean" || schema.Type == "integer" ||
 		schema.Type == "number" || schema.Type == "string" {
 		return example.value, nil
@@ -304,41 +283,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 
 		resultMap := make(map[string]interface{})
 
-		// We might have obtained an ID for the object from an extracted path
-		// parameter. If we did, fill it in. Note that this only occurs at the
-		// top level of recursion because any ID fields we find at other levels
-		// are likely for other objects.
-		//
-		// If we do replace an ID, extract the old one so that we can inject it
-		// into list URLs from our fixtures.
-		//
-		// This replacement must occur before iterating through the loop below
-		// because we might also use the new ID to replace other values in the
-		// object as well.
-		replacedID := params.replacedID
-		if params.doReplaceID && params.ID != nil {
-			_, ok := schema.Properties["id"]
-			if ok {
-				idValue, ok := exampleMap["id"]
-				if ok {
-					idValueStr := idValue.(string)
-					replacedID = &idValueStr
-					resultMap["id"] = *params.ID
-
-					if verbose {
-						fmt.Printf("Found ID to replace; previous: '%s' new: '%s'\n",
-							*replacedID, *params.ID)
-					}
-				}
-			}
-		}
-
 		for key, subSchema := range schema.Properties {
-			// If these conditions are met this was handled above. Skip it.
-			if params.doReplaceID && key == "id" && replacedID != nil {
-				continue
-			}
-
 			var subExpansions *ExpansionLevel
 			if params.Expansions != nil {
 				subExpansions = params.Expansions.expansions[key]
@@ -367,14 +312,12 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 
 			subValue, err := g.generateInternal(&GenerateParams{
 				Expansions:  subExpansions,
-				ID:          params.ID,
+				PathParams:  nil,
 				RequestPath: params.RequestPath,
 				Schema:      subSchema,
 
-				context:     fmt.Sprintf("%sIn property '%s' of object:\n", context, key),
-				doReplaceID: false,
-				example:     subvalueWrapper,
-				replacedID:  replacedID,
+				context: fmt.Sprintf("%sIn property '%s' of object:\n", context, key),
+				example: subvalueWrapper,
 			})
 			if err != nil {
 				return nil, err
@@ -413,14 +356,12 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 
 	itemData, err := g.generateInternal(&GenerateParams{
 		Expansions:  itemExpansions,
-		ID:          params.ID,
+		PathParams:  nil,
 		RequestPath: params.RequestPath,
 		Schema:      params.Schema.Properties["data"].Items,
 
-		context:     fmt.Sprintf("%sPopulating list resource:\n", params.context),
-		doReplaceID: false,
-		example:     nil,
-		replacedID:  params.replacedID,
+		context: fmt.Sprintf("%sPopulating list resource:\n", params.context),
+		example: nil,
 	})
 	if err != nil {
 		return nil, err
@@ -442,28 +383,16 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 		case "total_count":
 			val = 1
 		case "url":
-			var url string
 			if strings.HasPrefix(subSchema.Pattern, "^") {
 				// Many list resources have a URL pattern of the form "^/v1/whatevers";
 				// we cut off the "^" to leave the URL.
-				url = subSchema.Pattern[1:]
+				val = subSchema.Pattern[1:]
 			} else if params.example != nil {
 				// If an example was provided, we can assume it has the correct format
 				example := params.example.value.(map[string]interface{})
-				url = example["url"].(string)
+				val = example["url"].(string)
 			} else {
-				url = params.RequestPath
-			}
-
-			// Potentially replace a primary ID in the URL of a list so that
-			// requests against it may be consistent. For example, if
-			// `/v1/charges/ch_123` was requested, we'd want the refunds list
-			// within the returned object to have a URL like
-			// `/v1/charges/ch_123/refunds`.
-			if params.replacedID != nil {
-				val = strings.Replace(url, *params.replacedID, *params.ID, 1)
-			} else {
-				val = url
+				val = params.RequestPath
 			}
 		default:
 			val = nil
@@ -513,6 +442,100 @@ func definitionFromJSONPointer(pointer string) string {
 		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
 	}
 	return parts[3]
+}
+
+// distributeReplacedIDs descends through a generated data structure
+// recursively looking for IDs that were generated during data generation and
+// replaces them with their appropriate replacement value.
+func distributeReplacedIDs(pathParams *PathParamsMap, data interface{}) {
+	dataSlice, ok := data.([]interface{})
+	if ok {
+		for _, val := range dataSlice {
+			distributeReplacedIDs(pathParams, val)
+		}
+		return
+	}
+
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	for key, value := range dataMap {
+		newValue, ok := distributeReplacedIDsInValue(pathParams, value)
+		if ok {
+			dataMap[key] = newValue
+			continue
+		}
+
+		if key == "url" {
+			newValue, ok := distributeReplacedIDsInURL(pathParams, value)
+			if ok {
+				dataMap[key] = newValue
+				continue
+			}
+		}
+
+		distributeReplacedIDs(pathParams, value)
+	}
+}
+
+// distributeReplacedIDsInValue returns a new value for the `url` field of a
+// list object if it's detected that its value contained an ID that we replaced
+// with an injected one.
+//
+// For example, in the URL `/v1/charges/ch_123/refunds`, `ch_123` may have been
+// a replaced ID.
+func distributeReplacedIDsInURL(pathParams *PathParamsMap, value interface{}) (string, bool) {
+	valStr, ok := value.(string)
+	if !ok {
+		return "", false
+	}
+
+	if pathParams.replacedPrimaryID != nil {
+		search := "/" + *pathParams.replacedPrimaryID + "/"
+		if strings.Index(valStr, search) != -1 {
+			return strings.Replace(valStr, search, "/"+*pathParams.PrimaryID+"/", 1), true
+		}
+	}
+
+	for _, secondaryID := range pathParams.SecondaryIDs {
+		for _, replacedID := range secondaryID.replacedIDs {
+			search := "/" + replacedID + "/"
+			if strings.Index(valStr, search) != -1 {
+				return strings.Replace(valStr, search, "/"+secondaryID.ID+"/", 1), true
+			}
+		}
+	}
+
+	return "", false
+}
+
+// distributeReplacedIDsInValue returns a new value for an existing one if it's
+// detected that its value was an ID that we replaced with an injected one.
+//
+// It works by comparing the value against any replacement ID values that were
+// found in pathParams. Replacement IDs were added to pathParams when the
+// generator was doing another pass earlier on in the process.
+func distributeReplacedIDsInValue(pathParams *PathParamsMap, value interface{}) (string, bool) {
+	valStr, ok := value.(string)
+	if !ok {
+		return "", false
+	}
+
+	if pathParams.replacedPrimaryID != nil && valStr == *pathParams.replacedPrimaryID {
+		return *pathParams.PrimaryID, true
+	}
+
+	for _, secondaryID := range pathParams.SecondaryIDs {
+		for _, replacedID := range secondaryID.replacedIDs {
+			if valStr == replacedID {
+				return secondaryID.ID, true
+			}
+		}
+	}
+
+	return "", false
 }
 
 // generateSyntheticFixture generates a synthetic fixture for the given schema
@@ -615,6 +638,17 @@ func isRequiredProperty(schema *spec.Schema, name string) bool {
 	return false
 }
 
+// logReplacedID is just a logging shortcut for replaceIDsInternal so that we
+// can keep its function body more succinct.
+func logReplacedID(prevID, newID string) {
+	if !verbose {
+		return
+	}
+
+	fmt.Printf("Found ID to replace; previous: '%s' new: '%s'\n",
+		prevID, newID)
+}
+
 // propertyNames returns the names of all properties of a schema joined
 // together and comma-separated.
 //
@@ -630,6 +664,103 @@ func propertyNames(schema *spec.Schema) string {
 	sort.Strings(names)
 
 	return strings.Join(names, ", ")
+}
+
+// recordAndReplaceIDs descends through a generated data structure recursively
+// looking for object IDs and replaces them with values from the request's URL
+// (i.e., what's in pathParams) where appropriate.
+//
+// Returns the same PathParamsMap given to it as a parameter, after some
+// mutation. It's returned to add clarity as to what's happening to its
+// invocation sites.
+func recordAndReplaceIDs(pathParams *PathParamsMap, data interface{}) *PathParamsMap {
+	recordAndReplaceIDsInternal(pathParams, data, nil, 0)
+	return pathParams
+}
+
+// recordAndReplaceIDsInternal is identical to recordAndReplaceIDs, but is an
+// internal interface that tracks a parent key and recursion level. Use
+// recordAndReplaceIDs instead.
+func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
+	parentKey *string, recurseLevel int) {
+
+	dataSlice, ok := data.([]interface{})
+	if ok {
+		for _, val := range dataSlice {
+			recordAndReplaceIDsInternal(pathParams, val, nil, recurseLevel+1)
+		}
+		return
+	}
+
+	dataMap, ok := data.(map[string]interface{})
+	if !ok {
+		return
+	}
+
+	for key, val := range dataMap {
+		strVal, ok := val.(string)
+		if key == "id" && ok {
+			if recurseLevel == 0 {
+				// We'll only use a primary ID at the top level of the object
+				// (which is why we track recursion level).
+				if pathParams.PrimaryID != nil {
+					pathParams.replacedPrimaryID = &strVal
+					dataMap["id"] = *pathParams.PrimaryID
+					logReplacedID(strVal, *pathParams.PrimaryID)
+				}
+			} else {
+				// After the object's top level, we'll replace an object's ID
+				// if either of these two values are the same s the secondary
+				// ID's name (i.e., the "name" for the parameter that was
+				// extracted from the path in OpenAPI):
+				//
+				// (1) The value in the object's `object` field.
+				// (2) The value of the object's parent key (e.g., say it's a
+				//     "charge" object that was nested under a refund's
+				//     `charge` key).
+				objectVal, ok := dataMap["object"].(string)
+				if ok {
+					for _, secondaryID := range pathParams.SecondaryIDs {
+						if objectVal == secondaryID.Name {
+							secondaryID.appendReplacedID(strVal)
+							dataMap["id"] = secondaryID.ID
+							logReplacedID(strVal, secondaryID.ID)
+							break
+						}
+					}
+				}
+
+				for _, secondaryID := range pathParams.SecondaryIDs {
+					if parentKey != nil && *parentKey == secondaryID.Name {
+						secondaryID.appendReplacedID(strVal)
+						dataMap["id"] = secondaryID.ID
+						logReplacedID(strVal, secondaryID.ID)
+						break
+					}
+				}
+			}
+		} else {
+			if ok {
+				// This path replaces a string value with a secondary ID if the
+				// name of the field matches the secondary ID's target name.
+				//
+				// For example, an application fee refund might have an
+				// embedded `fee` field which is the ID of its parent
+				// application fee (unless it's expanded, at which point it
+				// will be handled by the case above).
+				for _, secondaryID := range pathParams.SecondaryIDs {
+					if key == secondaryID.Name {
+						secondaryID.appendReplacedID(strVal)
+						dataMap[key] = secondaryID.ID
+						logReplacedID(strVal, secondaryID.ID)
+						break
+					}
+				}
+			} else {
+				recordAndReplaceIDsInternal(pathParams, val, &key, recurseLevel+1)
+			}
+		}
+	}
 }
 
 // stringOrEmpty returns the string given as parameter, or the string "(empty)"

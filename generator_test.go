@@ -206,17 +206,60 @@ func TestGenerateResponseData(t *testing.T) {
 				},
 			},
 		}}
-		id := "ch_123_InjectedFromURL"
+		newID := "ch_123_InjectedFromURL"
 		data, err := generator.Generate(&GenerateParams{
-			ID:     &id,
-			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+			PathParams: &PathParamsMap{PrimaryID: &newID},
+			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
 		})
 		assert.Nil(t, err)
 		assert.Equal(t,
-			id,
+			newID,
 			data.(map[string]interface{})["id"])
 		assert.Equal(t,
-			id,
+			newID,
+			data.(map[string]interface{})["customer"])
+	}
+
+	// injected secondary ID
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					"id": "ch_123",
+				},
+				spec.ResourceID("customer"): map[string]interface{}{
+					"id":     "cus_123",
+					"object": "customer",
+				},
+			},
+		}}
+		newCustomerID := "cus_123_InjectedFromURL"
+		data, err := generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"customer": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
+			},
+			PathParams: &PathParamsMap{
+				SecondaryIDs: []*PathParamsSecondaryID{
+					{ID: newCustomerID, Name: "customer"},
+				},
+			},
+			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+
+		// The top level ID. This should have stayed the same.
+		assert.Equal(t,
+			"ch_123",
+			data.(map[string]interface{})["id"])
+
+		// The nested customer ID. This should have changed.
+		assert.Equal(t,
+			map[string]interface{}{
+				"id":     newCustomerID,
+				"object": "customer",
+			},
 			data.(map[string]interface{})["customer"])
 	}
 
@@ -297,6 +340,156 @@ func TestDefinitionFromJSONPointer(t *testing.T) {
 	assert.Equal(t, "charge", definition)
 }
 
+// This is meant as quite a blunt test. See TestMaybeReplaceID for something
+// that's probably easier to introspect/debug.
+func TestDistributeReplacedIDs(t *testing.T) {
+	newID := "new-id"
+	oldID := "old-id"
+
+	newSecondaryID := "new-secondary-id"
+	oldSecondaryID := "old-secondary-id"
+
+	pathParams := &PathParamsMap{
+		PrimaryID:         &newID,
+		replacedPrimaryID: &oldID,
+
+		SecondaryIDs: []*PathParamsSecondaryID{
+			{
+				ID:          newSecondaryID,
+				replacedIDs: []string{oldSecondaryID},
+			},
+		},
+	}
+
+	data := map[string]interface{}{
+		"key_with_id":   oldID,
+		"unrelated_key": "foo",
+		"nested": map[string]interface{}{
+			"key_with_secondary_id": oldSecondaryID,
+			"slice": []interface{}{
+				map[string]interface{}{
+					"key_with_id":   oldID,
+					"unrelated_key": "foo",
+					"url":           "/v1/charges/" + oldID + "/refunds",
+				},
+			},
+		},
+	}
+
+	// This function modifies structure in place.
+	distributeReplacedIDs(pathParams, data)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"key_with_id":   newID,
+			"unrelated_key": "foo",
+			"nested": map[string]interface{}{
+				"key_with_secondary_id": newSecondaryID,
+				"slice": []interface{}{
+					map[string]interface{}{
+						"key_with_id":   newID,
+						"unrelated_key": "foo",
+						"url":           "/v1/charges/" + newID + "/refunds",
+					},
+				},
+			},
+		},
+		data,
+	)
+}
+
+func TestDistributeReplacedIDsInURL(t *testing.T) {
+	newID := "new-id"
+	oldID := "old-id"
+
+	newSecondaryID := "new-secondary-id"
+	oldSecondaryID := "old-secondary-id"
+
+	pathParams := &PathParamsMap{
+		PrimaryID:         &newID,
+		replacedPrimaryID: &oldID,
+
+		SecondaryIDs: []*PathParamsSecondaryID{
+			{
+				ID:          newSecondaryID,
+				replacedIDs: []string{oldSecondaryID},
+			},
+		},
+	}
+
+	// Replaces primary ID
+	{
+		data, ok := distributeReplacedIDsInURL(pathParams, "/v1/charges/"+oldID+"/refunds")
+		assert.True(t, ok)
+		assert.Equal(t, "/v1/charges/"+newID+"/refunds", data)
+	}
+
+	// Replaces secondary ID
+	{
+		data, ok := distributeReplacedIDsInURL(pathParams, "/v1/charges/"+oldSecondaryID+"/refunds")
+		assert.True(t, ok)
+		assert.Equal(t, "/v1/charges/"+newSecondaryID+"/refunds", data)
+	}
+
+	// Doesn't replace a value that's not present
+	{
+		_, ok := distributeReplacedIDsInURL(pathParams, "/v1/charges/other/refunds")
+		assert.False(t, ok)
+	}
+
+	// Works fine on a non-string data type (by ignoring it)
+	{
+		_, ok := distributeReplacedIDsInURL(pathParams, 123)
+		assert.False(t, ok)
+	}
+}
+
+func TestDistributeReplacedIDsInValue(t *testing.T) {
+	newID := "new-id"
+	oldID := "old-id"
+
+	newSecondaryID := "new-secondary-id"
+	oldSecondaryID := "old-secondary-id"
+
+	pathParams := &PathParamsMap{
+		PrimaryID:         &newID,
+		replacedPrimaryID: &oldID,
+
+		SecondaryIDs: []*PathParamsSecondaryID{
+			{
+				ID:          newSecondaryID,
+				replacedIDs: []string{oldSecondaryID},
+			},
+		},
+	}
+
+	// Replaces primary ID
+	{
+		data, ok := distributeReplacedIDsInValue(pathParams, oldID)
+		assert.True(t, ok)
+		assert.Equal(t, newID, data)
+	}
+
+	// Replaces secondary ID
+	{
+		data, ok := distributeReplacedIDsInValue(pathParams, oldSecondaryID)
+		assert.True(t, ok)
+		assert.Equal(t, newSecondaryID, data)
+	}
+
+	// Doesn't replace a value that's not present
+	{
+		_, ok := distributeReplacedIDsInValue(pathParams, "other")
+		assert.False(t, ok)
+	}
+
+	// Works fine on a non-string data type (by ignoring it)
+	{
+		_, ok := distributeReplacedIDsInValue(pathParams, 123)
+		assert.False(t, ok)
+	}
+}
+
 func TestGenerateSyntheticFixture(t *testing.T) {
 	// Scalars (and an array, which is easy)
 	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, ""))
@@ -365,6 +558,118 @@ func TestPropertyNames(t *testing.T) {
 		},
 	}))
 	assert.Equal(t, "", propertyNames(&spec.Schema{}))
+}
+
+// This is meant as quite a blunt test. See TestMaybeReplaceID for something
+// that's probably easier to introspect/debug.
+func TestReplaceIDs(t *testing.T) {
+	newID := "new-id"
+	oldID := "old-id"
+
+	newApplicationID := "new-application-id"
+	oldApplicationID := "old-application-id"
+
+	newChargeID := "new-charge-id"
+	oldChargeID := "old-charge-id"
+
+	// The generator handles multiple values for the same type of entity. Here
+	// we're replacing two separate old charge IDs with a single new charge ID.
+	otherOldChargeID := "other-charge-id"
+
+	newRefundID := "new-refund-id"
+	oldRefundID := "old-refund-id"
+
+	newSourceID := "new-source-id"
+	oldSourceID := "old-source-id"
+
+	pathParams := &PathParamsMap{
+		PrimaryID:         &newID,
+		replacedPrimaryID: &oldID,
+
+		SecondaryIDs: []*PathParamsSecondaryID{
+			{
+				ID:          newApplicationID,
+				Name:        "application",
+				replacedIDs: nil,
+			},
+			{
+				ID:          newChargeID,
+				Name:        "charge",
+				replacedIDs: nil,
+			},
+			{
+				ID:          newRefundID,
+				Name:        "refund",
+				replacedIDs: nil,
+			},
+			{
+				ID:          newSourceID,
+				Name:        "source",
+				replacedIDs: nil,
+			},
+		},
+	}
+
+	data := map[string]interface{}{
+		"id": oldID,
+		"embedded_charge": map[string]interface{}{
+			"id":          oldChargeID,
+			"object":      "charge",
+			"application": oldApplicationID,
+			"embedded_refunds": []interface{}{
+				map[string]interface{}{
+					"id":     oldRefundID,
+					"object": "refund",
+				},
+			},
+			"source": map[string]interface{}{
+				"id":     oldSourceID,
+				"object": "not-source",
+			},
+		},
+		"charge": otherOldChargeID,
+		"not_replaced": map[string]interface{}{
+			"id":     "other-id",
+			"object": "other",
+		},
+	}
+
+	// This function modifies structure in place.
+	pathParams = recordAndReplaceIDs(pathParams, data)
+
+	assert.Equal(t, oldID, *pathParams.replacedPrimaryID)
+
+	assert.Equal(t, []string{oldApplicationID}, pathParams.SecondaryIDs[0].replacedIDs)
+	assert.Equal(t, []string{oldChargeID, otherOldChargeID}, pathParams.SecondaryIDs[1].replacedIDs)
+	assert.Equal(t, []string{oldRefundID}, pathParams.SecondaryIDs[2].replacedIDs)
+	assert.Equal(t, []string{oldSourceID}, pathParams.SecondaryIDs[3].replacedIDs)
+
+	assert.Equal(t,
+		map[string]interface{}{
+			"id": newID,
+			"embedded_charge": map[string]interface{}{
+				"id":          newChargeID,
+				"object":      "charge",
+				"application": newApplicationID,
+				"embedded_refunds": []interface{}{
+					map[string]interface{}{
+						"id":     newRefundID,
+						"object": "refund",
+					},
+				},
+				"source": map[string]interface{}{
+					"id":     newSourceID,
+					"object": "not-source",
+				},
+			},
+			"charge": newChargeID,
+			"not_replaced": map[string]interface{}{
+				"id":     "other-id",
+				"object": "other",
+			},
+		},
+		data,
+	)
 }
 
 func TestStringOrEmpty(t *testing.T) {

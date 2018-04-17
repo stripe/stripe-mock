@@ -34,6 +34,80 @@ type ExpansionLevel struct {
 	wildcard bool
 }
 
+// PathParamsMap holds a collection of parameter that values that have been
+// extracted from the path of a request. This is useful to hand off to the data
+// generator so that it can use these IDs while generating results.
+type PathParamsMap struct {
+	// PrimaryID contains a value for a primary ID extracted from a request
+	// path. A "primary" object is the one being enacted on and which will be
+	// directly returned with the API's response.
+	//
+	// Note that not all endpoints have a primary ID, and in those cases this
+	// value will be nil. Examples of endpoints without a primary ID are
+	// "create" and "list" methods.
+	PrimaryID *string
+
+	// SecondaryIDs contains a collection of "secondary IDs" (i.e., not the
+	// primary ID) extracted from the request path.
+	SecondaryIDs []*PathParamsSecondaryID
+
+	// replacedPrimaryID is the old value of an ID field that's had its value
+	// replaced by PrimaryID. This is used so that we can look for other
+	// instances of this replaced ID, and also replace them.
+	//
+	// For example, if we're handling a charge and replaced an old ID `ch_old`
+	// with the new value `ch_123` (from PrimaryID), this field would contain
+	// `ch_old`. If we found another instance of `ch_old` in another field's
+	// value (say if there was embedded refund with a field called `charge`
+	// that pointed back to its parent charge ID), we'd recognize it via this
+	// field and replace it with PrimaryID.
+	//
+	// nil if no ID has been replaced.
+	replacedPrimaryID *string
+}
+
+// PathParamsSecondaryID holds the name and value for a "secondary ID" (i.e.,
+// one that is not the primary ID) found in a request path.
+type PathParamsSecondaryID struct {
+	// ID is the value of the parameter extracted from the request path.
+	ID string
+
+	// Name is the name of the parameter according to the enclosing `{}` in the
+	// OpenAPI specification.
+	//
+	// For example, it might read `fee` if extracted from:
+	//
+	//     /v1/application_fees/{fee}/refunds
+	//
+	Name string
+
+	// replacedIDs is a slice of old values for an ID field that's had its
+	// value replaced by this secondary parameter's new ID. This is used so
+	// that we can look for other instances of this
+	// replaced ID, and also replace them.
+	//
+	// This is a slice as opposed to a single value because it's possible that
+	// we could encounter multiple fields while generating a response that all
+	// represent the same entity. Say for example that a series of nested
+	// expansions have been requested, each that internalizes an entity of a
+	// parameter's type -- we load a fixture for each but there's no guarantee
+	// that the entity in each one references the same ID.
+	//
+	// For more information, see PathParamsMap.replacedPrimaryID.
+	replacedIDs []string
+}
+
+// appendReplacedID appends a replaced ID to the secondary ID's internal slice
+// of replaced IDs.
+//
+// This function skips the case of an empty string value, so its use should be
+// preferred over using the internal slice directly.
+func (p *PathParamsSecondaryID) appendReplacedID(replacedID string) {
+	if replacedID != "" {
+		p.replacedIDs = append(p.replacedIDs, replacedID)
+	}
+}
+
 type ResponseError struct {
 	ErrorInfo struct {
 		Message string `json:"message"`
@@ -65,7 +139,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// Every response needs a Request-Id header except the invalid authorization
 	w.Header().Set("Request-Id", "req_123")
 
-	route, id := s.routeRequest(r)
+	route, pathParams := s.routeRequest(r)
 	if route == nil {
 		message := fmt.Sprintf(invalidRoute, r.Method, r.URL.Path)
 		stripeError := createStripeError(typeInvalidRequestError, message)
@@ -89,7 +163,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if verbose {
-		fmt.Printf("ID extracted from route: %+v\n", id)
+		fmt.Printf("IDs extracted from route: %+v\n", pathParams)
 		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
 
@@ -155,7 +229,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
 	responseData, err := generator.Generate(&GenerateParams{
 		Expansions:  expansions,
-		ID:          id,
+		PathParams:  pathParams,
 		RequestPath: r.URL.Path,
 		Schema:      responseContent.Schema,
 	})
@@ -215,16 +289,16 @@ func (s *StubServer) initializeRouter() error {
 
 			// We use whether the route ends with a parameter as a heuristic as
 			// to whether we should expect an object's primary ID in the URL.
-			var endsWithID bool
-			for _, suffix := range endsWithIDSuffixes {
+			var hasPrimaryID bool
+			for _, suffix := range hasPrimaryIDSuffixes {
 				if strings.HasSuffix(string(path), suffix) {
-					endsWithID = true
+					hasPrimaryID = true
 					break
 				}
 			}
 
 			route := stubServerRoute{
-				endsWithID:           endsWithID,
+				hasPrimaryID:         hasPrimaryID,
 				pattern:              pathPattern,
 				operation:            operation,
 				pathParamNames:       pathParamNames,
@@ -250,7 +324,7 @@ func (s *StubServer) initializeRouter() error {
 // if it looks like it's supposed to be the primary identifier of the returned
 // object (i.e., the route's pattern ended with a parameter). A nil is returned
 // as the second return value when no primary ID is available.
-func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *string) {
+func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParamsMap) {
 	verbRoutes := s.routes[spec.HTTPVerb(r.Method)]
 	for _, route := range verbRoutes {
 		matches := route.pattern.FindAllStringSubmatch(r.URL.Path, -1)
@@ -259,18 +333,62 @@ func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *string) {
 			continue
 		}
 
+		// There are no path parameters. Return the route only.
+		if len(route.pathParamNames) < 1 {
+			return &route, nil
+		}
+
 		// There will only ever be a single match in the string (this match
 		// contains the entire match plus all capture groups).
 		firstMatch := matches[0]
 
-		// This route doesn't appear to contain the ID of the primary object
-		// being returned. Return the route only.
-		if !route.endsWithID {
-			return &route, nil
+		// Secondary IDs are any IDs in the URL that are *not* the primary ID
+		// (which you'll see if say a resource is nested under another
+		// resource).
+		//
+		// Normally, we can calculate the number of secondary IDs based on the
+		// number of path parameters by subtracting one for the primary ID.
+		// There's a special case if the path doesn't have a primary ID in
+		// which the number of secondary IDs equals the number of path
+		// parameters.
+		var numSecondaryIDs int
+		if route.hasPrimaryID {
+			numSecondaryIDs = len(route.pathParamNames) - 1
+		} else {
+			numSecondaryIDs = len(route.pathParamNames)
 		}
 
-		// Return the route along with the likely ID.
-		return &route, &firstMatch[len(firstMatch)-1]
+		var secondaryIDs []*PathParamsSecondaryID
+		if numSecondaryIDs > 0 {
+			secondaryIDs = make([]*PathParamsSecondaryID, numSecondaryIDs)
+			for i := 0; i < numSecondaryIDs; i++ {
+				secondaryIDs[i] = &PathParamsSecondaryID{
+					// Note that the first position of `firstMatch` is the
+					// entire matching string. Capture groups start at position
+					// 1, so we add one to `i`.
+					ID: firstMatch[i+1],
+
+					Name: route.pathParamNames[i],
+				}
+			}
+		}
+
+		// Not all routes have a primary ID even if they might have secondary
+		// IDs. Consider for example a list endpoint nested under another
+		// resource:
+		//
+		//     GET "/v1/application_fees/fee_123/refunds
+		//
+		var primaryID *string
+		if route.hasPrimaryID {
+			primaryID = &firstMatch[len(firstMatch)-1]
+		}
+
+		// Return the route along with any IDs that matched in the path.
+		return &route, &PathParamsMap{
+			PrimaryID:    primaryID,
+			SecondaryIDs: secondaryIDs,
+		}
 	}
 	return nil, nil
 }
@@ -293,7 +411,7 @@ const (
 )
 
 // Suffixes for which we will try to exact an object's ID from the path.
-var endsWithIDSuffixes = [...]string{
+var hasPrimaryIDSuffixes = [...]string{
 	// The general case: we're looking for the end of an OpenAPI URL parameter.
 	"}",
 
@@ -318,7 +436,7 @@ var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
 // pattern to match an incoming path and a description of the method that would
 // be executed in the event of a match.
 type stubServerRoute struct {
-	endsWithID           bool
+	hasPrimaryID         bool
 	pattern              *regexp.Regexp
 	operation            *spec.Operation
 	pathParamNames       []string
