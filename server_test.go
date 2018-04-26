@@ -31,7 +31,7 @@ func TestStubServer(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestStubServerError(t *testing.T) {
+func TestStubServer_Error(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/a", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
@@ -45,6 +45,15 @@ func TestStubServerError(t *testing.T) {
 	assert.True(t, ok)
 	_, ok = errorInfo["message"]
 	assert.True(t, ok)
+}
+
+func TestStubServer_AllowsContentTypeWithParameters(t *testing.T) {
+	headers := getDefaultHeaders()
+	headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
+
+	resp, _ := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&currency=usd", headers)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
@@ -76,6 +85,47 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 	// pretty printed.
 	assert.Contains(t, string(body), `  "id"`)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestStubServer_ErrorsOnEmptyContentType(t *testing.T) {
+	headers := getDefaultHeaders()
+	headers["Content-Type"] = ""
+
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&currency=usd", headers)
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	assert.Equal(t, "invalid_request_error", errorInfo["type"])
+	assert.Equal(t,
+		fmt.Sprintf(contentTypeEmpty, "application/x-www-form-urlencoded"),
+		errorInfo["message"])
+}
+
+func TestStubServer_ErrorsOnMismatchedContentType(t *testing.T) {
+	headers := getDefaultHeaders()
+	headers["Content-Type"] = "application/json"
+
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&currency=usd", headers)
+	fmt.Printf("body = %+v\n", string(body))
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	assert.Equal(t, "invalid_request_error", errorInfo["type"])
+	assert.Equal(t,
+		fmt.Sprintf(contentTypeMismatched,
+			"application/x-www-form-urlencoded",
+			"application/json"),
+		errorInfo["message"])
 }
 
 func TestStubServer_RoutesRequest(t *testing.T) {
@@ -174,8 +224,11 @@ func TestGetValidator(t *testing.T) {
 			},
 		},
 	}}
-	schema := getRequestBodySchema(operation)
+	mediaType, schema := getRequestBodySchema(operation)
+	assert.NotNil(t, mediaType)
+	assert.Equal(t, "application/x-www-form-urlencoded", *mediaType)
 	assert.NotNil(t, schema)
+
 	validator, err := spec.GetValidatorForOpenAPI3Schema(schema, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, validator)
@@ -195,7 +248,8 @@ func TestGetValidator_NoSuitableParameter(t *testing.T) {
 	method := &spec.Operation{Parameters: []*spec.Parameter{
 		{Schema: nil},
 	}}
-	schema := getRequestBodySchema(method)
+	mediaType, schema := getRequestBodySchema(method)
+	assert.Nil(t, mediaType)
 	assert.Nil(t, schema)
 }
 
@@ -326,6 +380,7 @@ func encode64(s string) string {
 func getDefaultHeaders() map[string]string {
 	headers := make(map[string]string)
 	headers["Authorization"] = "Bearer sk_test_123"
+	headers["Content-Type"] = "application/x-www-form-urlencoded"
 	return headers
 }
 
@@ -338,6 +393,7 @@ func getStubServer(t *testing.T) *StubServer {
 
 func sendRequest(t *testing.T, method string, url string, params string,
 	headers map[string]string) (*http.Response, []byte) {
+
 	server := getStubServer(t)
 
 	fullUrl := fmt.Sprintf("https://stripe.com%s", url)
