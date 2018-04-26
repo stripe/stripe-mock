@@ -639,10 +639,18 @@ func TestReplaceIDs(t *testing.T) {
 
 	assert.Equal(t, oldID, *pathParams.replacedPrimaryID)
 
-	assert.Equal(t, []string{oldApplicationID}, pathParams.SecondaryIDs[0].replacedIDs)
-	assert.Equal(t, []string{oldChargeID, otherOldChargeID}, pathParams.SecondaryIDs[1].replacedIDs)
-	assert.Equal(t, []string{oldRefundID}, pathParams.SecondaryIDs[2].replacedIDs)
-	assert.Equal(t, []string{oldSourceID}, pathParams.SecondaryIDs[3].replacedIDs)
+	assert.Equal(t, 1, len(pathParams.SecondaryIDs[0].replacedIDs))
+	assert.Contains(t, pathParams.SecondaryIDs[0].replacedIDs, oldApplicationID)
+
+	assert.Equal(t, 2, len(pathParams.SecondaryIDs[1].replacedIDs))
+	assert.Contains(t, pathParams.SecondaryIDs[1].replacedIDs, oldChargeID)
+	assert.Contains(t, pathParams.SecondaryIDs[1].replacedIDs, otherOldChargeID)
+
+	assert.Equal(t, 1, len(pathParams.SecondaryIDs[2].replacedIDs))
+	assert.Contains(t, pathParams.SecondaryIDs[2].replacedIDs, oldRefundID)
+
+	assert.Equal(t, 1, len(pathParams.SecondaryIDs[3].replacedIDs))
+	assert.Contains(t, pathParams.SecondaryIDs[3].replacedIDs, oldSourceID)
 
 	assert.Equal(t,
 		map[string]interface{}{
