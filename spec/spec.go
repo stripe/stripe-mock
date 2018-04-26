@@ -58,15 +58,22 @@ var supportedSchemaFields = []string{
 }
 
 type Schema struct {
-	AdditionalProperties bool               `json:"additionalProperties,omitempty" yaml:"additionalProperties"`
-	AnyOf                []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
-	Enum                 []interface{}      `json:"enum,omitempty" yaml:"enum"`
-	Items                *Schema            `json:"items,omitempty" yaml:"items"`
-	Nullable             bool               `json:"nullable,omitempty" yaml:"nullable"`
-	Pattern              string             `json:"pattern,omitempty" yaml:"pattern"`
-	Properties           map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
-	Required             []string           `json:"required,omitempty" yaml:"required"`
-	Type                 string             `json:"type,omitempty" yaml:"type"`
+	// AdditionalProperties is either a `false` to indicate that no additional
+	// properties in the object are allowed (beyond what's in Properties), or a
+	// JSON schema that describes the expected format of any additional properties.
+	//
+	// We currently just read it as an `interface{}` because we're not using it
+	// for anything right now.
+	AdditionalProperties interface{} `json:"additionalProperties,omitempty" yaml:"additionalProperties"`
+
+	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
+	Enum       []interface{}      `json:"enum,omitempty" yaml:"enum"`
+	Items      *Schema            `json:"items,omitempty" yaml:"items"`
+	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
+	Pattern    string             `json:"pattern,omitempty" yaml:"pattern"`
+	Properties map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
+	Required   []string           `json:"required,omitempty" yaml:"required"`
+	Type       string             `json:"type,omitempty" yaml:"type"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
