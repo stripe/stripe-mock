@@ -50,7 +50,7 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 						CoerceParams(subSchema.Items, itemValMap)
 					} else if subSchema.Items.Type != "" {
 						// Handles the case of an array of primitive types
-						itemValCoerced, ok := coercePrimitiveType(itemVal, subSchema.Items.Type)
+						itemValCoerced, ok := coerceSchema(itemVal, subSchema.Items)
 						if ok {
 							valArr[i] = itemValCoerced
 						}
@@ -61,7 +61,7 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 			continue
 		}
 
-		valCoerced, ok := coercePrimitiveType(val, subSchema.Type)
+		valCoerced, ok := coerceSchema(val, subSchema)
 		if ok {
 			data[key] = valCoerced
 		}
@@ -125,6 +125,49 @@ func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bo
 	}
 
 	return nil, false
+}
+
+// coerceSchema tries to coerce a schema containing a primitive type from the
+// given generic interface{} value.
+//
+// It's similar to coercePrimitiveType above (and indeed calls into it), but
+// also handles the case of an anyOf schema that supports a number of different
+// primitve types.
+func coerceSchema(val interface{}, schema *spec.Schema) (interface{}, bool) {
+	if isSchemaPrimitiveType(schema) {
+		return coercePrimitiveType(val, schema.Type)
+	} else if schema.AnyOf != nil {
+		for _, subSchema := range schema.AnyOf {
+			val, ok := coerceSchema(val, subSchema)
+			if ok {
+				return val, ok
+			}
+		}
+	}
+
+	return nil, false
+}
+
+// isSchemaPrimitiveType checks whether the given schema is a coercable
+// primitive type (as opposed to an object or array).
+//
+// The conditional ladder in this function should be *identical* to the one in
+// coercePrimitiveType (i.e., if support is added for a new type, it needs to
+// be added in both places).
+func isSchemaPrimitiveType(schema *spec.Schema) bool {
+	if schema.Type == booleanType {
+		return true
+	}
+
+	if schema.Type == integerType {
+		return true
+	}
+
+	if schema.Type == numberType {
+		return true
+	}
+
+	return false
 }
 
 // parseIntegerIndexedMap tries to parse a map that has all integer-indexed

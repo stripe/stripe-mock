@@ -7,6 +7,24 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+func TestCoerceParams_AnyOfCoercion(t *testing.T) {
+	schema := &spec.Schema{Properties: map[string]*spec.Schema{
+		"objectorintkey": {
+			AnyOf: []*spec.Schema{
+				{Type: objectType},
+				{Type: integerType},
+			},
+		},
+	}}
+	data := map[string]interface{}{
+		"objectorintkey": "123",
+	}
+
+	err := CoerceParams(schema, data)
+	assert.NoError(t, err)
+	assert.Equal(t, 123, data["objectorintkey"])
+}
+
 func TestCoerceParams_ArrayCoercion(t *testing.T) {
 	// Array of primitive values
 	{
