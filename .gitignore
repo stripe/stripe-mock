@@ -1,4 +1,5 @@
 .env
 .envrc
-dist/
-stripe-mock
+/TODO.md
+/stripe-mock
+/dist/
