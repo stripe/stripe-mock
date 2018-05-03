@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"sort"
@@ -12,8 +11,8 @@ import (
 	"time"
 
 	"github.com/lestrrat/go-jsval"
+	"github.com/stripe/stripe-mock/param"
 	"github.com/stripe/stripe-mock/param/coercer"
-	"github.com/stripe/stripe-mock/param/parser"
 	"github.com/stripe/stripe-mock/spec"
 )
 
@@ -167,31 +166,18 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
 
-	var formString string
-	if r.Method == "GET" {
-		formString = r.URL.RawQuery
-	} else {
-		formBytes, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			fmt.Printf("Couldn't read request body: %v\n", err)
-			writeResponse(w, r, start, http.StatusInternalServerError,
-				createInternalServerError())
-			return
-		}
-		r.Body.Close()
-		formString = string(formBytes)
-	}
-	requestData, err := parser.ParseFormString(formString)
+	requestData, err := param.ParseParams(r)
 	if err != nil {
-		fmt.Printf("Couldn't parse query/body: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError,
-			createInternalServerError())
+		message := fmt.Sprintf("Couldn't parse query/body: %v", err)
+		fmt.Printf(message + "\n")
+		stripeError := createStripeError(typeInvalidRequestError, message)
+		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 		return
 	}
 
 	if verbose {
-		if formString != "" {
-			fmt.Printf("Request data: %s\n", formString)
+		if requestData != nil {
+			fmt.Printf("Request data: %+v\n", requestData)
 		} else {
 			fmt.Printf("Request data: (none)\n")
 		}
@@ -200,12 +186,37 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// Currently we only validate parameters in the request body, but we should
 	// really validate query and URL parameters as well now that we've
 	// transitioned to OpenAPI 3.0
-	bodySchema := getRequestBodySchema(route.operation)
-	if bodySchema != nil {
+	mediaType, bodySchema := getRequestBodySchema(route.operation)
+	if mediaType != nil {
+		contentType := r.Header.Get("Content-Type")
+
+		if contentType == "" {
+			message := fmt.Sprintf(contentTypeEmpty, *mediaType)
+			fmt.Printf(message + "\n")
+			stripeError := createStripeError(typeInvalidRequestError, message)
+			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+			return
+		}
+
+		// Truncate content type parameters. For example, given:
+		//
+		//     application/json; charset=utf-8
+		//
+		// We want to chop off the `; charset=utf-8` at the end.
+		contentType = strings.Split(contentType, ";")[0]
+
+		if contentType != *mediaType {
+			message := fmt.Sprintf(contentTypeMismatched, *mediaType, contentType)
+			fmt.Printf(message + "\n")
+			stripeError := createStripeError(typeInvalidRequestError, message)
+			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+			return
+		}
+
 		err := coercer.CoerceParams(bodySchema, requestData)
 		if err != nil {
-			fmt.Printf("Coercion error: %v\n", err)
-			message := fmt.Sprintf("Request error: %v", err)
+			message := fmt.Sprintf("Request coercion error: %v", err)
+			fmt.Printf(message + "\n")
 			stripeError := createStripeError(typeInvalidRequestError, message)
 			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
@@ -213,8 +224,8 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 		err = route.requestBodyValidator.Validate(requestData)
 		if err != nil {
-			fmt.Printf("Validation error: %v\n", err)
-			message := fmt.Sprintf("Request error: %v", err)
+			message := fmt.Sprintf("Request validation error: %v", err)
+			fmt.Printf(message + "\n")
 			stripeError := createStripeError(typeInvalidRequestError, message)
 			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
 			return
@@ -270,7 +281,7 @@ func (s *StubServer) initializeRouter() error {
 		for verb, operation := range verbs {
 			numEndpoints++
 
-			requestBodySchema := getRequestBodySchema(operation)
+			_, requestBodySchema := getRequestBodySchema(operation)
 			var requestBodyValidator *jsval.JSVal
 			if requestBodySchema != nil {
 				var err error
@@ -398,6 +409,9 @@ func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParam
 //
 
 const (
+	contentTypeEmpty      = "Request's `Content-Type` header was empty. Expected: `%s`."
+	contentTypeMismatched = "Request's `Content-Type` didn't match the path's expected media type. Expected: `%s`. Was: `%s`."
+
 	invalidAuthorization = "Please authenticate by specifying an " +
 		"`Authorization` header with any valid looking testmode secret API " +
 		"key. For example, `Authorization: Bearer sk_test_123`. " +
@@ -519,16 +533,23 @@ func extractExpansions(data map[string]interface{}) (*ExpansionLevel, []string) 
 	return nil, nil
 }
 
-func getRequestBodySchema(operation *spec.Operation) *spec.Schema {
+// getRequestBodySchema gets the media type and expected request schema for the
+// given operation. We don't expect any endpoint in the Stripe API to have
+// multiple supported media types, so the operation's first media type and
+// request schema is always the one that's returned.
+//
+// The first value is a media type like "application/x-www-form-urlencoded", or
+// nil if the operation has no request schemas.
+func getRequestBodySchema(operation *spec.Operation) (*string, *spec.Schema) {
 	if operation.RequestBody == nil {
-		return nil
+		return nil, nil
 	}
-	mediaType, mediaTypePresent :=
-		operation.RequestBody.Content["application/x-www-form-urlencoded"]
-	if !mediaTypePresent {
-		return nil
+
+	for mediaType, spec := range operation.RequestBody.Content {
+		return &mediaType, spec.Schema
 	}
-	return mediaType.Schema
+
+	return nil, nil
 }
 
 func isCurl(userAgent string) bool {
