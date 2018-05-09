@@ -84,7 +84,7 @@ func openapiOpenapiFixtures3Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "openapi/openapi/fixtures3.json", size: 42305, mode: os.FileMode(420), modTime: time.Unix(1525878826, 0)}
+	info := bindataFileInfo{name: "openapi/openapi/fixtures3.json", size: 42305, mode: os.FileMode(420), modTime: time.Unix(1525881858, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func openapiOpenapiSpec3Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "openapi/openapi/spec3.json", size: 1215667, mode: os.FileMode(420), modTime: time.Unix(1525878826, 0)}
+	info := bindataFileInfo{name: "openapi/openapi/spec3.json", size: 1215667, mode: os.FileMode(420), modTime: time.Unix(1525881858, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
