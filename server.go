@@ -183,53 +183,13 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Currently we only validate parameters in the request body, but we should
-	// really validate query and URL parameters as well now that we've
-	// transitioned to OpenAPI 3.0
-	mediaType, bodySchema := getRequestBodySchema(route.operation)
-	if mediaType != nil {
-		contentType := r.Header.Get("Content-Type")
-
-		if contentType == "" {
-			message := fmt.Sprintf(contentTypeEmpty, *mediaType)
-			fmt.Printf(message + "\n")
-			stripeError := createStripeError(typeInvalidRequestError, message)
-			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
-			return
-		}
-
-		// Truncate content type parameters. For example, given:
-		//
-		//     application/json; charset=utf-8
-		//
-		// We want to chop off the `; charset=utf-8` at the end.
-		contentType = strings.Split(contentType, ";")[0]
-
-		if contentType != *mediaType {
-			message := fmt.Sprintf(contentTypeMismatched, *mediaType, contentType)
-			fmt.Printf(message + "\n")
-			stripeError := createStripeError(typeInvalidRequestError, message)
-			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
-			return
-		}
-
-		err := coercer.CoerceParams(bodySchema, requestData)
-		if err != nil {
-			message := fmt.Sprintf("Request coercion error: %v", err)
-			fmt.Printf(message + "\n")
-			stripeError := createStripeError(typeInvalidRequestError, message)
-			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
-			return
-		}
-
-		err = route.requestBodyValidator.Validate(requestData)
-		if err != nil {
-			message := fmt.Sprintf("Request validation error: %v", err)
-			fmt.Printf(message + "\n")
-			stripeError := createStripeError(typeInvalidRequestError, message)
-			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
-			return
-		}
+	// Note that requestData is actually manipulated in place, but we show it
+	// returned here to make it clear that this function will be manipulating
+	// it.
+	requestData, stripeError := validateAndCoerceRequest(r, route, requestData)
+	if stripeError != nil {
+		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+		return
 	}
 
 	expansions, rawExpansions := extractExpansions(requestData)
@@ -584,6 +544,73 @@ func parseExpansionLevel(raw []string) *ExpansionLevel {
 	}
 
 	return level
+}
+
+// validateAndCoerceRequest validates an incoming request against an OpenAPI
+// schema and does parameter coercion.
+//
+// Firstly, `Content-Type` is checked against the schema's media type, then
+// string-encoded parameters are coerced to expected types (where possible).
+// Finally, we validate the incoming payload against the schema.
+func validateAndCoerceRequest(
+	r *http.Request,
+	route *stubServerRoute,
+	requestData map[string]interface{}) (map[string]interface{}, *ResponseError) {
+
+	// Currently we only validate parameters in the request body, but we should
+	// really validate query and URL parameters as well now that we've
+	// transitioned to OpenAPI 3.0.
+	mediaType, bodySchema := getRequestBodySchema(route.operation)
+
+	// There are no parameters on this route to validate.
+	if mediaType == nil {
+		return requestData, nil
+	}
+
+	contentType := r.Header.Get("Content-Type")
+
+	if contentType == "" {
+		// A special case: if a `DELETE` operation comes in with no request
+		// payload, we allow it. Most `DELETE` operations take no parameters,
+		// but a few of them take some optional ones.
+		if r.Method == http.MethodDelete {
+			return requestData, nil
+		}
+
+		message := fmt.Sprintf(contentTypeEmpty, *mediaType)
+		fmt.Printf(message + "\n")
+		return nil, createStripeError(typeInvalidRequestError, message)
+	}
+
+	// Truncate content type parameters. For example, given:
+	//
+	//     application/json; charset=utf-8
+	//
+	// We want to chop off the `; charset=utf-8` at the end.
+	contentType = strings.Split(contentType, ";")[0]
+
+	if contentType != *mediaType {
+		message := fmt.Sprintf(contentTypeMismatched, *mediaType, contentType)
+		fmt.Printf(message + "\n")
+		return nil, createStripeError(typeInvalidRequestError, message)
+	}
+
+	err := coercer.CoerceParams(bodySchema, requestData)
+	if err != nil {
+		message := fmt.Sprintf("Request coercion error: %v", err)
+		fmt.Printf(message + "\n")
+		return nil, createStripeError(typeInvalidRequestError, message)
+	}
+
+	err = route.requestBodyValidator.Validate(requestData)
+	if err != nil {
+		message := fmt.Sprintf("Request validation error: %v", err)
+		fmt.Printf(message + "\n")
+		return nil, createStripeError(typeInvalidRequestError, message)
+	}
+
+	// All checks were successful.
+	return requestData, nil
 }
 
 func validateAuth(auth string) bool {
