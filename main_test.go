@@ -83,14 +83,26 @@ func initTestSpec() {
 				Content: map[string]spec.MediaType{
 					"application/json": {
 						Schema: &spec.Schema{
-							Ref: "#/components/schemas/customer",
+							Ref: "#/components/schemas/charge",
 						},
 					},
 				},
 			},
 		},
 	}
-	chargeDeleteMethod = &spec.Operation{}
+	chargeDeleteMethod = &spec.Operation{
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/json": {
+						Schema: &spec.Schema{
+							Ref: "#/components/schemas/charge",
+						},
+					},
+				},
+			},
+		},
+	}
 	chargeGetMethod = &spec.Operation{}
 
 	// Here so we can test the relatively rare "action" operations (e.g.,

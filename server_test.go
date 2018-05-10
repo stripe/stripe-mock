@@ -106,6 +106,14 @@ func TestStubServer_ErrorsOnEmptyContentType(t *testing.T) {
 		errorInfo["message"])
 }
 
+func TestStubServer_AllowsEmptyContentTypeOnDelete(t *testing.T) {
+	headers := getDefaultHeaders()
+	headers["Content-Type"] = ""
+
+	resp, _ := sendRequest(t, "DELETE", "/v1/charges/ch_123", "", headers)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
 func TestStubServer_ErrorsOnMismatchedContentType(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["Content-Type"] = "application/json"
@@ -178,7 +186,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 			&http.Request{Method: "POST",
 				URL: &url.URL{Path: "/v1/invoices/in_123/pay"}})
 		assert.NotNil(t, route)
-		assert.Equal(t, chargeDeleteMethod, route.operation)
+		assert.Equal(t, invoicePayMethod, route.operation)
 		assert.Equal(t, "in_123", *(*pathParams).PrimaryID)
 		assert.Equal(t, []*PathParamsSecondaryID(nil), (*pathParams).SecondaryIDs)
 	}
@@ -202,7 +210,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds/fr_123"}})
 		assert.NotNil(t, route)
-		assert.Equal(t, chargeDeleteMethod, route.operation)
+		assert.Equal(t, applicationFeeRefundGetMethod, route.operation)
 		assert.Equal(t, "fr_123", *(*pathParams).PrimaryID)
 		assert.Equal(t, 1, len((*pathParams).SecondaryIDs))
 		assert.Equal(t, "fee_123", (*pathParams).SecondaryIDs[0].ID)
