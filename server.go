@@ -201,6 +201,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	responseData, err := generator.Generate(&GenerateParams{
 		Expansions:  expansions,
 		PathParams:  pathParams,
+		RequestData: requestData,
 		RequestPath: r.URL.Path,
 		Schema:      responseContent.Schema,
 	})
@@ -602,6 +603,7 @@ func validateAndCoerceRequest(
 		return nil, createStripeError(typeInvalidRequestError, message)
 	}
 
+	fmt.Printf("Request data = %+v\n", requestData)
 	err = route.requestBodyValidator.Validate(requestData)
 	if err != nil {
 		message := fmt.Sprintf("Request validation error: %v", err)

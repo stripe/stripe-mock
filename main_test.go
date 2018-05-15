@@ -68,6 +68,7 @@ func initTestSpec() {
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": {
 					Schema: &spec.Schema{
+						AdditionalProperties: false,
 						Properties: map[string]*spec.Schema{
 							"amount": {
 								Type: "integer",

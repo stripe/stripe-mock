@@ -21,7 +21,7 @@ import (
 
 func TestStubServer(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&currency=usd", getDefaultHeaders())
+		"amount=123", getDefaultHeaders())
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -31,7 +31,43 @@ func TestStubServer(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestStubServer_Error(t *testing.T) {
+func TestStubServer_MissingParam(t *testing.T) {
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"", getDefaultHeaders())
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	errorType, ok := errorInfo["type"]
+	assert.Equal(t, errorType, "invalid_request_error")
+	assert.True(t, ok)
+	message, ok := errorInfo["message"]
+	assert.True(t, ok)
+	assert.Contains(t, message, "object property 'amount' is required")
+}
+
+func TestStubServer_ExtraParam(t *testing.T) {
+	resp, body := sendRequest(t, "POST", "/v1/charges",
+		"amount=123&doesntexist=foo", getDefaultHeaders())
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	errorType, ok := errorInfo["type"]
+	assert.Equal(t, errorType, "invalid_request_error")
+	assert.True(t, ok)
+	message, ok := errorInfo["message"]
+	assert.True(t, ok)
+	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
+}
+
+func TestStubServer_InvalidAuthorization(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/a", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
@@ -52,7 +88,7 @@ func TestStubServer_AllowsContentTypeWithParameters(t *testing.T) {
 	headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
 
 	resp, _ := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&currency=usd", headers)
+		"amount=123", headers)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
@@ -79,7 +115,7 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["User-Agent"] = "curl/1.2.3"
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&currency=usd", headers)
+		"amount=123", headers)
 
 	// Note the two spaces in front of "id" which indicate that our JSON is
 	// pretty printed.
@@ -92,7 +128,7 @@ func TestStubServer_ErrorsOnEmptyContentType(t *testing.T) {
 	headers["Content-Type"] = ""
 
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&currency=usd", headers)
+		"amount=123", headers)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -119,7 +155,7 @@ func TestStubServer_ErrorsOnMismatchedContentType(t *testing.T) {
 	headers["Content-Type"] = "application/json"
 
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&currency=usd", headers)
+		"amount=123", headers)
 	fmt.Printf("body = %+v\n", string(body))
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
