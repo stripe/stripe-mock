@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/stripe/stripe-mock/generator/datareplacer"
 	"github.com/stripe/stripe-mock/spec"
 )
 
@@ -32,6 +33,14 @@ type GenerateParams struct {
 	// The value of this field is considered in a post-processing step for the
 	// generator. It's not used in the generator at all.
 	PathParams *PathParamsMap
+
+	// RequestData is a collection of decoded data that was included as part of
+	// the request's payload.
+	//
+	// It's used to find opportunities to reflect information included with a
+	// request into the response to make responses look more accurate than
+	// they'd otherwise be if they'd been generated from fixtures alone..
+	RequestData map[string]interface{}
 
 	// RequestPath is the path of the URL being requested which we're
 	// generating data for. It's used to populate the url property of any
@@ -107,6 +116,10 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		// IDs that we replaced. This is a separate step because IDs could have
 		// been found and replace at any point in the generation process.
 		distributeReplacedIDs(pathParams, data)
+	}
+
+	if mapData, ok := data.(map[string]interface{}); ok {
+		mapData = datareplacer.ReplaceData(params.RequestData, mapData)
 	}
 
 	return data, nil
