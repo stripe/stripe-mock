@@ -46,5 +46,18 @@ func ReplaceData(requestData map[string]interface{}, responseData map[string]int
 }
 
 func isSameType(v1, v2 interface{}) bool {
-	return reflect.ValueOf(v1).Type() == reflect.ValueOf(v2).Type()
+	v1Value := reflect.ValueOf(v1)
+	v2Value := reflect.ValueOf(v2)
+
+	// Reflect in Go has the concept of a "zero Value" (not be confused with a
+	// type's zero value with a lowercase "v") and asking for Type on one will
+	// panic. I'm not exactly sure under what conditions these are generated,
+	// but they are occasionally, so here we hedge against them.
+	//
+	// https://github.com/stripe/stripe-mock/issues/75
+	if !v1Value.IsValid() || !v2Value.IsValid() {
+		return false
+	}
+
+	return v1Value.Type() == v2Value.Type()
 }
