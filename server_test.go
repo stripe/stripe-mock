@@ -172,6 +172,15 @@ func TestStubServer_ErrorsOnMismatchedContentType(t *testing.T) {
 		errorInfo["message"])
 }
 
+func TestStubServer_ReflectsIdempotencyKey(t *testing.T) {
+	headers := getDefaultHeaders()
+	headers["Idempotency-Key"] = "my-key"
+
+	resp, _ := sendRequest(t, "POST", "/v1/charges",
+		"amount=123", headers)
+	assert.Equal(t, "my-key", resp.Header.Get("Idempotency-Key"))
+}
+
 func TestStubServer_RoutesRequest(t *testing.T) {
 	server := getStubServer(t)
 
