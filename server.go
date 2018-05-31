@@ -135,6 +135,13 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// We don't do anything with the idempotency key for now, but reflect it
+	// back into response headers like the Stripe API does.
+	idempotencyKey := r.Header.Get("Idempotency-Key")
+	if idempotencyKey != "" {
+		w.Header().Set("Idempotency-Key", idempotencyKey)
+	}
+
 	// Every response needs a Request-Id header except the invalid authorization
 	w.Header().Set("Request-Id", "req_123")
 
