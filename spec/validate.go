@@ -79,8 +79,17 @@ func getJSONSchemaForOpenAPI3Schema(oai *Schema) map[string]interface{} {
 		}
 		jss["enum"] = jssEnum
 	}
+	if oai.Format != "" {
+		// Note that the major format that will be seen here, unix-time, will
+		// not be supported by the validator we're using -- we should probably
+		// see if we can support that properly.
+		jss["format"] = oai.Format
+	}
 	if oai.Items != nil {
 		jss["items"] = getJSONSchemaForOpenAPI3Schema(oai.Items)
+	}
+	if oai.MaxLength != 0 {
+		jss["maxLength"] = oai.MaxLength
 	}
 	if oai.Pattern != "" {
 		jss["pattern"] = oai.Pattern
