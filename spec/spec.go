@@ -40,11 +40,14 @@ type HTTPVerb string
 // it's safe to ignore. If a field not in this list appears in the OpenAPI spec,
 // then we'll get an error so we remember to update stripe-mock to support it.
 var supportedSchemaFields = []string{
+	"$ref",
 	"additionalProperties",
 	"anyOf",
 	"description",
 	"enum",
+	"format",
 	"items",
+	"maxLength",
 	"nullable",
 	"pattern",
 	"properties",
@@ -54,7 +57,11 @@ var supportedSchemaFields = []string{
 	"x-expandableFields",
 	"x-expansionResources",
 	"x-resourceId",
-	"$ref",
+
+	// This is currently a hint for the server-side so I haven't included it in
+	// Schema yet. If we do start validating responses that come out of
+	// stripe-mock, we may need to observe this as well.
+	"x-stripeBypassValidation",
 }
 
 type Schema struct {
@@ -68,7 +75,9 @@ type Schema struct {
 
 	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
 	Enum       []interface{}      `json:"enum,omitempty" yaml:"enum"`
+	Format     string             `json:"format,omitempty" yaml:"format"`
 	Items      *Schema            `json:"items,omitempty" yaml:"items"`
+	MaxLength  int                `json:"maxLength,omitempty" yaml:"maxLength"`
 	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
 	Pattern    string             `json:"pattern,omitempty" yaml:"pattern"`
 	Properties map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
