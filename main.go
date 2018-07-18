@@ -18,7 +18,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const defaultPort = 12111
+const defaultPortHTTP = 12111
+const defaultPortHTTPS = 12112
 
 // verbose tracks whether the program is operating in verbose mode
 var verbose bool
@@ -30,41 +31,45 @@ var version = "master"
 // ---
 
 func main() {
-	var https bool
-	var showVersion bool
-	var port int
-	var fixturesPath string
-	var specPath string
-	var unix string
+	var options options
 
-	flag.BoolVar(&https, "https", false, "Run with HTTPS (which also allows HTTP/2 to be activated)")
-	flag.IntVar(&port, "port", 0, "Port to listen on (also respects PORT from environment)")
-	flag.StringVar(&fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version")
-	flag.StringVar(&specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
-	flag.StringVar(&unix, "unix", "", "Unix socket to listen on")
+	flag.BoolVar(&options.http, "http", false, "Run with HTTP")
+	flag.IntVar(&options.httpPort, "http-port", 0, "Port to listen on for HTTP")
+	flag.StringVar(&options.httpUnixSocket, "http-unix", "", "Unix socket to listen on for HTTP")
+
+	flag.BoolVar(&options.https, "https", false, "Run with HTTPS (which also allows HTTP/2 to be activated)")
+	flag.IntVar(&options.httpsPort, "https-port", 0, "Port to listen on for HTTPS")
+	flag.StringVar(&options.httpsUnixSocket, "https-unix", "", "Unix socket to listen on for HTTPS")
+
+	flag.IntVar(&options.port, "port", 0, "Port to listen on (also respects PORT from environment)")
+	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version")
+	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
+	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
-	flag.BoolVar(&showVersion, "version", false, "Show version and exit")
+	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
+
 	flag.Parse()
 
 	fmt.Printf("stripe-mock %s\n", version)
-	if showVersion || len(flag.Args()) == 1 && flag.Arg(0) == "version" {
+	if options.showVersion || len(flag.Args()) == 1 && flag.Arg(0) == "version" {
 		return
 	}
 
-	if unix != "" && port != 0 {
+	err := options.checkConflictingOptions()
+	if err != nil {
 		flag.Usage()
-		abort("Specify only one of -port or -unix\n")
+		abort(fmt.Sprintf("Invalid options: %v", err))
 	}
 
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := getSpec(specPath)
+	stripeSpec, err := getSpec(options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := getFixtures(fixturesPath)
+	fixtures, err := getFixtures(options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
@@ -77,12 +82,33 @@ func main() {
 
 	http.HandleFunc("/", stub.HandleRequest)
 
-	listener, err := getListener(port, unix)
+	httpListener, err := options.getHTTPListener()
 	if err != nil {
 		abort(err.Error())
 	}
 
-	if https {
+	// Only start HTTP if requested (it's the default, but it won't start if
+	// HTTPS is explicitly requested instead)
+	if httpListener != nil {
+		server := http.Server{}
+
+		// Listen in a new Goroutine that so we can start a simultaneous HTTPS
+		// listener if necessary.
+		go func() {
+			err := server.Serve(httpListener)
+			if err != nil {
+				abort(err.Error())
+			}
+		}()
+	}
+
+	httpsListener, err := options.getNonSecureHTTPSListener()
+	if err != nil {
+		abort(err.Error())
+	}
+
+	// Only start HTTPS if requested
+	if httpsListener != nil {
 		// Our self-signed certificate is bundled up using go-bindata so that
 		// it stays easy to distribute stripe-mock as a standalone binary with
 		// no other dependencies.
@@ -103,15 +129,141 @@ func main() {
 		}
 
 		server := http.Server{TLSConfig: tlsConfig}
-		tlsListener := tls.NewListener(listener, tlsConfig)
-		server.Serve(tlsListener)
-	} else {
-		server := http.Server{}
-		server.Serve(listener)
+		tlsListener := tls.NewListener(httpsListener, tlsConfig)
+
+		go func() {
+			err := server.Serve(tlsListener)
+			if err != nil {
+				abort(err.Error())
+			}
+		}()
 	}
+
+	// Block forever. The serve Goroutines above will abort the program if
+	// either of them fails.
+	select {}
 }
 
-// ---
+//
+// Private types
+//
+
+// options is a container for the command line options passed to stripe-mock.
+type options struct {
+	fixturesPath string
+
+	http           bool
+	httpPort       int
+	httpUnixSocket string
+
+	https           bool
+	httpsPort       int
+	httpsUnixSocket string
+
+	port        int
+	showVersion bool
+	specPath    string
+	unixSocket  string
+}
+
+func (o *options) checkConflictingOptions() error {
+	if o.unixSocket != "" && o.port != 0 {
+		return fmt.Errorf("Please specify only one of -port or -unix")
+	}
+
+	//
+	// HTTP
+	//
+
+	if o.http && (o.httpUnixSocket != "" || o.httpPort != 0) {
+		return fmt.Errorf("Please don't specify -http when using -http-port or -http-unix")
+	}
+
+	if (o.unixSocket != "" || o.port != 0) && (o.httpUnixSocket != "" || o.httpPort != 0) {
+		return fmt.Errorf("Please don't specify -port or -unix when using -http-port or -http-unix")
+	}
+
+	if o.httpUnixSocket != "" && o.httpPort != 0 {
+		return fmt.Errorf("Please specify only one of -http-port or -http-unix")
+	}
+
+	//
+	// HTTPS
+	//
+
+	if o.https && (o.httpsUnixSocket != "" || o.httpsPort != 0) {
+		return fmt.Errorf("Please don't specify -https when using -https-port or -https-unix")
+	}
+
+	if (o.unixSocket != "" || o.port != 0) && (o.httpsUnixSocket != "" || o.httpsPort != 0) {
+		return fmt.Errorf("Please don't specify -port or -unix when using -https-port or -https-unix")
+	}
+
+	if o.httpsUnixSocket != "" && o.httpsPort != 0 {
+		return fmt.Errorf("Please specify only one of -https-port or -https-unix")
+	}
+
+	return nil
+}
+
+// getHTTPListener gets a listener on a port or unix socket depending on the
+// options provided. If HTTP should not be enabled, it returns nil.
+func (o *options) getHTTPListener() (net.Listener, error) {
+	if o.httpPort != 0 {
+		return getPortListener(o.httpPort)
+	}
+
+	if o.httpUnixSocket != "" {
+		return getUnixSocketListener(o.httpUnixSocket)
+	}
+
+	// HTTP is active by default, but only if HTTPS is *not* active
+	if o.https || o.httpsPort != 0 || o.httpsUnixSocket != "" {
+		return nil, nil
+	}
+
+	if o.port != 0 {
+		return getPortListener(o.port)
+	}
+
+	if o.unixSocket != "" {
+		return getUnixSocketListener(o.unixSocket)
+	}
+
+	return getPortListenerDefault(defaultPortHTTP)
+}
+
+// getNonSecureHTTPSListener gets a basic listener on a port or unix socket
+// depending on the options provided. Its return listener must still be wrapped
+// in a TLSListener. If HTTPS should not be enabled, it returns nil.
+func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
+	if o.httpsPort != 0 {
+		return getPortListener(o.httpsPort)
+	}
+
+	if o.httpsUnixSocket != "" {
+		return getUnixSocketListener(o.httpsUnixSocket)
+	}
+
+	// HTTPS is disabled by default
+	if !o.https {
+		return nil, nil
+	}
+
+	if o.port != 0 {
+		return getPortListener(o.port)
+	}
+
+	if o.unixSocket != "" {
+		return getUnixSocketListener(o.unixSocket)
+	}
+
+	return getPortListenerDefault(defaultPortHTTPS)
+}
+
+//
+// Private functions
+//
 
 func abort(message string) {
 	fmt.Fprintf(os.Stderr, message)
@@ -132,20 +284,6 @@ func getTLSCertificate() (tls.Certificate, error) {
 	}
 
 	return tls.X509KeyPair(cert, key)
-}
-
-// getEnvPortOrDefault gets a port from the environment variable `PORT` or
-// falls back to the default port (`defaultPort`) if one was not present.
-func getEnvPortOrDefault() (int, error) {
-	if os.Getenv("PORT") != "" {
-		port, err := strconv.Atoi(os.Getenv("PORT"))
-		if err != nil {
-			return 0, err
-		}
-		return port, nil
-	}
-
-	return defaultPort, nil
 }
 
 func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
@@ -191,27 +329,29 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	return &fixtures, nil
 }
 
-func getListener(port int, unix string) (net.Listener, error) {
-	var err error
-	var listener net.Listener
-
-	if unix != "" {
-		listener, err = net.Listen("unix", unix)
-		fmt.Printf("Listening on unix socket %v\n", unix)
-	} else {
-		if port == 0 {
-			port, err = getEnvPortOrDefault()
-			if err != nil {
-				return nil, err
-			}
-		}
-		listener, err = net.Listen("tcp", ":"+strconv.Itoa(port))
-		fmt.Printf("Listening on port %v\n", port)
-	}
+func getPortListener(port int) (net.Listener, error) {
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		return nil, fmt.Errorf("Error listening on socket: %v\n", err)
+		return nil, fmt.Errorf("Error listening on port: %v\n", err)
 	}
+
+	fmt.Printf("Listening on port: %v\n", port)
 	return listener, nil
+}
+
+// getPortListenerDefault gets a port listener based on the environment
+// variable `PORT`, or falls back to a listener on the default port
+// (`defaultPort`) if one was not present.
+func getPortListenerDefault(defaultPort int) (net.Listener, error) {
+	if os.Getenv("PORT") != "" {
+		envPort, err := strconv.Atoi(os.Getenv("PORT"))
+		if err != nil {
+			return nil, err
+		}
+		return getPortListener(envPort)
+	}
+
+	return getPortListener(defaultPort)
 }
 
 func getSpec(specPath string) (*spec.Spec, error) {
@@ -244,4 +384,14 @@ func getSpec(specPath string) (*spec.Spec, error) {
 		return nil, fmt.Errorf("Error decoding spec: %v\n", err)
 	}
 	return &stripeSpec, nil
+}
+
+func getUnixSocketListener(unixSocket string) (net.Listener, error) {
+	listener, err := net.Listen("unix", unixSocket)
+	if err != nil {
+		return nil, fmt.Errorf("Error listening on socket: %v\n", err)
+	}
+
+	fmt.Printf("Listening on Unix socket: %v\n", unixSocket)
+	return listener, nil
 }
