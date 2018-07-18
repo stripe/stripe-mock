@@ -1,8 +1,9 @@
-//go:generate go-bindata openapi/openapi/fixtures3.json openapi/openapi/spec3.json
+//go:generate go-bindata cert/cert.pem cert/key.pem openapi/openapi/fixtures3.json openapi/openapi/spec3.json
 
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -29,12 +30,14 @@ var version = "master"
 // ---
 
 func main() {
+	var https bool
 	var showVersion bool
 	var port int
 	var fixturesPath string
 	var specPath string
 	var unix string
 
+	flag.BoolVar(&https, "https", false, "Run with HTTPS (which also allows HTTP/2 to be activated)")
 	flag.IntVar(&port, "port", 0, "Port to listen on (also respects PORT from environment)")
 	flag.StringVar(&fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version")
 	flag.StringVar(&specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
@@ -73,14 +76,39 @@ func main() {
 	}
 
 	http.HandleFunc("/", stub.HandleRequest)
-	server := http.Server{}
 
 	listener, err := getListener(port, unix)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	server.Serve(listener)
+	if https {
+		// Our self-signed certificate is bundled up using go-bindata so that
+		// it stays easy to distribute stripe-mock as a standalone binary with
+		// no other dependencies.
+		certificate, err := getTLSCertificate()
+		if err != nil {
+			abort(err.Error())
+		}
+
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{certificate},
+
+			// h2 is HTTP/2. A server with a default config normally doesn't
+			// need this hint, but Go is somewhat inflexible, and we need this
+			// here because we're using `Serve` and reading a TLS certificate
+			// from memory instead of using `ServeTLS` which would've read a
+			// certificate from file.
+			NextProtos: []string{"h2"},
+		}
+
+		server := http.Server{TLSConfig: tlsConfig}
+		tlsListener := tls.NewListener(listener, tlsConfig)
+		server.Serve(tlsListener)
+	} else {
+		server := http.Server{}
+		server.Serve(listener)
+	}
 }
 
 // ---
@@ -88,6 +116,22 @@ func main() {
 func abort(message string) {
 	fmt.Fprintf(os.Stderr, message)
 	os.Exit(1)
+}
+
+// getTLSCertificate reads a certificate and key from the assets built by
+// go-bindata.
+func getTLSCertificate() (tls.Certificate, error) {
+	cert, err := Asset("cert/cert.pem")
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	key, err := Asset("cert/key.pem")
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	return tls.X509KeyPair(cert, key)
 }
 
 // getEnvPortOrDefault gets a port from the environment variable `PORT` or
