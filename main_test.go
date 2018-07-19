@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"testing"
 
+	assert "github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-mock/spec"
 )
 
@@ -170,5 +173,165 @@ func initTestSpec() {
 				"post": invoicePayMethod,
 			},
 		},
+	}
+}
+
+func TestCheckConflictingOptions(t *testing.T) {
+	//
+	// Valid sets of options (not exhaustive, but included quite a few standard invocations)
+	//
+
+	{
+		options := &options{
+			http: true,
+		}
+		err := options.checkConflictingOptions()
+		assert.NoError(t, err)
+	}
+
+	{
+		options := &options{
+			https: true,
+		}
+		err := options.checkConflictingOptions()
+		assert.NoError(t, err)
+	}
+
+	{
+		options := &options{
+			https: true,
+			port:  12111,
+		}
+		err := options.checkConflictingOptions()
+		assert.NoError(t, err)
+	}
+
+	{
+		options := &options{
+			httpPort:  12111,
+			httpsPort: 12112,
+		}
+		err := options.checkConflictingOptions()
+		assert.NoError(t, err)
+	}
+
+	{
+		options := &options{
+			httpUnixSocket:  "/tmp/stripe-mock.sock",
+			httpsUnixSocket: "/tmp/stripe-mock-secure.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.NoError(t, err)
+	}
+
+	//
+	// Non-specific
+	//
+
+	{
+		options := &options{
+			port:       12111,
+			unixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please specify only one of -port or -unix"), err)
+	}
+
+	//
+	// HTTP
+	//
+
+	{
+		options := &options{
+			http:     true,
+			httpPort: 12111,
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -http when using -http-port or -http-unix"), err)
+	}
+
+	{
+		options := &options{
+			http:           true,
+			httpUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -http when using -http-port or -http-unix"), err)
+	}
+
+	{
+		options := &options{
+			port:     12111,
+			httpPort: 12111,
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -port or -unix when using -http-port or -http-unix"), err)
+	}
+
+	{
+		options := &options{
+			unixSocket:     "/tmp/stripe-mock.sock",
+			httpUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -port or -unix when using -http-port or -http-unix"), err)
+	}
+
+	{
+		options := &options{
+			httpPort:       12111,
+			httpUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please specify only one of -http-port or -http-unix"), err)
+	}
+
+	//
+	// HTTPS
+	//
+
+	{
+		options := &options{
+			https:     true,
+			httpsPort: 12111,
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -https when using -https-port or -https-unix"), err)
+	}
+
+	{
+		options := &options{
+			https:           true,
+			httpsUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -https when using -https-port or -https-unix"), err)
+	}
+
+	{
+		options := &options{
+			port:      12111,
+			httpsPort: 12111,
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -port or -unix when using -https-port or -https-unix"), err)
+	}
+
+	{
+		options := &options{
+			unixSocket:      "/tmp/stripe-mock.sock",
+			httpsUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please don't specify -port or -unix when using -https-port or -https-unix"), err)
+	}
+
+	{
+		options := &options{
+			httpsPort:       12111,
+			httpsUnixSocket: "/tmp/stripe-mock.sock",
+		}
+		err := options.checkConflictingOptions()
+		assert.Equal(t, fmt.Errorf("Please specify only one of -https-port or -https-unix"), err)
 	}
 }

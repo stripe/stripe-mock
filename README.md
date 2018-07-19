@@ -12,6 +12,50 @@ the API reference][apiref].
 
 ## Usage
 
+If you have Go installed, you can install the basic binary with:
+
+``` sh
+go get -u github.com/stripe/stripe-mock
+```
+
+With no arguments, stripe-mock will listen with HTTP on its default port of
+`12111`:
+
+``` sh
+stripe-mock
+```
+
+It can also be activated with HTTPS (and by extension support for HTTP/2) using
+the `-https` flag (the default port changes to `12112` for HTTPS):
+
+``` sh
+stripe-mock -https
+```
+
+For either HTTP or HTTPS, the port can be specified with either the `PORT`
+environmental variable or the `-port` option (the latter is preferred if both
+are present):
+
+``` sh
+stripe-mock -port 12111
+```
+
+It can also listen on a Unix socket:
+
+``` sh
+stripe-mock -https -unix /tmp/stripe-mock-secure.sock
+```
+
+It can be configured to receive both HTTP _and_ HTTPS by using the
+`-http-port`, `-http-unix`, `-https-port`, and `-https-unix` options (and note
+that these cannot be mixed with any of the basic options above):
+
+``` sh
+stripe-mock -http-port 12111 -https-port 12112
+```
+
+### Homebrew
+
 Get it from Homebrew or download it [from the releases page][releases]:
 
 ``` sh
@@ -24,34 +68,28 @@ brew services start stripe-mock
 brew upgrade stripe-mock
 ```
 
-Or if you have Go installed you can build it:
+The Homebrew service listens on port `12111` for HTTP and `12112` for HTTPS and
+HTTP/2.
 
-``` sh
-go get -u github.com/stripe/stripe-mock
-```
+### Docker
 
-Run it:
-
-``` sh
-stripe-mock
-```
-
-Or with docker:
 ``` sh
 # build
 docker build . -t stripe-mock
 # run
-docker run -p 12111:12111 stripe-mock
+docker run -p 12111:12112 stripe-mock
 ```
 
-Then from another terminal:
+The default Docker `ENTRYPOINT` listens on port `12111` for HTTP and `12112`
+for HTTPS and HTTP/2.
+
+### Sample request
+
+After you've started stripe-mock, you can try a sample request against it:
 
 ``` sh
 curl -i http://localhost:12111/v1/charges -H "Authorization: Bearer sk_test_123"
 ```
-
-By default, stripe-mock runs on port 12111, but is configurable with the
-`-port` option.
 
 ## Development
 
