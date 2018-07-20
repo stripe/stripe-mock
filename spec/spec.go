@@ -23,15 +23,15 @@ const (
 //
 
 type Components struct {
-	Schemas map[string]*Schema `json:"schemas" yaml:"schemas"`
+	Schemas map[string]*Schema `json:"schemas"`
 }
 
 type ExpansionResources struct {
-	OneOf []*Schema `json:"oneOf" yaml:"oneOf"`
+	OneOf []*Schema `json:"oneOf"`
 }
 
 type Fixtures struct {
-	Resources map[ResourceID]interface{} `json:"resources" yaml:"resources"`
+	Resources map[ResourceID]interface{} `json:"resources"`
 }
 
 type HTTPVerb string
@@ -71,26 +71,26 @@ type Schema struct {
 	//
 	// We currently just read it as an `interface{}` because we're not using it
 	// for anything right now.
-	AdditionalProperties interface{} `json:"additionalProperties,omitempty" yaml:"additionalProperties"`
+	AdditionalProperties interface{} `json:"additionalProperties,omitempty"`
 
-	AnyOf      []*Schema          `json:"anyOf,omitempty" yaml:"anyOf"`
-	Enum       []interface{}      `json:"enum,omitempty" yaml:"enum"`
-	Format     string             `json:"format,omitempty" yaml:"format"`
-	Items      *Schema            `json:"items,omitempty" yaml:"items"`
-	MaxLength  int                `json:"maxLength,omitempty" yaml:"maxLength"`
-	Nullable   bool               `json:"nullable,omitempty" yaml:"nullable"`
-	Pattern    string             `json:"pattern,omitempty" yaml:"pattern"`
-	Properties map[string]*Schema `json:"properties,omitempty" yaml:"properties"`
-	Required   []string           `json:"required,omitempty" yaml:"required"`
-	Type       string             `json:"type,omitempty" yaml:"type"`
+	AnyOf      []*Schema          `json:"anyOf,omitempty"`
+	Enum       []interface{}      `json:"enum,omitempty"`
+	Format     string             `json:"format,omitempty"`
+	Items      *Schema            `json:"items,omitempty"`
+	MaxLength  int                `json:"maxLength,omitempty"`
+	Nullable   bool               `json:"nullable,omitempty"`
+	Pattern    string             `json:"pattern,omitempty"`
+	Properties map[string]*Schema `json:"properties,omitempty"`
+	Required   []string           `json:"required,omitempty"`
+	Type       string             `json:"type,omitempty"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
-	Ref string `json:"$ref,omitempty" yaml:"$ref"`
+	Ref string `json:"$ref,omitempty"`
 
-	XExpandableFields   *[]string           `json:"x-expandableFields,omitempty" yaml:"x-expandableFields"`
-	XExpansionResources *ExpansionResources `json:"x-expansionResources,omitempty" yaml:"x-expansionResources"`
-	XResourceID         string              `json:"x-resourceId,omitempty" yaml:"x-resourceId"`
+	XExpandableFields   *[]string           `json:"x-expandableFields,omitempty"`
+	XExpansionResources *ExpansionResources `json:"x-expansionResources,omitempty"`
+	XResourceID         string              `json:"x-resourceId,omitempty"`
 }
 
 func (s *Schema) String() string {
@@ -132,42 +132,42 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 }
 
 type MediaType struct {
-	Schema *Schema `json:"schema" yaml:"schema"`
+	Schema *Schema `json:"schema"`
 }
 
 type Operation struct {
-	Description string                  `json:"description" yaml:"description"`
-	OperationID string                  `json:"operation_id" yaml:"operation_id"`
-	Parameters  []*Parameter            `json:"parameters" yaml:"parameters"`
-	RequestBody *RequestBody            `json:"requestBody" yaml:"requestBody"`
-	Responses   map[StatusCode]Response `json:"responses" yaml:"responses"`
+	Description string                  `json:"description"`
+	OperationID string                  `json:"operation_id"`
+	Parameters  []*Parameter            `json:"parameters"`
+	RequestBody *RequestBody            `json:"requestBody"`
+	Responses   map[StatusCode]Response `json:"responses"`
 }
 
 type Parameter struct {
-	Description string  `json:"description" yaml:"description"`
-	In          string  `json:"in" yaml:"in"`
-	Name        string  `json:"name" yaml:"name"`
-	Required    bool    `json:"required" yaml:"required"`
-	Schema      *Schema `json:"schema" yaml:"schema"`
+	Description string  `json:"description"`
+	In          string  `json:"in"`
+	Name        string  `json:"name"`
+	Required    bool    `json:"required"`
+	Schema      *Schema `json:"schema"`
 }
 
 type Path string
 
 type RequestBody struct {
-	Content  map[string]MediaType `json:"content" yaml:"content"`
-	Required bool                 `json:"required" yaml:"required"`
+	Content  map[string]MediaType `json:"content"`
+	Required bool                 `json:"required"`
 }
 
 type Response struct {
-	Description string               `json:"description" yaml:"description"`
-	Content     map[string]MediaType `json:"content" yaml:"content"`
+	Description string               `json:"description"`
+	Content     map[string]MediaType `json:"content"`
 }
 
 type ResourceID string
 
 type Spec struct {
-	Components Components                       `json:"components" yaml:"components"`
-	Paths      map[Path]map[HTTPVerb]*Operation `json:"paths" yaml:"paths"`
+	Components Components                       `json:"components"`
+	Paths      map[Path]map[HTTPVerb]*Operation `json:"paths"`
 }
 
 type StatusCode string
