@@ -11,7 +11,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/stripe/stripe-mock/spec"
 )
@@ -292,6 +294,10 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 		// And do the same for fixtures
 		data, err = Asset("openapi/openapi/fixtures3.json")
 	} else {
+		if !isJSONFile(fixturesPath) {
+			return nil, fmt.Errorf("Fixtures should come from a JSON file")
+		}
+
 		data, err = ioutil.ReadFile(fixturesPath)
 	}
 
@@ -341,6 +347,10 @@ func getSpec(specPath string) (*spec.Spec, error) {
 		// Load the spec information from go-bindata
 		data, err = Asset("openapi/openapi/spec3.json")
 	} else {
+		if !isJSONFile(specPath) {
+			return nil, fmt.Errorf("Spec should come from a JSON file")
+		}
+
 		data, err = ioutil.ReadFile(specPath)
 	}
 	if err != nil {
@@ -364,4 +374,11 @@ func getUnixSocketListener(unixSocket string) (net.Listener, error) {
 
 	fmt.Printf("Listening on Unix socket: %v\n", unixSocket)
 	return listener, nil
+}
+
+// isJSONFile judges based on a file's extension whether it's a JSON file. It's
+// used to return a better error message if the user points to an unsupported
+// file.
+func isJSONFile(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".json"
 }
