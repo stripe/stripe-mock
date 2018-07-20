@@ -11,11 +11,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/stripe/stripe-mock/spec"
-	"gopkg.in/yaml.v2"
 )
 
 const defaultPortHTTP = 12111
@@ -42,8 +40,8 @@ func main() {
 	flag.StringVar(&options.httpsUnixSocket, "https-unix", "", "Unix socket to listen on for HTTPS")
 
 	flag.IntVar(&options.port, "port", 0, "Port to listen on (also respects PORT from environment)")
-	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version")
-	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version")
+	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version (should be JSON)")
+	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
@@ -289,17 +287,12 @@ func getTLSCertificate() (tls.Certificate, error) {
 func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	var data []byte
 	var err error
-	var isYAML bool
 
 	if fixturesPath == "" {
 		// And do the same for fixtures
 		data, err = Asset("openapi/openapi/fixtures3.json")
 	} else {
 		data, err = ioutil.ReadFile(fixturesPath)
-
-		if filepath.Ext(fixturesPath) == ".yaml" {
-			isYAML = true
-		}
 	}
 
 	if err != nil {
@@ -307,25 +300,11 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	}
 
 	var fixtures spec.Fixtures
-
-	if isYAML {
-		err = yaml.Unmarshal(data, &fixtures)
-		if err == nil {
-			// To support boolean keys, the `yaml` package unmarshals maps to
-			// map[interface{}]interface{}. Here we recurse through the result
-			// and change all maps to map[string]interface{} like we would've
-			// gotten from `json`.
-			for k, v := range fixtures.Resources {
-				fixtures.Resources[k] = stringifyKeysMapValue(v)
-			}
-		}
-	} else {
-		err = json.Unmarshal(data, &fixtures)
-	}
-
+	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
 		return nil, fmt.Errorf("Error decoding spec: %v\n", err)
 	}
+
 	return &fixtures, nil
 }
 
@@ -357,32 +336,23 @@ func getPortListenerDefault(defaultPort int) (net.Listener, error) {
 func getSpec(specPath string) (*spec.Spec, error) {
 	var data []byte
 	var err error
-	var isYAML bool
 
 	if specPath == "" {
 		// Load the spec information from go-bindata
 		data, err = Asset("openapi/openapi/spec3.json")
 	} else {
 		data, err = ioutil.ReadFile(specPath)
-
-		if filepath.Ext(specPath) == ".yaml" {
-			isYAML = true
-		}
 	}
 	if err != nil {
 		return nil, fmt.Errorf("Error loading spec: %v\n", err)
 	}
 
 	var stripeSpec spec.Spec
-
-	if isYAML {
-		err = yaml.Unmarshal(data, &stripeSpec)
-	} else {
-		err = json.Unmarshal(data, &stripeSpec)
-	}
+	err = json.Unmarshal(data, &stripeSpec)
 	if err != nil {
 		return nil, fmt.Errorf("Error decoding spec: %v\n", err)
 	}
+
 	return &stripeSpec, nil
 }
 
