@@ -1,14 +1,53 @@
 # stripe-mock [![Build Status](https://travis-ci.org/stripe/stripe-mock.svg?branch=master)](https://travis-ci.org/stripe/stripe-mock)
 
 stripe-mock is a mock HTTP server that responds like the real Stripe API. It
-can be used instead of Stripe's testmode to make test suites integrating with
-Stripe faster and less brittle.
+can be used instead of Stripe's test mode to make test suites integrating with
+Stripe faster and less brittle. It's powered by [the Stripe OpenAPI
+specification][openapi], which is generated from within Stripe's API.
 
-stripe-mock is powered by [the Stripe OpenAPI specification][openapi], which is
-generated from within the backend API implementation. It operates statelessly
-(i.e. it won't remember new resources that are created with it) and responds
-with sample data that's generated using a similar scheme to the one found [in
-the API reference][apiref].
+## Current state of development
+
+stripe-mock is able to generate an approximately correct API response for any
+endpoint, but the logic for doing so is still quite naive. It supports the
+following features:
+
+* It has a catalog of every API URL and their signatures. It responds on URLs
+  that exist with a resource that it returns and 404s on URLs that don't exist.
+* JSON Schema is used to check the validity of the parameters of incoming
+  requests. Validation is comprehensive, but far from exhaustive, so don't
+  expect the full barrage of checks of the live API.
+* Responses are generated based off resource fixtures. They're also generated
+  from within Stripe's API, and similar to the sample data available in
+  Stripe's [API reference][apiref].
+* It reflects the values of valid input parameters into responses where the
+  naming and type are the same. So if a charge is created with `amount=123`, a
+  charge will be returned with `"amount": 123`.
+* It will respond over HTTP or over HTTPS. HTTP/2 over HTTPS is available if
+  the client supports it.
+
+Limitations:
+
+* It's currently stateless. Data created with `POST` calls won't be stored so
+  that the same information is available later.
+* For polymorphic endpoints (say one that returns either a card or an object),
+  only a single resource type is ever returned. There's no way to specify which
+  one that is.
+* It's locked to the latest version of Stripe's API and doesn't support old
+  versions.
+
+## Future plans
+
+The next important feature that we're aiming to provide is statefulness. The
+idea would be that resources created during a session would be stored for that
+session's duration and could be subsequently retrieved, updated, and deleted.
+This would allow more comprehensive integration tests to run successfully
+against stripe-mock.
+
+We'll continue to aim to improve the quality of stripe-mock's responses, but it
+will never be on perfect parity with the live API. We think the ideal test
+suite for an integration would involve running most of the suite against
+stripe-mock, and then to have a few smoke tests run critical flows against the
+more accurate (but also very slow) Stripe API in test mode.
 
 ## Usage
 
