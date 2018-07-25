@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 	"testing"
 
@@ -292,7 +293,7 @@ func TestGenerateResponseData(t *testing.T) {
 		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
 		data, err := generator.Generate(&GenerateParams{
 			// Just needs to be any HTTP method that's not DELETE
-			RequestMethod: "POST",
+			RequestMethod: http.MethodPost,
 			Schema: &spec.Schema{AnyOf: []*spec.Schema{
 				// put the deleted version first so we know it's not just
 				// returning the first result
@@ -311,7 +312,7 @@ func TestGenerateResponseData(t *testing.T) {
 	{
 		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
 		data, err := generator.Generate(&GenerateParams{
-			RequestMethod: "DELETE",
+			RequestMethod: http.MethodDelete,
 			Schema: &spec.Schema{AnyOf: []*spec.Schema{
 				// put the non-deleted version first so we know it's not just
 				// returning the first result

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 	"sort"
 	"strings"
@@ -225,7 +226,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	}
 
 	if len(schema.AnyOf) != 0 {
-		anyOfSchema, err := g.findAnyOfBranch(schema, params.RequestMethod == "DELETE")
+		anyOfSchema, err := g.findAnyOfBranch(schema, params.RequestMethod == http.MethodDelete)
 		if err != nil {
 			return nil, err
 		}
