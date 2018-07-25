@@ -42,6 +42,14 @@ type GenerateParams struct {
 	// they'd otherwise be if they'd been generated from fixtures alone..
 	RequestData map[string]interface{}
 
+	// RequestMethod is the HTTP method of the URL being requested which we're
+	// generating data for. It's used to decide between returning a deleted and
+	// non-deleted schema in some cases.
+	//
+	// The value of this field is expected to stay stable across all levels of
+	// recursion.
+	RequestMethod string
+
 	// RequestPath is the path of the URL being requested which we're
 	// generating data for. It's used to populate the url property of any
 	// nested lists that we generate.
@@ -91,12 +99,14 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 	}
 
 	data, err := g.generateInternal(&GenerateParams{
-		Expansions:  params.Expansions,
-		PathParams:  nil,
-		RequestPath: params.RequestPath,
-		Schema:      params.Schema,
+		Expansions:    params.Expansions,
+		PathParams:    nil,
+		RequestMethod: params.RequestMethod,
+		RequestPath:   params.RequestPath,
+		Schema:        params.Schema,
 
-		context: fmt.Sprintf("Responding to %s:\n", requestPathDisplay),
+		context: fmt.Sprintf("Responding to %s %s:\n",
+			params.RequestMethod, requestPathDisplay),
 		example: nil,
 	})
 	if err != nil {
@@ -169,10 +179,11 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		if params.Expansions != nil {
 			// We're expanding this specific object
 			return g.generateInternal(&GenerateParams{
-				Expansions:  params.Expansions,
-				PathParams:  nil,
-				RequestPath: params.RequestPath,
-				Schema:      schema.XExpansionResources.OneOf[0],
+				Expansions:    params.Expansions,
+				PathParams:    nil,
+				RequestMethod: params.RequestMethod,
+				RequestPath:   params.RequestPath,
+				Schema:        schema.XExpansionResources.OneOf[0],
 
 				context: fmt.Sprintf("%sExpanding optional expandable field:\n", context),
 				example: nil,
@@ -181,10 +192,11 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			// We're not expanding this specific object. Our example should be of the
 			// unexpanded form, which is the first branch of the AnyOf
 			return g.generateInternal(&GenerateParams{
-				Expansions:  params.Expansions,
-				PathParams:  nil,
-				RequestPath: params.RequestPath,
-				Schema:      schema.AnyOf[0],
+				Expansions:    params.Expansions,
+				PathParams:    nil,
+				RequestMethod: params.RequestMethod,
+				RequestPath:   params.RequestPath,
+				Schema:        schema.AnyOf[0],
 
 				context: fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
 				example: example,
@@ -200,10 +212,11 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		} else {
 			// Since there's only one subschema, we can confidently recurse into it
 			return g.generateInternal(&GenerateParams{
-				Expansions:  params.Expansions,
-				PathParams:  nil,
-				RequestPath: params.RequestPath,
-				Schema:      schema.AnyOf[0],
+				Expansions:    params.Expansions,
+				PathParams:    nil,
+				RequestMethod: params.RequestMethod,
+				RequestPath:   params.RequestPath,
+				Schema:        schema.AnyOf[0],
 
 				context: fmt.Sprintf("%sChoosing only branch of anyOf:\n", context),
 				example: example,
@@ -212,16 +225,30 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	}
 
 	if len(schema.AnyOf) != 0 {
+		anyOfSchema, err := g.findAnyOfBranch(schema, params.RequestMethod == "DELETE")
+		if err != nil {
+			return nil, err
+		}
+
+		var context string
+		if anyOfSchema != nil {
+			context = fmt.Sprintf("%sChoosing branch of anyOf based on request method:\n", context)
+		} else {
+			context = fmt.Sprintf("%sChoosing first branch of anyOf:\n", context)
+			anyOfSchema = schema.AnyOf[0]
+		}
+
 		// Just generate an example of the first subschema. Note that we don't pass
 		// in any example, even if we have an example available, because we don't
 		// know which branch of the AnyOf the example corresponds to.
 		return g.generateInternal(&GenerateParams{
-			Expansions:  params.Expansions,
-			PathParams:  nil,
-			RequestPath: params.RequestPath,
-			Schema:      schema.AnyOf[0],
+			Expansions:    params.Expansions,
+			PathParams:    nil,
+			RequestMethod: params.RequestMethod,
+			RequestPath:   params.RequestPath,
+			Schema:        anyOfSchema,
 
-			context: fmt.Sprintf("%sChoosing first branch of anyOf:\n", context),
+			context: context,
 			example: nil,
 		})
 	}
@@ -230,10 +257,11 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		// We special-case list resources and always fill in the list with at least
 		// one item of data, regardless of what was present in the example
 		listData, err := g.generateListResource(&GenerateParams{
-			Expansions:  params.Expansions,
-			PathParams:  nil,
-			RequestPath: params.RequestPath,
-			Schema:      schema,
+			Expansions:    params.Expansions,
+			PathParams:    nil,
+			RequestMethod: params.RequestMethod,
+			RequestPath:   params.RequestPath,
+			Schema:        schema,
 
 			context: context,
 			example: example,
@@ -324,10 +352,11 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			}
 
 			subValue, err := g.generateInternal(&GenerateParams{
-				Expansions:  subExpansions,
-				PathParams:  nil,
-				RequestPath: params.RequestPath,
-				Schema:      subSchema,
+				Expansions:    subExpansions,
+				PathParams:    nil,
+				RequestMethod: params.RequestMethod,
+				RequestPath:   params.RequestPath,
+				Schema:        subSchema,
 
 				context: fmt.Sprintf("%sIn property '%s' of object:\n", context, key),
 				example: subvalueWrapper,
@@ -345,6 +374,23 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	panic(fmt.Sprintf(
 		"%sEncountered unusual scenario:\nschema=%s\nexample=%+v",
 		context, schema, example))
+}
+
+// findAnyOfBranch finds a branch of a schema containing `anyOf` that's either
+// a deleted resource or not based off of the value of the deleted argument.
+func (g *DataGenerator) findAnyOfBranch(schema *spec.Schema, deleted bool) (*spec.Schema, error) {
+	for _, anyOfSchema := range schema.AnyOf {
+		anyOfSchema, _, err := g.maybeDereference(anyOfSchema, "")
+		if err != nil {
+			return nil, err
+		}
+
+		deletedResource := isDeletedResource(anyOfSchema)
+		if deleted == deletedResource {
+			return anyOfSchema, nil
+		}
+	}
+	return nil, nil
 }
 
 func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*spec.Schema, string, error) {
@@ -368,10 +414,11 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 	}
 
 	itemData, err := g.generateInternal(&GenerateParams{
-		Expansions:  itemExpansions,
-		PathParams:  nil,
-		RequestPath: params.RequestPath,
-		Schema:      params.Schema.Properties["data"].Items,
+		Expansions:    itemExpansions,
+		PathParams:    nil,
+		RequestMethod: params.RequestMethod,
+		RequestPath:   params.RequestPath,
+		Schema:        params.Schema.Properties["data"].Items,
 
 		context: fmt.Sprintf("%sPopulating list resource:\n", params.context),
 		example: nil,
@@ -619,6 +666,11 @@ func generateSyntheticFixture(schema *spec.Schema, context string) interface{} {
 	}
 
 	panic(fmt.Sprintf("%sUnhandled type: %s", context, stringOrEmpty(schema.Type)))
+}
+
+func isDeletedResource(schema *spec.Schema) bool {
+	_, ok := schema.Properties["deleted"]
+	return ok
 }
 
 func isListResource(schema *spec.Schema) bool {

@@ -120,7 +120,12 @@ func initTestSpec() {
 					"customer": "cus_123",
 					"id":       "ch_123",
 				},
-				spec.ResourceID("customer"): map[string]interface{}{"id": "cus_123"},
+				spec.ResourceID("customer"): map[string]interface{}{
+					"id": "cus_123",
+				},
+				spec.ResourceID("deleted_customer"): map[string]interface{}{
+					"deleted": true,
+				},
 			},
 		}
 
@@ -151,6 +156,13 @@ func initTestSpec() {
 				"customer": {
 					Type:        "object",
 					XResourceID: "customer",
+				},
+				"deleted_customer": {
+					Properties: map[string]*spec.Schema{
+						"deleted": {Type: "boolean"},
+					},
+					Type:        "object",
+					XResourceID: "deleted_customer",
 				},
 			},
 		},
