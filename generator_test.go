@@ -286,6 +286,45 @@ func TestGenerateResponseData(t *testing.T) {
 			data,
 		)
 	}
+
+	// pick non-deleted anyOf branch
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			// Just needs to be any HTTP method that's not DELETE
+			RequestMethod: "POST",
+			Schema: &spec.Schema{AnyOf: []*spec.Schema{
+				// put the deleted version first so we know it's not just
+				// returning the first result
+				{Ref: "#/components/schemas/deleted_customer"},
+				{Ref: "#/components/schemas/customer"},
+			}},
+		})
+		assert.Nil(t, err)
+
+		// There should be no deleted field
+		_, ok := data.(map[string]interface{})["deleted"]
+		assert.False(t, ok)
+	}
+
+	// pick deleted anyOf branch
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestMethod: "DELETE",
+			Schema: &spec.Schema{AnyOf: []*spec.Schema{
+				// put the non-deleted version first so we know it's not just
+				// returning the first result
+				{Ref: "#/components/schemas/customer"},
+				{Ref: "#/components/schemas/deleted_customer"},
+			}},
+		})
+		assert.Nil(t, err)
+
+		// There should be a deleted field
+		_, ok := data.(map[string]interface{})["deleted"]
+		assert.True(t, ok)
+	}
 }
 
 func TestValidFixtures(t *testing.T) {
@@ -490,6 +529,46 @@ func TestDistributeReplacedIDsInValue(t *testing.T) {
 	}
 }
 
+func TestFindAnyOfBranch(t *testing.T) {
+	deletedSchema := &spec.Schema{
+		Properties: map[string]*spec.Schema{
+			"deleted": nil,
+		},
+	}
+
+	nonDeletedSchema := &spec.Schema{}
+
+	schema := &spec.Schema{
+		AnyOf: []*spec.Schema{
+			deletedSchema,
+			nonDeletedSchema,
+		},
+	}
+
+	generator := DataGenerator{nil, nil}
+
+	// Finds a deleted schema branch
+	{
+		anyOfSchema, err := generator.findAnyOfBranch(schema, true)
+		assert.NoError(t, err)
+		assert.Equal(t, deletedSchema, anyOfSchema)
+	}
+
+	// Finds a non-deleted schema branch
+	{
+		anyOfSchema, err := generator.findAnyOfBranch(schema, false)
+		assert.NoError(t, err)
+		assert.Equal(t, nonDeletedSchema, anyOfSchema)
+	}
+
+	// Safe to use on an empty schema
+	{
+		anyOfSchema, err := generator.findAnyOfBranch(&spec.Schema{}, false)
+		assert.NoError(t, err)
+		assert.Equal(t, (*spec.Schema)(nil), anyOfSchema)
+	}
+}
+
 func TestGenerateSyntheticFixture(t *testing.T) {
 	// Scalars (and an array, which is easy)
 	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, ""))
@@ -558,6 +637,16 @@ func TestPropertyNames(t *testing.T) {
 		},
 	}))
 	assert.Equal(t, "", propertyNames(&spec.Schema{}))
+}
+
+func TestIsDeletedResource(t *testing.T) {
+	assert.True(t, isDeletedResource(&spec.Schema{
+		Properties: map[string]*spec.Schema{
+			"deleted": nil,
+		},
+	}))
+
+	assert.False(t, isDeletedResource(&spec.Schema{}))
 }
 
 // This is meant as quite a blunt test. See TestMaybeReplaceID for something

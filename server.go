@@ -206,11 +206,12 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
 	responseData, err := generator.Generate(&GenerateParams{
-		Expansions:  expansions,
-		PathParams:  pathParams,
-		RequestData: requestData,
-		RequestPath: r.URL.Path,
-		Schema:      responseContent.Schema,
+		Expansions:    expansions,
+		PathParams:    pathParams,
+		RequestData:   requestData,
+		RequestMethod: r.Method,
+		RequestPath:   r.URL.Path,
+		Schema:        responseContent.Schema,
 	})
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
