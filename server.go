@@ -399,9 +399,11 @@ var hasPrimaryIDSuffixes = [...]string{
 
 	// These are resource "actions". They don't take the standard form, but we
 	// can expect an object's primary ID to live right before them in a path.
+	"/approve",
 	"/capture",
 	"/cancel",
 	"/close",
+	"/decline",
 	"/pay",
 	"/refund",
 	"/reject",
