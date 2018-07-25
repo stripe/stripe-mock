@@ -23,7 +23,7 @@ import (
 // package's implementation non-trivial. We rely on the nestedtypeassembler
 // subpackage to do the heavy lifting for that.
 func ParseParams(r *http.Request) (map[string]interface{}, error) {
-	var values form.FormValues
+	var values form.Values
 
 	contentType := r.Header.Get("Content-Type")
 
@@ -42,15 +42,15 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if contentType == MultipartMediaType {
-		err := r.ParseMultipartForm(MaxMemory)
+	} else if contentType == multipartMediaType {
+		err := r.ParseMultipartForm(maxMemory)
 		if err != nil {
 			return nil, err
 		}
 
 		for key, keyValues := range r.MultipartForm.Value {
 			for _, keyValue := range keyValues {
-				values = append(values, form.FormPair{key, keyValue})
+				values = append(values, form.Pair{key, keyValue})
 			}
 		}
 
@@ -67,7 +67,7 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 					return nil, err
 				}
 
-				values = append(values, form.FormPair{key, string(keyFileBytes)})
+				values = append(values, form.Pair{key, string(keyFileBytes)})
 			}
 		}
 	} else {
@@ -92,9 +92,11 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 // Private constants
 //
 
-// The maximum amount of memory allowed when ingesting a multipart form.
+// maxMemory is the maximum amount of memory allowed when ingesting a multipart
+// form.
 //
 // Set to 1 MB.
-const MaxMemory = 1 * 1024 * 1024
+const maxMemory = 1 * 1024 * 1024
 
-const MultipartMediaType = "multipart/form-data"
+// multipartMediaType is the `Content-Type` for a multipart request.
+const multipartMediaType = "multipart/form-data"

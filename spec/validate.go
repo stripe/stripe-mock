@@ -6,10 +6,14 @@ import (
 	"github.com/lestrrat/go-jsval/builder"
 )
 
+// ComponentsForValidation is a collection of components for an OpenAPI
+// specification that's been translated into equivalent JSON Schemas.
 type ComponentsForValidation struct {
 	root interface{}
 }
 
+// GetValidatorForOpenAPI3Schema gets a JSON Schema validator for a given
+// OpenAPI specification and set of JSON Schema components.
 func GetValidatorForOpenAPI3Schema(oaiSchema *Schema, components *ComponentsForValidation) (*jsval.JSVal, error) {
 	jsonSchemaAsJSON := getJSONSchemaForOpenAPI3Schema(oaiSchema)
 
@@ -32,6 +36,10 @@ func GetValidatorForOpenAPI3Schema(oaiSchema *Schema, components *ComponentsForV
 	return validator, nil
 }
 
+// GetComponentsForValidation translates a collection of components for an
+// OpenAPI specification into equivalent JSON schemas.
+//
+// See also the comment on getJSONSchemaForOpenAPI3Schema.
 func GetComponentsForValidation(components *Components) *ComponentsForValidation {
 	jsonSchemas := make(map[string]interface{})
 	for name, oaiSchema := range components.Schemas {

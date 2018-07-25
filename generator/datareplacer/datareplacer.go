@@ -4,6 +4,12 @@ import (
 	"reflect"
 )
 
+// ReplaceData takes a generated response and replaces values in it that share
+// a name and type of parameters that were sent in with the request.
+//
+// This is designed to have the effect of making returned fixtures more
+// realistic while also staying a simple heuristic that doesn't require very
+// much maintenance.
 func ReplaceData(requestData map[string]interface{}, responseData map[string]interface{}) map[string]interface{} {
 	for k, requestValue := range requestData {
 		responseValue, ok := responseData[k]

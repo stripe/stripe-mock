@@ -6,10 +6,10 @@ package form
 // Public types
 //
 
-// FormPair is a key/value pair as extracted from a form-encoded string. For
+// Pair is a key/value pair as extracted from a form-encoded string. For
 // example, "a=b" is the pair [a, b].
-type FormPair [2]string
+type Pair [2]string
 
-// FormValues is a full slice of all the key/value pairs from a form-encoded
+// Values is a full slice of all the key/value pairs from a form-encoded
 // string.
-type FormValues []FormPair
+type Values []Pair

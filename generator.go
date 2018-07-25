@@ -189,20 +189,20 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 				context: fmt.Sprintf("%sExpanding optional expandable field:\n", context),
 				example: nil,
 			})
-		} else {
-			// We're not expanding this specific object. Our example should be of the
-			// unexpanded form, which is the first branch of the AnyOf
-			return g.generateInternal(&GenerateParams{
-				Expansions:    params.Expansions,
-				PathParams:    nil,
-				RequestMethod: params.RequestMethod,
-				RequestPath:   params.RequestPath,
-				Schema:        schema.AnyOf[0],
-
-				context: fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
-				example: example,
-			})
 		}
+
+		// We're not expanding this specific object. Our example should be of
+		// the unexpanded form, which is the first branch of the AnyOf
+		return g.generateInternal(&GenerateParams{
+			Expansions:    params.Expansions,
+			PathParams:    nil,
+			RequestMethod: params.RequestMethod,
+			RequestPath:   params.RequestPath,
+			Schema:        schema.AnyOf[0],
+
+			context: fmt.Sprintf("%sNot expanding optional expandable field:\n", context),
+			example: example,
+		})
 	}
 
 	if len(schema.AnyOf) == 1 && schema.Nullable {

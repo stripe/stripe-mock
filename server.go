@@ -20,9 +20,6 @@ import (
 // Public types
 //
 
-type ErrorInfo struct {
-}
-
 // ExpansionLevel represents expansions on a single "level" of resource. It may
 // have subexpansions that are meant to take effect on resources that are
 // nested below it (on other levels).
@@ -107,6 +104,8 @@ func (p *PathParamsSecondaryID) appendReplacedID(replacedID string) {
 	}
 }
 
+// ResponseError is a JSON-serializable structure representing an error
+// returned from Stripe's API.
 type ResponseError struct {
 	ErrorInfo struct {
 		Message string `json:"message"`
@@ -220,11 +219,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if verbose {
-		responseDataJson, err := json.MarshalIndent(responseData, "", "  ")
+		responseDataJSON, err := json.MarshalIndent(responseData, "", "  ")
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("Response data: %s\n", responseDataJson)
+		fmt.Printf("Response data: %s\n", responseDataJSON)
 	}
 	writeResponse(w, r, start, http.StatusOK, responseData)
 }

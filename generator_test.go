@@ -813,9 +813,9 @@ func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand b
 	err = validator.Validate(example)
 	if err != nil {
 		t.Logf("Schema is: %s", schema)
-		exampleJson, err := json.MarshalIndent(example, "", "  ")
+		exampleJSON, err := json.MarshalIndent(example, "", "  ")
 		assert.NoError(t, err)
-		t.Logf("Example is: %s", exampleJson)
+		t.Logf("Example is: %s", exampleJSON)
 	}
 	assert.NoError(t, err)
 }
