@@ -1,4 +1,4 @@
-// Package nestedtypeassembler takes a collection of FormPair tuples and uses
+// Package nestedtypeassembler takes a collection of form.Pair tuples and uses
 // them to construct more complex data types using "Rack-style" conventions for
 // arrays and maps with a few small Stripe-specific tweaks.
 //
@@ -17,7 +17,10 @@ import (
 // Public functions
 //
 
-func AssembleParams(form form.FormValues) (map[string]interface{}, error) {
+// AssembleParams takes a collection of form.Pair tuples and translates them to
+// parameter map that includes complex data types like arrays and other nested
+// maps.
+func AssembleParams(form form.Values) (map[string]interface{}, error) {
 	params := make(map[string]interface{})
 
 	for _, pair := range form {
@@ -32,7 +35,7 @@ func AssembleParams(form form.FormValues) (map[string]interface{}, error) {
 
 		rawkeyPart := keyParts[0]
 		if rawkeyPart.KeyType() != keyTypeRaw {
-			return nil, fmt.Errorf(`Invalid key "%v". Keys must start with a name.`, key)
+			return nil, fmt.Errorf(`invalid key "%v": keys must start with a name`, key)
 		}
 
 		pairParams, err := buildParamStructure(rawkeyPart.Content(), keyParts[1:], value)
@@ -212,7 +215,7 @@ func buildParamStructure(key string, parts []keyPart, value string) (map[string]
 		params[key] = subParams
 
 	default:
-		return nil, fmt.Errorf("Invalid key. Raw content can't be mixed in after arrays and maps.")
+		return nil, fmt.Errorf("invalid key: raw content can't be mixed in after arrays and maps")
 	}
 
 	return params, nil

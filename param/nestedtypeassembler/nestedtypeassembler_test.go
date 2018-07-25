@@ -224,7 +224,7 @@ func TestParseKey(t *testing.T) {
 // Private functions
 //
 
-func mustParse(t *testing.T, query string) form.FormValues {
+func mustParse(t *testing.T, query string) form.Values {
 	values, err := parser.ParseFormString(query)
 	assert.NoError(t, err)
 	return values

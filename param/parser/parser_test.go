@@ -13,7 +13,7 @@ import (
 
 func TestParseForm(t *testing.T) {
 	var err error
-	var v form.FormValues
+	var v form.Values
 
 	v, err = ParseFormString(``)
 	assert.NoError(t, err)
@@ -21,52 +21,52 @@ func TestParseForm(t *testing.T) {
 
 	v, err = ParseFormString(`a=b&c=d&e=f`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"a", "b"},
-		form.FormPair{"c", "d"},
-		form.FormPair{"e", "f"},
+	assert.Equal(t, form.Values{
+		form.Pair{"a", "b"},
+		form.Pair{"c", "d"},
+		form.Pair{"e", "f"},
 	}, v)
 
 	v, err = ParseFormString(`a=b&a=c`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"a", "b"},
-		form.FormPair{"a", "c"},
+	assert.Equal(t, form.Values{
+		form.Pair{"a", "b"},
+		form.Pair{"a", "c"},
 	}, v)
 
 	v, err = ParseFormString(`a=b&a=b`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"a", "b"},
-		form.FormPair{"a", "b"},
+	assert.Equal(t, form.Values{
+		form.Pair{"a", "b"},
+		form.Pair{"a", "b"},
 	}, v)
 
 	v, err = ParseFormString(`?a=b&a=b`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"a", "b"},
-		form.FormPair{"a", "b"},
+	assert.Equal(t, form.Values{
+		form.Pair{"a", "b"},
+		form.Pair{"a", "b"},
 	}, v)
 
 	v, err = ParseFormString(`?x=%20&%20=x`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"x", " "},
-		form.FormPair{" ", "x"},
+	assert.Equal(t, form.Values{
+		form.Pair{"x", " "},
+		form.Pair{" ", "x"},
 	}, v)
 
 	v, err = ParseFormString(`?x=+&+=x`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"x", " "},
-		form.FormPair{" ", "x"},
+	assert.Equal(t, form.Values{
+		form.Pair{"x", " "},
+		form.Pair{" ", "x"},
 	}, v)
 
 	v, err = ParseFormString(`?x=%2c&%2c=x`)
 	assert.NoError(t, err)
-	assert.Equal(t, form.FormValues{
-		form.FormPair{"x", ","},
-		form.FormPair{",", "x"},
+	assert.Equal(t, form.Values{
+		form.Pair{"x", ","},
+		form.Pair{",", "x"},
 	}, v)
 
 	_, err = ParseFormString(`%`)

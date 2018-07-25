@@ -17,7 +17,7 @@ import (
 // "Rack-style" form encoding.
 //
 // Implementation modified from: https://github.com/deoxxa/urlqp
-func ParseFormString(s string) (form.FormValues, error) {
+func ParseFormString(s string) (form.Values, error) {
 	s = strings.TrimPrefix(s, "?")
 
 	if s == "" {
@@ -25,7 +25,7 @@ func ParseFormString(s string) (form.FormValues, error) {
 	}
 
 	rawValues := strings.Split(s, "&")
-	r := make(form.FormValues, len(rawValues))
+	r := make(form.Values, len(rawValues))
 
 	for i, rawValue := range rawValues {
 		// Split this raw form value into two parts, at the first `=`
@@ -48,7 +48,7 @@ func ParseFormString(s string) (form.FormValues, error) {
 			}
 		}
 
-		r[i] = form.FormPair{formKey, v}
+		r[i] = form.Pair{formKey, v}
 	}
 
 	return r, nil

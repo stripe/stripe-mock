@@ -302,13 +302,13 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("Error loading fixtures: %v\n", err)
+		return nil, fmt.Errorf("error loading fixtures: %v", err)
 	}
 
 	var fixtures spec.Fixtures
 	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding spec: %v\n", err)
+		return nil, fmt.Errorf("error decoding spec: %v", err)
 	}
 
 	return &fixtures, nil
@@ -317,7 +317,7 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 func getPortListener(port int) (net.Listener, error) {
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
-		return nil, fmt.Errorf("Error listening on port: %v\n", err)
+		return nil, fmt.Errorf("error listening on port: %v", err)
 	}
 
 	fmt.Printf("Listening on port: %v\n", port)
@@ -348,19 +348,19 @@ func getSpec(specPath string) (*spec.Spec, error) {
 		data, err = Asset("openapi/openapi/spec3.json")
 	} else {
 		if !isJSONFile(specPath) {
-			return nil, fmt.Errorf("Spec should come from a JSON file")
+			return nil, fmt.Errorf("spec should come from a JSON file")
 		}
 
 		data, err = ioutil.ReadFile(specPath)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("Error loading spec: %v\n", err)
+		return nil, fmt.Errorf("error loading spec: %v", err)
 	}
 
 	var stripeSpec spec.Spec
 	err = json.Unmarshal(data, &stripeSpec)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding spec: %v\n", err)
+		return nil, fmt.Errorf("error decoding spec: %v", err)
 	}
 
 	return &stripeSpec, nil
@@ -369,7 +369,7 @@ func getSpec(specPath string) (*spec.Spec, error) {
 func getUnixSocketListener(unixSocket string) (net.Listener, error) {
 	listener, err := net.Listen("unix", unixSocket)
 	if err != nil {
-		return nil, fmt.Errorf("Error listening on socket: %v\n", err)
+		return nil, fmt.Errorf("error listening on socket: %v", err)
 	}
 
 	fmt.Printf("Listening on Unix socket: %v\n", unixSocket)

@@ -15,9 +15,7 @@ before_install:
 
 script:
   - go generate
-  - make test
-  - make vet
-  - scripts/check_gofmt.sh
+  - make
 
   # Build and test the Docker image. It's pushed to Docker Hub as part of the
   # deploy phase.

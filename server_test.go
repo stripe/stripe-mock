@@ -449,8 +449,8 @@ func sendRequest(t *testing.T, method string, url string, params string,
 
 	server := getStubServer(t)
 
-	fullUrl := fmt.Sprintf("https://stripe.com%s", url)
-	req := httptest.NewRequest(method, fullUrl, bytes.NewBufferString(params))
+	fullURL := fmt.Sprintf("https://stripe.com%s", url)
+	req := httptest.NewRequest(method, fullURL, bytes.NewBufferString(params))
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
