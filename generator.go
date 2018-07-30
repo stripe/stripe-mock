@@ -129,8 +129,12 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		distributeReplacedIDs(pathParams, data)
 	}
 
-	if mapData, ok := data.(map[string]interface{}); ok {
-		mapData = datareplacer.ReplaceData(params.RequestData, mapData)
+	// In `POST` requests we reflect input parameters into responses to try and
+	// simulate a more realistic create or update operation.
+	if params.RequestMethod == http.MethodPost {
+		if mapData, ok := data.(map[string]interface{}); ok {
+			mapData = datareplacer.ReplaceData(params.RequestData, mapData)
+		}
 	}
 
 	return data, nil
