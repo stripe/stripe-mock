@@ -264,6 +264,38 @@ func TestGenerateResponseData(t *testing.T) {
 			data.(map[string]interface{})["customer"])
 	}
 
+	// data replacement on `POST`
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestData: map[string]interface{}{
+				"customer": "cus_9999",
+			},
+			RequestMethod: http.MethodPost,
+			Schema:        &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+		assert.Equal(t,
+			"cus_9999",
+			data.(map[string]interface{})["customer"])
+	}
+
+	// *no* data replacement on non-`POST`
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestData: map[string]interface{}{
+				"customer": "cus_9999",
+			},
+			RequestMethod: http.MethodGet,
+			Schema:        &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+		assert.NotEqual(t,
+			"cus_9999",
+			data.(map[string]interface{})["customer"])
+	}
+
 	// synthetic schema
 	{
 		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
