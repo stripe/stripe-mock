@@ -13,7 +13,7 @@ func TestCoerceParams_AnyOfCoercion(t *testing.T) {
 		schema := &spec.Schema{Properties: map[string]*spec.Schema{
 			"bool_or_int_key": {
 				AnyOf: []*spec.Schema{
-					{Type: objectType},
+					{Type: booleanType},
 					{Type: integerType},
 				},
 			},

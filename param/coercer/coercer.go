@@ -105,21 +105,21 @@ func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bo
 	case primitiveType == booleanType:
 		valBool, err := strconv.ParseBool(valStr)
 		if err != nil {
-			valBool = false
+			return nil, false
 		}
 		return valBool, true
 
 	case primitiveType == integerType:
 		valInt, err := strconv.Atoi(valStr)
 		if err != nil {
-			valInt = 0
+			return nil, false
 		}
 		return valInt, true
 
 	case primitiveType == numberType:
 		valFloat, err := strconv.ParseFloat(valStr, 64)
 		if err != nil {
-			valFloat = 0.0
+			return nil, false
 		}
 		return valFloat, true
 	}
