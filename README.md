@@ -29,9 +29,9 @@ Limitations:
 
 * It's currently stateless. Data created with `POST` calls won't be stored so
   that the same information is available later.
-* For polymorphic endpoints (say one that returns either a card or an object),
-  only a single resource type is ever returned. There's no way to specify which
-  one that is.
+* For polymorphic endpoints (say one that returns either a card or a bank
+  account), only a single resource type is ever returned. There's no way to
+  specify which one that is.
 * It's locked to the latest version of Stripe's API and doesn't support old
   versions.
 
