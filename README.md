@@ -116,7 +116,7 @@ HTTP/2.
 # build
 docker build . -t stripe-mock
 # run
-docker run -p 12111:12112 stripe-mock
+docker run -p 12111-12112:12111-12112 stripe-mock
 ```
 
 The default Docker `ENTRYPOINT` listens on port `12111` for HTTP and `12112`
