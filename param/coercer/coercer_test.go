@@ -8,21 +8,47 @@ import (
 )
 
 func TestCoerceParams_AnyOfCoercion(t *testing.T) {
-	schema := &spec.Schema{Properties: map[string]*spec.Schema{
-		"objectorintkey": {
-			AnyOf: []*spec.Schema{
-				{Type: objectType},
-				{Type: integerType},
+	// `anyOf` with basic types
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"bool_or_int_key": {
+				AnyOf: []*spec.Schema{
+					{Type: objectType},
+					{Type: integerType},
+				},
 			},
-		},
-	}}
-	data := map[string]interface{}{
-		"objectorintkey": "123",
+		}}
+		data := map[string]interface{}{
+			"bool_or_int_key": "123",
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+		assert.Equal(t, 123, data["bool_or_int_key"])
 	}
 
-	err := CoerceParams(schema, data)
-	assert.NoError(t, err)
-	assert.Equal(t, 123, data["objectorintkey"])
+	// `anyOf` with object type
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"object_or_int_key": {
+				AnyOf: []*spec.Schema{
+					{Properties: map[string]*spec.Schema{
+						"intkey": {Type: integerType},
+					}},
+					{Type: integerType},
+				},
+			},
+		}}
+		data := map[string]interface{}{
+			"object_or_int_key": map[string]interface{}{
+				"intkey": 123,
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+		assert.Equal(t, 123, data["object_or_int_key"].(map[string]interface{})["intkey"])
+	}
 }
 
 func TestCoerceParams_ArrayCoercion(t *testing.T) {
