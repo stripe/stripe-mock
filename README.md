@@ -47,7 +47,7 @@ We'll continue to aim to improve the quality of stripe-mock's responses, but it
 will never be on perfect parity with the live API. We think the ideal test
 suite for an integration would involve running most of the suite against
 stripe-mock, and then to have a few smoke tests run critical flows against the
-more accurate (but also very slow) Stripe API in test mode.
+more accurate (but also slower) Stripe API in test mode.
 
 ## Usage
 
