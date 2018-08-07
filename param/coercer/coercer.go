@@ -136,11 +136,21 @@ func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bo
 func coerceSchema(val interface{}, schema *spec.Schema) (interface{}, bool) {
 	if isSchemaPrimitiveType(schema) {
 		return coercePrimitiveType(val, schema.Type)
-	} else if schema.AnyOf != nil {
+	}
+
+	if schema.AnyOf != nil {
 		for _, subSchema := range schema.AnyOf {
-			val, ok := coerceSchema(val, subSchema)
-			if ok {
-				return val, ok
+			if isSchemaPrimitiveType(subSchema) {
+				val, ok := coerceSchema(val, subSchema)
+				if ok {
+					return val, ok
+				}
+			} else {
+				valMap, ok := val.(map[string]interface{})
+				if ok {
+					CoerceParams(subSchema, valMap)
+					return valMap, ok
+				}
 			}
 		}
 	}
