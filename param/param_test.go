@@ -11,22 +11,38 @@ import (
 )
 
 func TestParseParams_Get(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/?foo=bar", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?query_param=query_val", nil)
 	params, err := ParseParams(req)
 	assert.NoError(t, err)
 	assert.Equal(t, map[string]interface{}{
-		"foo": "bar",
+		"query_param": "query_val",
 	}, params)
 }
 
 func TestParseParams_Form(t *testing.T) {
-	req := httptest.NewRequest(http.MethodPost, "/",
-		bytes.NewBufferString("foo=bar"))
-	params, err := ParseParams(req)
-	assert.NoError(t, err)
-	assert.Equal(t, map[string]interface{}{
-		"foo": "bar",
-	}, params)
+	// Basic form in the request body.
+	{
+		req := httptest.NewRequest(http.MethodPost, "/",
+			bytes.NewBufferString("body_param=body_val"))
+		params, err := ParseParams(req)
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]interface{}{
+			"body_param": "body_val",
+		}, params)
+	}
+
+	// Requests with a form body should also include values from the query
+	// string, if any were sent.
+	{
+		req := httptest.NewRequest(http.MethodPost, "/?query_param=query_val",
+			bytes.NewBufferString("body_param=body_val"))
+		params, err := ParseParams(req)
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]interface{}{
+			"body_param":  "body_val",
+			"query_param": "query_val",
+		}, params)
+	}
 }
 
 func TestParseParams_MultipartForm(t *testing.T) {

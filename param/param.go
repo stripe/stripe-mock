@@ -34,15 +34,22 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 	// We want to chop off the `; charset=utf-8` at the end.
 	contentType = strings.Split(contentType, ";")[0]
 
-	if r.Method == "GET" {
-		formString := r.URL.RawQuery
+	formString := r.URL.RawQuery
 
-		var err error
-		values, err = parser.ParseFormString(formString)
-		if err != nil {
-			return nil, err
-		}
-	} else if contentType == multipartMediaType {
+	// Ideally we'd just parse the query string for `GET` requests and use the
+	// request body for others, but the way Stripe's API actually works is to
+	// mix all these request parameters together into one big bucket, behavior
+	// inherited from Rack.
+	//
+	// Here we parse the query string regardless of the request type, then move
+	// on to potentially parse the body if it looks like we should.
+	var err error
+	values, err = parser.ParseFormString(formString)
+	if err != nil {
+		return nil, err
+	}
+
+	if contentType == multipartMediaType {
 		err := r.ParseMultipartForm(maxMemory)
 		if err != nil {
 			return nil, err
@@ -70,7 +77,7 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 				values = append(values, form.Pair{key, string(keyFileBytes)})
 			}
 		}
-	} else {
+	} else if r.Method != "GET" {
 		formBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return nil, err
@@ -79,10 +86,12 @@ func ParseParams(r *http.Request) (map[string]interface{}, error) {
 
 		formString := string(formBytes)
 
-		values, err = parser.ParseFormString(formString)
+		formValues, err := parser.ParseFormString(formString)
 		if err != nil {
 			return nil, err
 		}
+
+		values = append(values, formValues...)
 	}
 
 	return nestedtypeassembler.AssembleParams(values)
