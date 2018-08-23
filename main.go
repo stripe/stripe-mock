@@ -87,8 +87,8 @@ func main() {
 		abort(err.Error())
 	}
 
-	// Only start HTTP if requested (it's the default, but it won't start if
-	// HTTPS is explicitly requested instead)
+	// Only start HTTP if requested (it will activate by default with no arguments, but it won't start if
+	// HTTPS is explicitly requested and HTTP is not).
 	if httpListener != nil {
 		server := http.Server{}
 
@@ -107,7 +107,9 @@ func main() {
 		abort(err.Error())
 	}
 
-	// Only start HTTPS if requested
+	// Only start HTTPS if requested (it will activate by default with no
+	// arguments, but it won't start if HTTP is explicitly requested and HTTPS
+	// is not).
 	if httpsListener != nil {
 		// Our self-signed certificate is bundled up using go-bindata so that
 		// it stays easy to distribute stripe-mock as a standalone binary with
@@ -209,56 +211,62 @@ func (o *options) checkConflictingOptions() error {
 // getHTTPListener gets a listener on a port or unix socket depending on the
 // options provided. If HTTP should not be enabled, it returns nil.
 func (o *options) getHTTPListener() (net.Listener, error) {
+	protocol := "HTTP"
+
 	if o.httpPort != 0 {
-		return getPortListener(o.httpPort)
+		return getPortListener(o.httpPort, protocol)
 	}
 
 	if o.httpUnixSocket != "" {
-		return getUnixSocketListener(o.httpUnixSocket)
+		return getUnixSocketListener(o.httpUnixSocket, protocol)
 	}
 
-	// HTTP is active by default, but only if HTTPS is *not* active
+	// HTTPS is active by default, but only if HTTP has not been explicitly
+	// activated.
 	if o.https || o.httpsPort != 0 || o.httpsUnixSocket != "" {
 		return nil, nil
 	}
 
 	if o.port != 0 {
-		return getPortListener(o.port)
+		return getPortListener(o.port, protocol)
 	}
 
 	if o.unixSocket != "" {
-		return getUnixSocketListener(o.unixSocket)
+		return getUnixSocketListener(o.unixSocket, protocol)
 	}
 
-	return getPortListenerDefault(defaultPortHTTP)
+	return getPortListenerDefault(defaultPortHTTP, protocol)
 }
 
 // getNonSecureHTTPSListener gets a basic listener on a port or unix socket
 // depending on the options provided. Its return listener must still be wrapped
 // in a TLSListener. If HTTPS should not be enabled, it returns nil.
 func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
+	protocol := "HTTPS"
+
 	if o.httpsPort != 0 {
-		return getPortListener(o.httpsPort)
+		return getPortListener(o.httpsPort, protocol)
 	}
 
 	if o.httpsUnixSocket != "" {
-		return getUnixSocketListener(o.httpsUnixSocket)
+		return getUnixSocketListener(o.httpsUnixSocket, protocol)
 	}
 
-	// HTTPS is disabled by default
-	if !o.https {
+	// HTTPS is active by default, but only if HTTP has not been explicitly
+	// activated.
+	if o.http || o.httpPort != 0 || o.httpUnixSocket != "" {
 		return nil, nil
 	}
 
 	if o.port != 0 {
-		return getPortListener(o.port)
+		return getPortListener(o.port, protocol)
 	}
 
 	if o.unixSocket != "" {
-		return getUnixSocketListener(o.unixSocket)
+		return getUnixSocketListener(o.unixSocket, protocol)
 	}
 
-	return getPortListenerDefault(defaultPortHTTPS)
+	return getPortListenerDefault(defaultPortHTTPS, protocol)
 }
 
 //
@@ -314,29 +322,29 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	return &fixtures, nil
 }
 
-func getPortListener(port int) (net.Listener, error) {
+func getPortListener(port int, protocol string) (net.Listener, error) {
 	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
 		return nil, fmt.Errorf("error listening on port: %v", err)
 	}
 
-	fmt.Printf("Listening on port: %v\n", port)
+	fmt.Printf("Listening for %s on port: %v\n", protocol, port)
 	return listener, nil
 }
 
 // getPortListenerDefault gets a port listener based on the environment
 // variable `PORT`, or falls back to a listener on the default port
 // (`defaultPort`) if one was not present.
-func getPortListenerDefault(defaultPort int) (net.Listener, error) {
+func getPortListenerDefault(defaultPort int, protocol string) (net.Listener, error) {
 	if os.Getenv("PORT") != "" {
 		envPort, err := strconv.Atoi(os.Getenv("PORT"))
 		if err != nil {
 			return nil, err
 		}
-		return getPortListener(envPort)
+		return getPortListener(envPort, protocol)
 	}
 
-	return getPortListener(defaultPort)
+	return getPortListener(defaultPort, protocol)
 }
 
 func getSpec(specPath string) (*spec.Spec, error) {
@@ -366,13 +374,13 @@ func getSpec(specPath string) (*spec.Spec, error) {
 	return &stripeSpec, nil
 }
 
-func getUnixSocketListener(unixSocket string) (net.Listener, error) {
+func getUnixSocketListener(unixSocket, protocol string) (net.Listener, error) {
 	listener, err := net.Listen("unix", unixSocket)
 	if err != nil {
 		return nil, fmt.Errorf("error listening on socket: %v", err)
 	}
 
-	fmt.Printf("Listening on Unix socket: %v\n", unixSocket)
+	fmt.Printf("Listening for %s on Unix socket: %s\n", protocol, unixSocket)
 	return listener, nil
 }
 
