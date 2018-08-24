@@ -37,14 +37,14 @@ func main() {
 	}
 
 	flag.BoolVar(&options.http, "http", false, "Run with HTTP")
-	flag.IntVar(&options.httpPort, "http-port", 0, "Port to listen on for HTTP")
+	flag.IntVar(&options.httpPort, "http-port", -1, "Port to listen on for HTTP")
 	flag.StringVar(&options.httpUnixSocket, "http-unix", "", "Unix socket to listen on for HTTP")
 
 	flag.BoolVar(&options.https, "https", false, "Run with HTTPS (which also allows HTTP/2 to be activated)")
-	flag.IntVar(&options.httpsPort, "https-port", 0, "Port to listen on for HTTPS")
+	flag.IntVar(&options.httpsPort, "https-port", -1, "Port to listen on for HTTPS")
 	flag.StringVar(&options.httpsUnixSocket, "https-unix", "", "Unix socket to listen on for HTTPS")
 
-	flag.IntVar(&options.port, "port", 0, "Port to listen on (also respects PORT from environment)")
+	flag.IntVar(&options.port, "port", -1, "Port to listen on (also respects PORT from environment)")
 	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version (should be JSON)")
 	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
@@ -174,7 +174,7 @@ type options struct {
 }
 
 func (o *options) checkConflictingOptions() error {
-	if o.unixSocket != "" && o.port != 0 {
+	if o.unixSocket != "" && o.port != -1 {
 		return fmt.Errorf("Please specify only one of -port or -unix")
 	}
 
@@ -182,15 +182,15 @@ func (o *options) checkConflictingOptions() error {
 	// HTTP
 	//
 
-	if o.http && (o.httpUnixSocket != "" || o.httpPort != 0) {
+	if o.http && (o.httpUnixSocket != "" || o.httpPort != -1) {
 		return fmt.Errorf("Please don't specify -http when using -http-port or -http-unix")
 	}
 
-	if (o.unixSocket != "" || o.port != 0) && (o.httpUnixSocket != "" || o.httpPort != 0) {
+	if (o.unixSocket != "" || o.port != -1) && (o.httpUnixSocket != "" || o.httpPort != -1) {
 		return fmt.Errorf("Please don't specify -port or -unix when using -http-port or -http-unix")
 	}
 
-	if o.httpUnixSocket != "" && o.httpPort != 0 {
+	if o.httpUnixSocket != "" && o.httpPort != -1 {
 		return fmt.Errorf("Please specify only one of -http-port or -http-unix")
 	}
 
@@ -198,15 +198,15 @@ func (o *options) checkConflictingOptions() error {
 	// HTTPS
 	//
 
-	if o.https && (o.httpsUnixSocket != "" || o.httpsPort != 0) {
+	if o.https && (o.httpsUnixSocket != "" || o.httpsPort != -1) {
 		return fmt.Errorf("Please don't specify -https when using -https-port or -https-unix")
 	}
 
-	if (o.unixSocket != "" || o.port != 0) && (o.httpsUnixSocket != "" || o.httpsPort != 0) {
+	if (o.unixSocket != "" || o.port != -1) && (o.httpsUnixSocket != "" || o.httpsPort != -1) {
 		return fmt.Errorf("Please don't specify -port or -unix when using -https-port or -https-unix")
 	}
 
-	if o.httpsUnixSocket != "" && o.httpsPort != 0 {
+	if o.httpsUnixSocket != "" && o.httpsPort != -1 {
 		return fmt.Errorf("Please specify only one of -https-port or -https-unix")
 	}
 
@@ -218,7 +218,7 @@ func (o *options) checkConflictingOptions() error {
 func (o *options) getHTTPListener() (net.Listener, error) {
 	protocol := "HTTP"
 
-	if o.httpPort != 0 {
+	if o.httpPort != -1 {
 		return getPortListener(o.httpPort, protocol)
 	}
 
@@ -228,11 +228,11 @@ func (o *options) getHTTPListener() (net.Listener, error) {
 
 	// HTTPS is active by default, but only if HTTP has not been explicitly
 	// activated.
-	if o.https || o.httpsPort != 0 || o.httpsUnixSocket != "" {
+	if o.https || o.httpsPort != -1 || o.httpsUnixSocket != "" {
 		return nil, nil
 	}
 
-	if o.port != 0 {
+	if o.port != -1 {
 		return getPortListener(o.port, protocol)
 	}
 
@@ -249,7 +249,7 @@ func (o *options) getHTTPListener() (net.Listener, error) {
 func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 	protocol := "HTTPS"
 
-	if o.httpsPort != 0 {
+	if o.httpsPort != -1 {
 		return getPortListener(o.httpsPort, protocol)
 	}
 
@@ -259,11 +259,11 @@ func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 
 	// HTTPS is active by default, but only if HTTP has not been explicitly
 	// activated.
-	if o.http || o.httpPort != 0 || o.httpUnixSocket != "" {
+	if o.http || o.httpPort != -1 || o.httpUnixSocket != "" {
 		return nil, nil
 	}
 
-	if o.port != 0 {
+	if o.port != -1 {
 		return getPortListener(o.port, protocol)
 	}
 
