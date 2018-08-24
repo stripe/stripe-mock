@@ -58,7 +58,7 @@ go get -u github.com/stripe/stripe-mock
 ```
 
 With no arguments, stripe-mock will listen with HTTP on its default port of
-`12111`:
+`12111` and HTTPS on `12112`:
 
 ``` sh
 stripe-mock
