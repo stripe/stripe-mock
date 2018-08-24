@@ -31,7 +31,10 @@ var version = "master"
 // ---
 
 func main() {
-	var options options
+	options := options{
+		httpPortDefault:  defaultPortHTTP,
+		httpsPortDefault: defaultPortHTTPS,
+	}
 
 	flag.BoolVar(&options.http, "http", false, "Run with HTTP")
 	flag.IntVar(&options.httpPort, "http-port", 0, "Port to listen on for HTTP")
@@ -154,13 +157,15 @@ func main() {
 type options struct {
 	fixturesPath string
 
-	http           bool
-	httpPort       int
-	httpUnixSocket string
+	http            bool
+	httpPortDefault int // For testability -- in practice always defaultPortHTTP
+	httpPort        int
+	httpUnixSocket  string
 
-	https           bool
-	httpsPort       int
-	httpsUnixSocket string
+	https            bool
+	httpsPortDefault int // For testability -- in practice always defaultPortHTTPS
+	httpsPort        int
+	httpsUnixSocket  string
 
 	port        int
 	showVersion bool
@@ -235,7 +240,7 @@ func (o *options) getHTTPListener() (net.Listener, error) {
 		return getUnixSocketListener(o.unixSocket, protocol)
 	}
 
-	return getPortListenerDefault(defaultPortHTTP, protocol)
+	return getPortListenerDefault(o.httpPortDefault, protocol)
 }
 
 // getNonSecureHTTPSListener gets a basic listener on a port or unix socket
@@ -266,7 +271,7 @@ func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 		return getUnixSocketListener(o.unixSocket, protocol)
 	}
 
-	return getPortListenerDefault(defaultPortHTTPS, protocol)
+	return getPortListenerDefault(o.httpsPortDefault, protocol)
 }
 
 //

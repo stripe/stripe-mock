@@ -347,3 +347,76 @@ func TestCheckConflictingOptions(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("Please specify only one of -https-port or -https-unix"), err)
 	}
 }
+
+// I didn't find a particularly easy way of asking for a free port in Go, so
+// here we just pick one in a high range that's unlikely to conflict with
+// anything else.
+const hopefullyFreePort = 32983
+
+func TestOptionsGetHTTPListener(t *testing.T) {
+	// Gets a listener when explicitly requested.
+	{
+		options := &options{
+			httpPort: hopefullyFreePort,
+		}
+		listener, err := options.getHTTPListener()
+		assert.NoError(t, err)
+		assert.NotNil(t, listener)
+		listener.Close()
+	}
+
+	// No listener when HTTPS is explicitly requested, but HTTP is not.
+	{
+		options := &options{
+			httpsPort: hopefullyFreePort,
+		}
+		listener, err := options.getHTTPListener()
+		assert.NoError(t, err)
+		assert.Nil(t, listener)
+	}
+
+	// Activates on the default HTTP port if no other args provided.
+	{
+		options := &options{
+			httpPortDefault: hopefullyFreePort,
+		}
+		listener, err := options.getHTTPListener()
+		assert.NoError(t, err)
+		assert.NotNil(t, listener)
+		listener.Close()
+	}
+}
+
+func TestOptionsGetNonSecureHTTPSListener(t *testing.T) {
+	// Gets a listener when explicitly requested.
+	{
+		options := &options{
+			httpsPort: hopefullyFreePort,
+		}
+		listener, err := options.getNonSecureHTTPSListener()
+		assert.NoError(t, err)
+		assert.NotNil(t, listener)
+		listener.Close()
+	}
+
+	// No listener when HTTP is explicitly requested, but HTTPS is not.
+	{
+		options := &options{
+			httpPort: hopefullyFreePort,
+		}
+		listener, err := options.getNonSecureHTTPSListener()
+		assert.NoError(t, err)
+		assert.Nil(t, listener)
+	}
+
+	// Activates on the default HTTPS port if no other args provided.
+	{
+		options := &options{
+			httpsPortDefault: hopefullyFreePort,
+		}
+		listener, err := options.getNonSecureHTTPSListener()
+		assert.NoError(t, err)
+		assert.NotNil(t, listener)
+		listener.Close()
+	}
+}
