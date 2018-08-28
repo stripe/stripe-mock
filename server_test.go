@@ -67,6 +67,34 @@ func TestStubServer_ExtraParam(t *testing.T) {
 	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
 }
 
+func TestStubServer_QueryParam(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10",
+		"", getDefaultHeaders())
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+}
+
+func TestStubServer_QueryExtraParam(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10&doesntexist=foo",
+		"", getDefaultHeaders())
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	errorType, ok := errorInfo["type"]
+	assert.Equal(t, errorType, "invalid_request_error")
+	assert.True(t, ok)
+	message, ok := errorInfo["message"]
+	assert.True(t, ok)
+	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
+}
+
 func TestStubServer_InvalidAuthorization(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/a", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)

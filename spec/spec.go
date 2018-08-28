@@ -9,6 +9,12 @@ import (
 // Public values
 //
 
+// A set of constants for the different types of possible OpenAPI parameters.
+const (
+	ParameterPath  = "path"
+	ParameterQuery = "query"
+)
+
 // A set of constant for the named types available in JSON Schema.
 const (
 	TypeArray   = "array"

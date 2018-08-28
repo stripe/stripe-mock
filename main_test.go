@@ -65,7 +65,29 @@ func initTestSpec() {
 	applicationFeeRefundCreateMethod = &spec.Operation{}
 	applicationFeeRefundGetMethod = &spec.Operation{}
 
-	chargeAllMethod = &spec.Operation{}
+	chargeAllMethod = &spec.Operation{
+		Parameters: []*spec.Parameter{
+			{
+				In:       spec.ParameterQuery,
+				Name:     "limit",
+				Required: false,
+				Schema: &spec.Schema{
+					Type: spec.TypeInteger,
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/json": {
+						Schema: &spec.Schema{
+							Type: spec.TypeObject,
+						},
+					},
+				},
+			},
+		},
+	}
 	chargeCreateMethod = &spec.Operation{
 		RequestBody: &spec.RequestBody{
 			Content: map[string]spec.MediaType{
@@ -74,7 +96,7 @@ func initTestSpec() {
 						AdditionalProperties: false,
 						Properties: map[string]*spec.Schema{
 							"amount": {
-								Type: "integer",
+								Type: spec.TypeInteger,
 							},
 						},
 						Required: []string{"amount"},
@@ -95,6 +117,16 @@ func initTestSpec() {
 		},
 	}
 	chargeDeleteMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": {
+					Schema: &spec.Schema{
+						AdditionalProperties: false,
+						Type:                 spec.TypeObject,
+					},
+				},
+			},
+		},
 		Responses: map[spec.StatusCode]spec.Response{
 			"200": {
 				Content: map[string]spec.MediaType{
