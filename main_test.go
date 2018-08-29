@@ -417,6 +417,18 @@ func TestOptionsGetNonSecureHTTPSListener(t *testing.T) {
 		assert.Nil(t, listener)
 	}
 
+	// No listener when HTTP is explicitly requested with the old `-port`
+	// option.
+	{
+		options := &options{
+			httpsPort: -1, // Signals not specified
+			port:      freePort,
+		}
+		listener, err := options.getNonSecureHTTPSListener()
+		assert.NoError(t, err)
+		assert.Nil(t, listener)
+	}
+
 	// Activates on the default HTTPS port if no other args provided.
 	{
 		options := &options{
