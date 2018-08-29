@@ -258,8 +258,10 @@ func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 	}
 
 	// HTTPS is active by default, but only if HTTP has not been explicitly
-	// activated.
-	if o.http || o.httpPort != -1 || o.httpUnixSocket != "" {
+	// activated. HTTP may be activated with `-http`, `-http-port`, or
+	// `-http-unix`, but also with the old backwards compatible basic `-port`
+	// option.
+	if o.http || o.httpPort != -1 || o.httpUnixSocket != "" || o.port != -1 {
 		return nil, nil
 	}
 
