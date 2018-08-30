@@ -174,7 +174,7 @@ func TestStubServer_AllowsEmptyContentTypeOnDelete(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["Content-Type"] = ""
 
-	resp, _ := sendRequest(t, "DELETE", "/v1/charges/ch_123", "", headers)
+	resp, _ := sendRequest(t, "DELETE", "/v1/customers/cus_123", "", headers)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
@@ -239,10 +239,10 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	{
 		route, pathParams := server.routeRequest(
-			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/charges/ch_123"}})
+			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/customers/cus_123"}})
 		assert.NotNil(t, route)
-		assert.Equal(t, chargeDeleteMethod, route.operation)
-		assert.Equal(t, "ch_123", *(*pathParams).PrimaryID)
+		assert.Equal(t, customerDeleteMethod, route.operation)
+		assert.Equal(t, "cus_123", *(*pathParams).PrimaryID)
 		assert.Equal(t, []*PathParamsSecondaryID(nil), (*pathParams).SecondaryIDs)
 	}
 

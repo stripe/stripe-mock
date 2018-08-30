@@ -13,8 +13,8 @@ var applicationFeeRefundCreateMethod *spec.Operation
 var applicationFeeRefundGetMethod *spec.Operation
 var chargeAllMethod *spec.Operation
 var chargeCreateMethod *spec.Operation
-var chargeDeleteMethod *spec.Operation
 var chargeGetMethod *spec.Operation
+var customerDeleteMethod *spec.Operation
 var invoicePayMethod *spec.Operation
 
 // Try to avoid using the real spec as much as possible because it's more
@@ -116,7 +116,9 @@ func initTestSpec() {
 			},
 		},
 	}
-	chargeDeleteMethod = &spec.Operation{
+	chargeGetMethod = &spec.Operation{}
+
+	customerDeleteMethod = &spec.Operation{
 		RequestBody: &spec.RequestBody{
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": {
@@ -132,14 +134,13 @@ func initTestSpec() {
 				Content: map[string]spec.MediaType{
 					"application/json": {
 						Schema: &spec.Schema{
-							Ref: "#/components/schemas/charge",
+							Ref: "#/components/schemas/deleted_customer",
 						},
 					},
 				},
 			},
 		},
 	}
-	chargeGetMethod = &spec.Operation{}
 
 	// Here so we can test the relatively rare "action" operations (e.g.,
 	// `POST` to `/pay` on an invoice).
@@ -210,8 +211,10 @@ func initTestSpec() {
 				"post": chargeCreateMethod,
 			},
 			spec.Path("/v1/charges/{id}"): {
-				"get":    chargeGetMethod,
-				"delete": chargeDeleteMethod,
+				"get": chargeGetMethod,
+			},
+			spec.Path("/v1/customers/{id}"): {
+				"delete": customerDeleteMethod,
 			},
 			spec.Path("/v1/invoices/{id}/pay"): {
 				"post": invoicePayMethod,
