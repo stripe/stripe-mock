@@ -249,20 +249,43 @@ func (s *StubServer) initializeRouter() error {
 		for verb, operation := range verbs {
 			numEndpoints++
 
-			_, requestBodySchema := getRequestBodySchema(operation)
-			var requestBodyValidator *jsval.JSVal
-			if requestBodySchema != nil {
+			var requestMediaType *string
+			var requestSchema *spec.Schema
+			var requestValidator *jsval.JSVal
+
+			// For `GET` requests we build a validator based off a
+			// pseudo-schema constructed from the endpoint's query parameters.
+			// For all other verbs we use the body schema.
+			//
+			// This is all a little weird and based off of how Stripe's OpenAPI
+			// specification is generated which is itself based off the
+			// original Rack confusion between query and body parameters
+			// (because it became ossified in Stripe's server implementation).
+			if verb == "get" {
+				requestSchema = spec.BuildQuerySchema(operation)
+
 				var err error
-				requestBodyValidator, err = spec.GetValidatorForOpenAPI3Schema(
-					requestBodySchema, componentsForValidation)
+				requestValidator, err = spec.GetValidatorForOpenAPI3Schema(
+					requestSchema, nil)
 				if err != nil {
 					return err
+				}
+			} else {
+				requestMediaType, requestSchema = getRequestBodySchema(operation)
+
+				if requestSchema != nil {
+					var err error
+					requestValidator, err = spec.GetValidatorForOpenAPI3Schema(
+						requestSchema, componentsForValidation)
+					if err != nil {
+						return err
+					}
 				}
 			}
 
 			// Note that this may be nil if no suitable validator could be
 			// generated.
-			if requestBodyValidator != nil {
+			if requestValidator != nil {
 				numValidators++
 			}
 
@@ -277,11 +300,13 @@ func (s *StubServer) initializeRouter() error {
 			}
 
 			route := stubServerRoute{
-				hasPrimaryID:         hasPrimaryID,
-				pattern:              pathPattern,
-				operation:            operation,
-				pathParamNames:       pathParamNames,
-				requestBodyValidator: requestBodyValidator,
+				hasPrimaryID:     hasPrimaryID,
+				pattern:          pathPattern,
+				operation:        operation,
+				pathParamNames:   pathParamNames,
+				requestMediaType: requestMediaType,
+				requestSchema:    requestSchema,
+				requestValidator: requestValidator,
 			}
 
 			// net/http will always give us verbs in uppercase, so build our
@@ -290,6 +315,19 @@ func (s *StubServer) initializeRouter() error {
 
 			s.routes[verb] = append(s.routes[verb], route)
 		}
+	}
+
+	for _, verbRoutes := range s.routes {
+		// After sorting all routes, order them by their number of path
+		// parameters so that paths with static portions will tend to be
+		// preferred over those with dynamic parts.
+		//
+		// For example, `/v1/invoices/upcoming` should be preferred over
+		// `/v1/invoices/:invoice` even though both will match the string
+		// `/v1/invoices/upcoming`.
+		sort.Slice(verbRoutes, func(i, j int) bool {
+			return len(verbRoutes[i].pathParamNames) < len(verbRoutes[j].pathParamNames)
+		})
 	}
 
 	fmt.Printf("Routing to %v path(s) and %v endpoint(s) with %v validator(s)\n",
@@ -420,11 +458,13 @@ var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
 // pattern to match an incoming path and a description of the method that would
 // be executed in the event of a match.
 type stubServerRoute struct {
-	hasPrimaryID         bool
-	pattern              *regexp.Regexp
-	operation            *spec.Operation
-	pathParamNames       []string
-	requestBodyValidator *jsval.JSVal
+	hasPrimaryID     bool
+	operation        *spec.Operation
+	pathParamNames   []string
+	pattern          *regexp.Regexp
+	requestMediaType *string
+	requestSchema    *spec.Schema
+	requestValidator *jsval.JSVal
 }
 
 //
@@ -567,45 +607,37 @@ func validateAndCoerceRequest(
 	route *stubServerRoute,
 	requestData map[string]interface{}) (map[string]interface{}, *ResponseError) {
 
-	// Currently we only validate parameters in the request body, but we should
-	// really validate query and URL parameters as well now that we've
-	// transitioned to OpenAPI 3.0.
-	mediaType, bodySchema := getRequestBodySchema(route.operation)
-
-	// There are no parameters on this route to validate.
-	if mediaType == nil {
-		return requestData, nil
-	}
-
-	contentType := r.Header.Get("Content-Type")
-
-	if contentType == "" {
-		// A special case: if a `DELETE` operation comes in with no request
-		// payload, we allow it. Most `DELETE` operations take no parameters,
-		// but a few of them take some optional ones.
-		if r.Method == http.MethodDelete {
-			return requestData, nil
+	// We only check content type on non-`GET` non-`DELETE` requests.
+	//
+	// `GET` requests either send no parameters or send parameters only in the
+	// query.
+	//
+	// `DELETE` will often have no parameters. When it does, they're in the
+	// body, but we'll ignore content type validation in this one case for
+	// simplicity.
+	if r.Method != http.MethodDelete && r.Method != http.MethodGet {
+		contentType := r.Header.Get("Content-Type")
+		if contentType == "" {
+			message := fmt.Sprintf(contentTypeEmpty, *route.requestMediaType)
+			fmt.Printf(message + "\n")
+			return nil, createStripeError(typeInvalidRequestError, message)
 		}
 
-		message := fmt.Sprintf(contentTypeEmpty, *mediaType)
-		fmt.Printf(message + "\n")
-		return nil, createStripeError(typeInvalidRequestError, message)
+		// Truncate content type parameters. For example, given:
+		//
+		//     application/json; charset=utf-8
+		//
+		// We want to chop off the `; charset=utf-8` at the end.
+		contentType = strings.Split(contentType, ";")[0]
+
+		if contentType != *route.requestMediaType {
+			message := fmt.Sprintf(contentTypeMismatched, *route.requestMediaType, contentType)
+			fmt.Printf(message + "\n")
+			return nil, createStripeError(typeInvalidRequestError, message)
+		}
 	}
 
-	// Truncate content type parameters. For example, given:
-	//
-	//     application/json; charset=utf-8
-	//
-	// We want to chop off the `; charset=utf-8` at the end.
-	contentType = strings.Split(contentType, ";")[0]
-
-	if contentType != *mediaType {
-		message := fmt.Sprintf(contentTypeMismatched, *mediaType, contentType)
-		fmt.Printf(message + "\n")
-		return nil, createStripeError(typeInvalidRequestError, message)
-	}
-
-	err := coercer.CoerceParams(bodySchema, requestData)
+	err := coercer.CoerceParams(route.requestSchema, requestData)
 	if err != nil {
 		message := fmt.Sprintf("Request coercion error: %v", err)
 		fmt.Printf(message + "\n")
@@ -613,7 +645,7 @@ func validateAndCoerceRequest(
 	}
 
 	fmt.Printf("Request data = %+v\n", requestData)
-	err = route.requestBodyValidator.Validate(requestData)
+	err = route.requestValidator.Validate(requestData)
 	if err != nil {
 		message := fmt.Sprintf("Request validation error: %v", err)
 		fmt.Printf(message + "\n")

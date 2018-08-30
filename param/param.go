@@ -10,6 +10,10 @@ import (
 	"github.com/stripe/stripe-mock/param/parser"
 )
 
+//
+// Public functions
+//
+
 // ParseParams extracts parameters from a request that an application can
 // consume.
 //

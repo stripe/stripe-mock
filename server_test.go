@@ -67,6 +67,34 @@ func TestStubServer_ExtraParam(t *testing.T) {
 	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
 }
 
+func TestStubServer_QueryParam(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10",
+		"", getDefaultHeaders())
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+}
+
+func TestStubServer_QueryExtraParam(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10&doesntexist=foo",
+		"", getDefaultHeaders())
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var data map[string]interface{}
+	err := json.Unmarshal(body, &data)
+	assert.NoError(t, err)
+	errorInfo, ok := data["error"].(map[string]interface{})
+	assert.True(t, ok)
+	errorType, ok := errorInfo["type"]
+	assert.Equal(t, errorType, "invalid_request_error")
+	assert.True(t, ok)
+	message, ok := errorInfo["message"]
+	assert.True(t, ok)
+	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
+}
+
 func TestStubServer_InvalidAuthorization(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/a", "", nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
@@ -146,7 +174,7 @@ func TestStubServer_AllowsEmptyContentTypeOnDelete(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["Content-Type"] = ""
 
-	resp, _ := sendRequest(t, "DELETE", "/v1/charges/ch_123", "", headers)
+	resp, _ := sendRequest(t, "DELETE", "/v1/customers/cus_123", "", headers)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
@@ -211,10 +239,10 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	{
 		route, pathParams := server.routeRequest(
-			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/charges/ch_123"}})
+			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/customers/cus_123"}})
 		assert.NotNil(t, route)
-		assert.Equal(t, chargeDeleteMethod, route.operation)
-		assert.Equal(t, "ch_123", *(*pathParams).PrimaryID)
+		assert.Equal(t, customerDeleteMethod, route.operation)
+		assert.Equal(t, "cus_123", *(*pathParams).PrimaryID)
 		assert.Equal(t, []*PathParamsSecondaryID(nil), (*pathParams).SecondaryIDs)
 	}
 
