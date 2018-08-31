@@ -13,10 +13,12 @@ docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
 #
 # Create Docker Hub tags for Git tags and keep one in place for the master
 # branch.
-if [ ! -z "$TRAVIS_TAG" ]; then
+if [[ ! -z "$TRAVIS_TAG" ]]; then
     docker tag "$DOCKER_REPO:${TRAVIS_COMMIT:0:8}" "$DOCKER_REPO:$TRAVIS_TAG"
-elif [ "$TRAVIS_BRANCH" == "master"]; then
-    docker tag "$DOCKER_REPO:${TRAVIS_COMMIT:0:8}" "$DOCKER_REPO:master"
+elif [[ "$TRAVIS_BRANCH" -eq "master" ]]; then
+    # Convention on Docker Hub is to use "latest" instead of "master", so we
+    # tag accordingly.
+    docker tag "$DOCKER_REPO:${TRAVIS_COMMIT:0:8}" "$DOCKER_REPO:latest"
 fi
 
 docker push "$DOCKER_REPO"
