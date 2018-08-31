@@ -19,8 +19,8 @@ script:
 
   # Build and test the Docker image. It's pushed to Docker Hub as part of the
   # deploy phase.
-  - docker build -t "$DOCKER_REPO" .
-  - docker run -d --name stripe-mock-container -p 12111:12111 "$DOCKER_REPO"
+  - docker build -t "$DOCKER_REPO:${TRAVIS_COMMIT:0:8}" .
+  - docker run -d --name stripe-mock-container -p 12111:12111 "$DOCKER_REPO:${TRAVIS_COMMIT:0:8}"
   - docker ps -a
 
 deploy:
