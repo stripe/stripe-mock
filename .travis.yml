@@ -27,10 +27,8 @@ deploy:
   provider: script
   script: bash scripts/docker_push.sh
   on:
-    # Note that currently on the `master` branch is pushed to Docker Hub. We
-    # may want to do tagged releases as well if this ends up being something
-    # that people use.
     branch: master
+    tags: true
 
 notifications:
   email:
