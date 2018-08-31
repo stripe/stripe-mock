@@ -27,8 +27,7 @@ deploy:
   provider: script
   script: bash scripts/docker_push.sh
   on:
-    branch: master
-    tags: true
+    condition: ! -z "$TRAVIS_TAG" || "$TRAVIS_BRANCH" -eq "master"
 
 notifications:
   email:
