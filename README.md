@@ -64,33 +64,19 @@ With no arguments, stripe-mock will listen with HTTP on its default port of
 stripe-mock
 ```
 
-It can also be activated with HTTPS (and by extension support for HTTP/2) using
-the `-https` flag (the default port changes to `12112` for HTTPS):
-
-``` sh
-stripe-mock -https
-```
-
-For either HTTP or HTTPS, the port can be specified with either the `PORT`
-environmental variable or the `-port` option (the latter is preferred if both
-are present):
-
-``` sh
-stripe-mock -port 12111
-```
-
-It can also listen on a Unix socket:
-
-``` sh
-stripe-mock -https -unix /tmp/stripe-mock-secure.sock
-```
-
-It can be configured to receive both HTTP _and_ HTTPS by using the
-`-http-port`, `-http-unix`, `-https-port`, and `-https-unix` options (and note
-that these cannot be mixed with any of the basic options above):
+Ports can be specified explicitly with:
 
 ``` sh
 stripe-mock -http-port 12111 -https-port 12112
+```
+
+(Leave either `-http-port` or `-https-port` out to activate stripe-mock on only
+one protocol.)
+
+It can also listen via Unix socket:
+
+``` sh
+stripe-mock -http-unix /tmp/stripe-mock.sock -https-unix /tmp/stripe-mock-secure.sock
 ```
 
 ### Homebrew
