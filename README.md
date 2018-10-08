@@ -36,7 +36,7 @@ Limitations:
   versions.
 * [Testing for specific responses and errors](https://stripe.com/docs/testing#cards-responses)
   is currently not supported. It will return a success response instead of
-  the desired erro response.
+  the desired error response.
 
 ## Future plans
 
