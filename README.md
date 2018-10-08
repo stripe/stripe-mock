@@ -34,6 +34,9 @@ Limitations:
   specify which one that is.
 * It's locked to the latest version of Stripe's API and doesn't support old
   versions.
+* [Testing for specific responses and errors](https://stripe.com/docs/testing#cards-responses)
+  is currently not supported. It will return a success response instead of
+  the desired error response.
 
 ## Future plans
 
