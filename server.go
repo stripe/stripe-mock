@@ -442,10 +442,14 @@ var hasPrimaryIDSuffixes = [...]string{
 	"/cancel",
 	"/close",
 	"/decline",
+	"/finalize",
+	"/mark_uncollectible",
 	"/pay",
 	"/refund",
 	"/reject",
+	"/send",
 	"/verify",
+	"/void",
 }
 
 var pathParameterPattern = regexp.MustCompile(`\{(\w+)\}`)
