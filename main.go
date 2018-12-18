@@ -335,7 +335,7 @@ func getPortListener(port int, protocol string) (net.Listener, error) {
 		return nil, fmt.Errorf("error listening on port: %v", err)
 	}
 
-	fmt.Printf("Listening for %s on port: %v\n", protocol, port)
+	fmt.Printf("Listening for %s on port: %v\n", protocol, listener.Addr().(*net.TCPAddr).Port)
 	return listener, nil
 }
 
