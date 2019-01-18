@@ -76,6 +76,12 @@ stripe-mock -http-port 12111 -https-port 12112
 (Leave either `-http-port` or `-https-port` out to activate stripe-mock on only
 one protocol.)
 
+Have stripe-mock select a port automatically by passing `0`:
+
+``` sh
+stripe-mock -http-port 0
+```
+
 It can also listen via Unix socket:
 
 ``` sh
