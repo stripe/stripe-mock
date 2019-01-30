@@ -447,6 +447,7 @@ var hasPrimaryIDSuffixes = [...]string{
 	"/pay",
 	"/refund",
 	"/reject",
+	"/release",
 	"/send",
 	"/verify",
 	"/void",
