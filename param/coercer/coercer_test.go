@@ -41,13 +41,90 @@ func TestCoerceParams_AnyOfCoercion(t *testing.T) {
 		}}
 		data := map[string]interface{}{
 			"object_or_int_key": map[string]interface{}{
-				"intkey": 123,
+				"intkey": "123",
 			},
 		}
 
 		err := CoerceParams(schema, data)
 		assert.NoError(t, err)
 		assert.Equal(t, 123, data["object_or_int_key"].(map[string]interface{})["intkey"])
+	}
+
+	// `anyOf` with array of mixed types
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"array_object_or_int_key": {
+				AnyOf: []*spec.Schema{
+					// primitives are skipped
+					{Type: integerType},
+					{Type: stringType},
+					// array of int is skipped
+					{Items: &spec.Schema{
+						Type: integerType,
+					}, Type: arrayType},
+					// array of object is chosen
+					{Items: &spec.Schema{
+						Properties: map[string]*spec.Schema{
+							"intkey": {Type: integerType},
+						}},
+						Type: arrayType},
+				},
+			},
+		}}
+		data := map[string]interface{}{
+			"array_object_or_int_key": map[string]interface{}{
+				"0": map[string]interface{}{"intkey": "123"},
+				"1": map[string]interface{}{"intkey": nil},
+				"2": map[string]interface{}{"intkey": "124"},
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["array_object_or_int_key"].([]interface{})
+		assert.True(t, ok)
+
+		assert.Equal(t, 123, sliceVal[0].(map[string]interface{})["intkey"])
+		assert.Equal(t, nil, sliceVal[1].(map[string]interface{})["intkey"])
+		assert.Equal(t, 124, sliceVal[2].(map[string]interface{})["intkey"])
+	}
+
+	//`anyOf` with array of different primitives
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"array_string_or_array_int": {
+				AnyOf: []*spec.Schema{
+					{Type: booleanType},
+					// array of string is chosen
+					{Items: &spec.Schema{
+						Type: stringType},
+						Type: arrayType},
+					{Items: &spec.Schema{
+						Type: integerType,
+					},
+						Type: arrayType},
+				},
+			},
+		}}
+		data := map[string]interface{}{
+			"array_string_or_array_int": map[string]interface{}{
+				"0": "123",
+				"1": nil,
+				"2": "456",
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["array_string_or_array_int"].([]interface{})
+		assert.True(t, ok)
+
+		// values are not coerced into numbers, given explicit string-typed
+		assert.Equal(t, "123", sliceVal[0])
+		assert.Equal(t, nil, sliceVal[1])
+		assert.Equal(t, "456", sliceVal[2])
 	}
 }
 
@@ -251,6 +328,26 @@ func TestCoerceParams_NumberCoercion(t *testing.T) {
 	err := CoerceParams(schema, data)
 	assert.NoError(t, err)
 	assert.Equal(t, 123.45, data["numberkey"])
+}
+
+func TestCoerceParams_UnspecifiedTypeNoCoercion(t *testing.T) {
+	schema := &spec.Schema{Properties: map[string]*spec.Schema{
+		// unspecified types
+		"stringkey": {},
+		"numberKey": {},
+		"objectKey": {},
+	}}
+	data := map[string]interface{}{
+		"stringkey": "123",
+		"numberKey": 1.0 / 3,
+		"objectKey": map[string]interface{}{"foo": "bar"},
+	}
+
+	err := CoerceParams(schema, data)
+	assert.NoError(t, err)
+	assert.Equal(t, "123", data["stringkey"])
+	assert.Equal(t, 1.0/3, data["numberKey"])
+	assert.Equal(t, "bar", data["objectKey"].(map[string]interface{})["foo"])
 }
 
 func TestCoerceParams_Recursion(t *testing.T) {
