@@ -19,12 +19,12 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 		if !ok {
 			continue
 		}
-		val, ok, err := coerceSubSchema(val, subSchema)
+		coercedVal, ok, err := coerceSubSchema(val, subSchema)
 		if err != nil {
 			return err
 		}
 		if ok {
-			data[key] = val
+			data[key] = coercedVal
 		}
 	}
 
@@ -37,14 +37,15 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 // of anyOf or array.
 func coerceSubSchema(val interface{}, subSchema *spec.Schema) (interface{}, bool, error) {
 	if len(subSchema.Properties) == 0 {
-		// anyOf, array, and primitive schemas
-		// additionalProperties without properties will not be coerced
+		// Non-object schemas are anyOf, array, and primitive schemas.
+		// Implicitly treats actual object schema with empty properties as non-object.
 		return coerceNonObjectSchema(val, subSchema)
 	}
-	// schema with properties with `object` type
+	// `object` schema with properties
 	valMap, ok := val.(map[string]interface{})
 	var err error
 	if ok {
+		// unwrapping sub-schemas, and coerce contents in the map
 		err = CoerceParams(subSchema, valMap)
 	}
 	return valMap, ok, err
