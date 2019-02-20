@@ -31,16 +31,17 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 	return nil
 }
 
-// coerceSubSchema coerces sub-param value according to an arbitrary JSON sub-schema.
-// It is sub-schema because it can be array, primitive, or object,  unlike the main `CoerceParams`
-// only expecting object type with properties. This is also used in coercing each sub-schema
-// of anyOf or array.
+// coerceSubSchema coerces a sub-param value according to an arbitrary JSON sub-schema.
+// It is named with "sub-schema" because it can be array, primitive, or object, unlike the main
+// `CoerceParams` only expecting object type with properties. This is also used in coercing each
+// sub-schema of anyOf or array.
 func coerceSubSchema(val interface{}, subSchema *spec.Schema) (interface{}, bool, error) {
 	if len(subSchema.Properties) == 0 {
 		// Non-object schemas are anyOf, array, and primitive schemas.
 		// Implicitly treats actual object schema with empty properties as non-object.
 		return coerceNonObjectSchema(val, subSchema)
 	}
+
 	// `object` schema with properties
 	valMap, ok := val.(map[string]interface{})
 	var err error
@@ -61,8 +62,8 @@ const (
 	booleanType = "boolean"
 	integerType = "integer"
 	numberType  = "number"
-	stringType  = "string"
 	objectType  = "object"
+	stringType  = "string"
 )
 
 // maxSliceSize defines a somewhat arbitrary maximum size on an incoming
