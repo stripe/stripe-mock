@@ -19,55 +19,37 @@ func CoerceParams(schema *spec.Schema, data map[string]interface{}) error {
 		if !ok {
 			continue
 		}
-
-		valMap, ok := val.(map[string]interface{})
-		if ok {
-			CoerceParams(subSchema, valMap)
-
-			if subSchema.Type == arrayType {
-				valSlice, err := parseIntegerIndexedMap(valMap)
-				if err != nil {
-					return err
-				}
-
-				if valSlice != nil {
-					data[key] = valSlice
-					val = valSlice
-				}
-			}
-
-			// May fall through to the next segment where we iterate an array
-			// and coerce it
+		coercedVal, ok, err := coerceSubSchema(val, subSchema)
+		if err != nil {
+			return err
 		}
-
-		valArr, ok := val.([]interface{})
 		if ok {
-			if subSchema.Items != nil {
-				for i, itemVal := range valArr {
-					itemValMap, ok := itemVal.(map[string]interface{})
-					if ok {
-						// Handles the case of an array of generic objects
-						CoerceParams(subSchema.Items, itemValMap)
-					} else if subSchema.Items.Type != "" {
-						// Handles the case of an array of primitive types
-						itemValCoerced, ok := coerceSchema(itemVal, subSchema.Items)
-						if ok {
-							valArr[i] = itemValCoerced
-						}
-					}
-				}
-			}
-
-			continue
-		}
-
-		valCoerced, ok := coerceSchema(val, subSchema)
-		if ok {
-			data[key] = valCoerced
+			data[key] = coercedVal
 		}
 	}
 
 	return nil
+}
+
+// coerceSubSchema coerces a sub-param value according to an arbitrary JSON sub-schema.
+// It is named with "sub-schema" because it can be array, primitive, or object, unlike the main
+// `CoerceParams` only expecting object type with properties. This is also used in coercing each
+// sub-schema of anyOf or array.
+func coerceSubSchema(val interface{}, subSchema *spec.Schema) (interface{}, bool, error) {
+	if len(subSchema.Properties) == 0 {
+		// Non-object schemas are anyOf, array, and primitive schemas.
+		// Implicitly treats actual object schema with empty properties as non-object.
+		return coerceNonObjectSchema(val, subSchema)
+	}
+
+	// `object` schema with properties
+	valMap, ok := val.(map[string]interface{})
+	var err error
+	if ok {
+		// unwrapping sub-schemas, and coerce contents in the map
+		err = CoerceParams(subSchema, valMap)
+	}
+	return valMap, ok, err
 }
 
 //
@@ -81,6 +63,7 @@ const (
 	integerType = "integer"
 	numberType  = "number"
 	objectType  = "object"
+	stringType  = "string"
 )
 
 // maxSliceSize defines a somewhat arbitrary maximum size on an incoming
@@ -122,40 +105,71 @@ func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bo
 			return nil, false
 		}
 		return valFloat, true
+
+	case primitiveType == stringType:
+		return valStr, true
 	}
 
 	return nil, false
 }
 
-// coerceSchema tries to coerce a schema containing a primitive type from the
-// given generic interface{} value.
+// coerceNonObjectSchema tries to coerce a non-object schema given generic interface{} value.
 //
 // It's similar to coercePrimitiveType above (and indeed calls into it), but
-// also handles the case of an anyOf schema that supports a number of different
-// primitve types.
-func coerceSchema(val interface{}, schema *spec.Schema) (interface{}, bool) {
+// also handles array and anyOf schema (supporting a number of different primitive types)
+func coerceNonObjectSchema(val interface{}, schema *spec.Schema) (interface{}, bool, error) {
 	if isSchemaPrimitiveType(schema) {
-		return coercePrimitiveType(val, schema.Type)
+		val, ok := coercePrimitiveType(val, schema.Type)
+		return val, ok, nil
 	}
 
 	if schema.AnyOf != nil {
 		for _, subSchema := range schema.AnyOf {
-			if isSchemaPrimitiveType(subSchema) {
-				val, ok := coerceSchema(val, subSchema)
-				if ok {
-					return val, ok
-				}
-			} else {
-				valMap, ok := val.(map[string]interface{})
-				if ok {
-					CoerceParams(subSchema, valMap)
-					return valMap, ok
-				}
+			val, ok, err := coerceSubSchema(val, subSchema)
+			if ok {
+				return val, ok, err
 			}
 		}
 	}
 
-	return nil, false
+	if schema.Type == arrayType {
+		valMap, ok := val.(map[string]interface{})
+		if ok {
+			valSlice, err := parseIntegerIndexedMap(valMap)
+			if err != nil {
+				return nil, false, err
+			}
+			if valSlice != nil {
+				val = valSlice
+			}
+		}
+
+		valArr, ok := val.([]interface{})
+		if schema.Items == nil {
+			// underspecified array of primitive
+			return val, ok, nil
+		}
+
+		if ok {
+			allOk := true
+			for i, itemVal := range valArr {
+				itemValCoerced, itemOk, err := coerceSubSchema(itemVal, schema.Items)
+				if err != nil {
+					return nil, false, err
+				}
+				if itemOk {
+					valArr[i] = itemValCoerced
+				}
+				skipNilItem := itemVal == nil
+				allOk = allOk && (itemOk || skipNilItem)
+			}
+			if allOk {
+				return valArr, true, nil
+			}
+		}
+	}
+
+	return nil, false, nil
 }
 
 // isSchemaPrimitiveType checks whether the given schema is a coercable
@@ -174,6 +188,10 @@ func isSchemaPrimitiveType(schema *spec.Schema) bool {
 	}
 
 	if schema.Type == numberType {
+		return true
+	}
+
+	if schema.Type == stringType {
 		return true
 	}
 
