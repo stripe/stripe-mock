@@ -134,9 +134,8 @@ func TestCoerceParams_AnyOfCoercion(t *testing.T) {
 				AnyOf: []*spec.Schema{
 					{Enum: []interface{}{
 						"enum1",
-						"enum2",
-					}, Type: stringType,
-					},
+						"enum2"},
+						Type: stringType},
 					{Type: integerType},
 				},
 			},
