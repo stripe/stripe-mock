@@ -119,6 +119,15 @@ func coercePrimitiveType(val interface{}, primitiveType string) (interface{}, bo
 // also handles array and anyOf schema (supporting a number of different primitive types)
 func coerceNonObjectSchema(val interface{}, schema *spec.Schema) (interface{}, bool, error) {
 	if isSchemaPrimitiveType(schema) {
+		if schema.Enum != nil {
+			// assuming enum value isn't numeric string. when given anyOf schema with enum and
+			// number, the numeric string won't falsely be taken as enum and miss its coercion
+			_, isNumeric := coercePrimitiveType(val, numberType)
+			if isNumeric {
+				return nil, false, nil
+			}
+		}
+
 		val, ok := coercePrimitiveType(val, schema.Type)
 		return val, ok, nil
 	}

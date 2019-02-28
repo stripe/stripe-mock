@@ -126,6 +126,40 @@ func TestCoerceParams_AnyOfCoercion(t *testing.T) {
 		assert.Equal(t, nil, sliceVal[1])
 		assert.Equal(t, "456", sliceVal[2])
 	}
+
+	// `anyOf` Enum and numeric string
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"enum_or_int_key": {
+				AnyOf: []*spec.Schema{
+					{Enum: []interface{}{
+						"enum1",
+						"enum2",
+					}, Type: stringType,
+					},
+					{Type: integerType},
+				},
+			},
+		}}
+
+		// numeric string shouldn't be considered as enum string
+		// and still be coerced to number
+		data := map[string]interface{}{
+			"enum_or_int_key": "123",
+		}
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+		assert.Equal(t, 123, data["enum_or_int_key"])
+
+		// note that value "foo" is not a valid value, but
+		// validation is not done here. having "foo" as string is sufficient
+		data = map[string]interface{}{
+			"enum_or_int_key": "foo",
+		}
+		err = CoerceParams(schema, data)
+		assert.NoError(t, err)
+		assert.Equal(t, "foo", data["enum_or_int_key"])
+	}
 }
 
 func TestCoerceParams_ArrayCoercion(t *testing.T) {
@@ -218,6 +252,36 @@ func TestCoerceParams_ArrayCoercion(t *testing.T) {
 		assert.Equal(t, 123, sliceVal[0].(map[string]interface{})["intkey"])
 		assert.Equal(t, nil, sliceVal[1].(map[string]interface{})["intkey"])
 		assert.Equal(t, 124, sliceVal[2].(map[string]interface{})["intkey"])
+	}
+
+	// Integer-indexed of enum
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"array_enum": {
+				Items: &spec.Schema{
+					Enum: []interface{}{
+						"enum1",
+						"enum2",
+					}, Type: stringType,
+				},
+				Type: arrayType,
+			},
+		}}
+		data := map[string]interface{}{
+			"array_enum": map[string]interface{}{
+				// enum value is incorrect, but only coercion
+				// to string is required
+				"0": "enum",
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+
+		sliceVal, ok := data["array_enum"].([]interface{})
+		assert.True(t, ok)
+
+		assert.Equal(t, "enum", sliceVal[0])
 	}
 }
 
