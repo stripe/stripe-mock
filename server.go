@@ -263,16 +263,14 @@ func (s *StubServer) initializeRouter() error {
 			// (because it became ossified in Stripe's server implementation).
 			if verb == "get" {
 				requestSchema = spec.BuildQuerySchema(operation)
-
 				var err error
 				requestValidator, err = spec.GetValidatorForOpenAPI3Schema(
-					requestSchema, nil)
+					requestSchema, componentsForValidation)
 				if err != nil {
 					return err
 				}
 			} else {
 				requestMediaType, requestSchema = getRequestBodySchema(operation)
-
 				if requestSchema != nil {
 					var err error
 					requestValidator, err = spec.GetValidatorForOpenAPI3Schema(
@@ -297,6 +295,10 @@ func (s *StubServer) initializeRouter() error {
 					hasPrimaryID = true
 					break
 				}
+			}
+
+			if requestSchema != nil {
+				requestSchema = replaceRef(requestSchema, s.spec.Components.Schemas)
 			}
 
 			route := stubServerRoute{
@@ -333,6 +335,35 @@ func (s *StubServer) initializeRouter() error {
 	fmt.Printf("Routing to %v path(s) and %v endpoint(s) with %v validator(s)\n",
 		numPaths, numEndpoints, numValidators)
 	return nil
+}
+
+func replaceRef(requestSchema *spec.Schema, componentSchemas map[string]*spec.Schema) *spec.Schema {
+	if requestSchema.Ref != "" {
+		return replaceRef(
+			componentSchemas[definitionFromJSONPointer(requestSchema.Ref)],
+			componentSchemas)
+	}
+
+	if requestSchema.Items != nil {
+		requestSchema.Items = replaceRef(requestSchema.Items, componentSchemas)
+		return requestSchema
+	}
+
+	if len(requestSchema.Properties) != 0 {
+		for prop, val := range requestSchema.Properties {
+			requestSchema.Properties[prop] = replaceRef(val, componentSchemas)
+		}
+		return requestSchema
+	}
+
+	if len(requestSchema.AnyOf) != 0 {
+		for i, val := range requestSchema.AnyOf {
+			requestSchema.AnyOf[i] = replaceRef(val, componentSchemas)
+		}
+		return requestSchema
+	}
+
+	return requestSchema
 }
 
 // routeRequest tries to find a matching route for the given request. If
