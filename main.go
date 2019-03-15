@@ -47,6 +47,7 @@ func main() {
 	flag.IntVar(&options.port, "port", -1, "Port to listen on (also respects PORT from environment)")
 	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version (should be JSON)")
 	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
+	flag.BoolVar(&options.strictVersionCheck, "strict-version-check", false, "Errors if version sent in Stripe-Version doesn't match the one in OpenAPI")
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
@@ -77,7 +78,11 @@ func main() {
 		abort(err.Error())
 	}
 
-	stub := StubServer{fixtures: fixtures, spec: stripeSpec}
+	stub := StubServer{
+		fixtures:           fixtures,
+		spec:               stripeSpec,
+		strictVersionCheck: options.strictVersionCheck,
+	}
 	err = stub.initializeRouter()
 	if err != nil {
 		abort(fmt.Sprintf("Error initializing router: %v\n", err))
@@ -167,10 +172,11 @@ type options struct {
 	httpsPort        int
 	httpsUnixSocket  string
 
-	port        int
-	showVersion bool
-	specPath    string
-	unixSocket  string
+	port               int
+	showVersion        bool
+	specPath           string
+	strictVersionCheck bool
+	unixSocket         string
 }
 
 func (o *options) checkConflictingOptions() error {

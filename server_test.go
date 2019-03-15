@@ -21,7 +21,7 @@ import (
 
 func TestStubServer(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", getDefaultHeaders())
+		"amount=123", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -33,7 +33,7 @@ func TestStubServer(t *testing.T) {
 
 func TestStubServer_MissingParam(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"", getDefaultHeaders())
+		"", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -51,7 +51,7 @@ func TestStubServer_MissingParam(t *testing.T) {
 
 func TestStubServer_ExtraParam(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123&doesntexist=foo", getDefaultHeaders())
+		"amount=123&doesntexist=foo", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -69,7 +69,7 @@ func TestStubServer_ExtraParam(t *testing.T) {
 
 func TestStubServer_QueryParam(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10",
-		"", getDefaultHeaders())
+		"", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -79,7 +79,7 @@ func TestStubServer_QueryParam(t *testing.T) {
 
 func TestStubServer_QueryExtraParam(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/v1/charges?limit=10&doesntexist=foo",
-		"", getDefaultHeaders())
+		"", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -96,7 +96,7 @@ func TestStubServer_QueryExtraParam(t *testing.T) {
 }
 
 func TestStubServer_InvalidAuthorization(t *testing.T) {
-	resp, body := sendRequest(t, "GET", "/a", "", nil)
+	resp, body := sendRequest(t, "GET", "/a", "", nil, nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -107,8 +107,43 @@ func TestStubServer_InvalidAuthorization(t *testing.T) {
 	errorType, ok := errorInfo["type"]
 	assert.Equal(t, errorType, "invalid_request_error")
 	assert.True(t, ok)
-	_, ok = errorInfo["message"]
+	message, ok := errorInfo["message"]
 	assert.True(t, ok)
+	assert.Equal(t, fmt.Sprintf(invalidAuthorization, ""), message)
+}
+
+func TestStubServer_InvalidStripeVersion(t *testing.T) {
+	testBadVersion := "2006-01-01"
+
+	headers := getDefaultHeaders()
+	headers["Stripe-Version"] = testBadVersion
+
+	// With strictVersionCheck on, which throws the error
+	{
+		resp, body := sendRequest(t, "GET", "/v1/charges", "", headers,
+			&testStubServerOptions{strictVersionCheck: true})
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+		var data map[string]interface{}
+		err := json.Unmarshal(body, &data)
+		assert.NoError(t, err)
+		errorInfo, ok := data["error"].(map[string]interface{})
+		assert.True(t, ok)
+		errorType, ok := errorInfo["type"]
+		assert.Equal(t, errorType, "invalid_request_error")
+		assert.True(t, ok)
+		message, ok := errorInfo["message"]
+		assert.True(t, ok)
+		assert.Equal(t,
+			fmt.Sprintf(invalidStripeVersion, testBadVersion, testSpecAPIVersion),
+			message)
+	}
+
+	// With strictVersionCheck off, which responds normally
+	{
+		resp, _ := sendRequest(t, "GET", "/v1/charges", "", headers, nil)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	}
 }
 
 func TestStubServer_AllowsContentTypeWithParameters(t *testing.T) {
@@ -116,25 +151,25 @@ func TestStubServer_AllowsContentTypeWithParameters(t *testing.T) {
 	headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
 
 	resp, _ := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", headers)
+		"amount=123", headers, nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
-	resp, _ := sendRequest(t, "POST", "/", "", nil)
+	resp, _ := sendRequest(t, "POST", "/", "", nil, nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
 	_, ok := resp.Header["Request-Id"]
 	assert.False(t, ok)
 
-	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders())
+	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
 	assert.Equal(t, "req_123", resp.Header.Get("Request-Id"))
 }
 
 func TestStubServer_ParameterValidation(t *testing.T) {
-	resp, body := sendRequest(t, "POST", "/v1/charges", "", getDefaultHeaders())
+	resp, body := sendRequest(t, "POST", "/v1/charges", "", getDefaultHeaders(), nil)
 	assert.Contains(t, string(body), "property 'amount' is required")
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
@@ -143,7 +178,7 @@ func TestStubServer_FormatsForCurl(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["User-Agent"] = "curl/1.2.3"
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", headers)
+		"amount=123", headers, nil)
 
 	// Note the two spaces in front of "id" which indicate that our JSON is
 	// pretty printed.
@@ -156,7 +191,7 @@ func TestStubServer_ErrorsOnEmptyContentType(t *testing.T) {
 	headers["Content-Type"] = ""
 
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", headers)
+		"amount=123", headers, nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var data map[string]interface{}
@@ -174,7 +209,7 @@ func TestStubServer_AllowsEmptyContentTypeOnDelete(t *testing.T) {
 	headers := getDefaultHeaders()
 	headers["Content-Type"] = ""
 
-	resp, _ := sendRequest(t, "DELETE", "/v1/customers/cus_123", "", headers)
+	resp, _ := sendRequest(t, "DELETE", "/v1/customers/cus_123", "", headers, nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
@@ -183,7 +218,7 @@ func TestStubServer_ErrorsOnMismatchedContentType(t *testing.T) {
 	headers["Content-Type"] = "application/json"
 
 	resp, body := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", headers)
+		"amount=123", headers, nil)
 	fmt.Printf("body = %+v\n", string(body))
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
@@ -205,12 +240,12 @@ func TestStubServer_ReflectsIdempotencyKey(t *testing.T) {
 	headers["Idempotency-Key"] = "my-key"
 
 	resp, _ := sendRequest(t, "POST", "/v1/charges",
-		"amount=123", headers)
+		"amount=123", headers, nil)
 	assert.Equal(t, "my-key", resp.Header.Get("Idempotency-Key"))
 }
 
 func TestStubServer_RoutesRequest(t *testing.T) {
-	server := getStubServer(t)
+	server := getStubServer(t, nil)
 
 	{
 		route, pathParams := server.routeRequest(
@@ -451,6 +486,14 @@ func TestParseExpansionLevel(t *testing.T) {
 }
 
 //
+// Private types
+//
+
+type testStubServerOptions struct {
+	strictVersionCheck bool
+}
+
+//
 // Private functions
 //
 
@@ -465,17 +508,25 @@ func getDefaultHeaders() map[string]string {
 	return headers
 }
 
-func getStubServer(t *testing.T) *StubServer {
-	server := &StubServer{spec: &testSpec, fixtures: &testFixtures}
+func getStubServer(t *testing.T, serverOptions *testStubServerOptions) *StubServer {
+	if serverOptions == nil {
+		serverOptions = &testStubServerOptions{}
+	}
+
+	server := &StubServer{
+		spec:               &testSpec,
+		fixtures:           &testFixtures,
+		strictVersionCheck: serverOptions.strictVersionCheck,
+	}
 	err := server.initializeRouter()
 	assert.NoError(t, err)
 	return server
 }
 
 func sendRequest(t *testing.T, method string, url string, params string,
-	headers map[string]string) (*http.Response, []byte) {
+	headers map[string]string, serverOptions *testStubServerOptions) (*http.Response, []byte) {
 
-	server := getStubServer(t)
+	server := getStubServer(t, serverOptions)
 
 	fullURL := fmt.Sprintf("https://stripe.com%s", url)
 	req := httptest.NewRequest(method, fullURL, bytes.NewBufferString(params))

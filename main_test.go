@@ -9,6 +9,8 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+const testSpecAPIVersion = "2019-01-01"
+
 var applicationFeeRefundCreateMethod *spec.Operation
 var applicationFeeRefundGetMethod *spec.Operation
 var chargeAllMethod *spec.Operation
@@ -163,6 +165,9 @@ func initTestSpec() {
 		}
 
 	testSpec = spec.Spec{
+		Info: &spec.Info{
+			Version: testSpecAPIVersion,
+		},
 		Components: spec.Components{
 			Schemas: map[string]*spec.Schema{
 				"charge": {

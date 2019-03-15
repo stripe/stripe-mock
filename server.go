@@ -116,15 +116,20 @@ type ResponseError struct {
 // StubServer handles incoming HTTP requests and responds to them appropriately
 // based off the set of OpenAPI routes that it's been configured with.
 type StubServer struct {
-	fixtures *spec.Fixtures
-	routes   map[spec.HTTPVerb][]stubServerRoute
-	spec     *spec.Spec
+	fixtures           *spec.Fixtures
+	routes             map[spec.HTTPVerb][]stubServerRoute
+	spec               *spec.Spec
+	strictVersionCheck bool
 }
 
 // HandleRequest handes an HTTP request directed at the API stub.
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
+
+	//
+	// Validate headers
+	//
 
 	auth := r.Header.Get("Authorization")
 	if !validateAuth(auth) {
@@ -133,6 +138,24 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		writeResponse(w, r, start, http.StatusUnauthorized, stripeError)
 		return
 	}
+
+	// If the option `-strict-version-check` is on, any request that sends an
+	// explicit `Stripe-Version` header must have a version that matches that
+	// the one in the OpenAPI spec. This allows the user to optionally
+	// strengthen expectations to protect against an unintended version drift.
+	if s.strictVersionCheck {
+		stripeVersion := r.Header.Get("Stripe-Version")
+		if stripeVersion != "" && stripeVersion != s.spec.Info.Version {
+			message := fmt.Sprintf(invalidStripeVersion, stripeVersion, s.spec.Info.Version)
+			stripeError := createStripeError(typeInvalidRequestError, message)
+			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+			return
+		}
+	}
+
+	//
+	// Set headers
+	//
 
 	// We don't do anything with the idempotency key for now, but reflect it
 	// back into response headers like the Stripe API does.
@@ -143,6 +166,10 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 	// Every response needs a Request-Id header except the invalid authorization
 	w.Header().Set("Request-Id", "req_123")
+
+	//
+	// Route request
+	//
 
 	route, pathParams := s.routeRequest(r)
 	if route == nil {
@@ -424,6 +451,11 @@ const (
 		"Authorization was '%s'."
 
 	invalidRoute = "Unrecognized request URL (%s: %s)."
+
+	invalidStripeVersion = "Version sent in `Stripe-Version` header '%s' " +
+		"doesn't match version in OpenAPI specification '%s' which may have " +
+		"unintended consequences. This error was shown because stripe-mock  " +
+		"was started with `-stripe-version-check`."
 
 	internalServerError = "An internal error occurred."
 
