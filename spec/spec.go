@@ -49,6 +49,14 @@ type Fixtures struct {
 // HTTPVerb is a type for an HTTP verb like GET, POST, etc.
 type HTTPVerb string
 
+// Info is the `info` portion of an OpenAPI specification that contains meta
+// information about it.
+type Info struct {
+	// Version is the Stripe API version represented in the specification. It
+	// takes a date-based form like `2019-02-19`.
+	Version string `json:"version"`
+}
+
 // This is a list of fields that either we handle properly or we're confident
 // it's safe to ignore. If a field not in this list appears in the OpenAPI spec,
 // then we'll get an error so we remember to update stripe-mock to support it.
@@ -201,6 +209,7 @@ type ResourceID string
 // Spec is a struct representing an OpenAPI specification.
 type Spec struct {
 	Components Components                       `json:"components"`
+	Info       *Info                            `json:"info"`
 	Paths      map[Path]map[HTTPVerb]*Operation `json:"paths"`
 }
 
