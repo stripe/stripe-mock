@@ -3,8 +3,8 @@ package builder
 import (
 	"errors"
 
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
 )
 
 func buildIntegerConstraint(ctx *buildctx, nc *jsval.IntegerConstraint, s *schema.Schema) error {

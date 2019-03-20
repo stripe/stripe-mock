@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lestrrat/go-structinfo"
+	"github.com/lestrrat-go/structinfo"
 )
 
 var ctxPool = sync.Pool{

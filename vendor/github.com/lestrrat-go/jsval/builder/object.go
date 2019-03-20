@@ -1,9 +1,9 @@
 package builder
 
 import (
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
+	"github.com/lestrrat-go/pdebug"
 )
 
 func buildObjectConstraint(ctx *buildctx, c *jsval.ObjectConstraint, s *schema.Schema) error {

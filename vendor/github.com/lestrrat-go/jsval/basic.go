@@ -4,7 +4,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 func (dv defaultValue) HasDefault() bool {

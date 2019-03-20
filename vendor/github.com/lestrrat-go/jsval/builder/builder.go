@@ -10,10 +10,10 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/lestrrat/go-jsref"
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/jsref"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
+	"github.com/lestrrat-go/pdebug"
 )
 
 // Builder builds Validator objects from JSON schemas

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 type PropInfo struct {

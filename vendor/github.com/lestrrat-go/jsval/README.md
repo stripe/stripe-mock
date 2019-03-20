@@ -2,9 +2,9 @@
 
 Validator toolset, with code generation from JSON Schema
 
-[![Build Status](https://travis-ci.org/lestrrat/go-jsval.svg?branch=master)](https://travis-ci.org/lestrrat/go-jsval)
+[![Build Status](https://travis-ci.org/lestrrat-go/jsval.svg?branch=master)](https://travis-ci.org/lestrrat-go/jsval)
 
-[![GoDoc](https://godoc.org/github.com/lestrrat/go-jsval?status.svg)](https://godoc.org/github.com/lestrrat/go-jsval)
+[![GoDoc](https://godoc.org/github.com/lestrrat-go/jsval?status.svg)](https://godoc.org/github.com/lestrrat-go/jsval)
 
 
 # Description
@@ -29,8 +29,8 @@ package jsval_test
 import (
   "log"
 
-  "github.com/lestrrat/go-jsschema"
-  "github.com/lestrrat/go-jsval/builder"
+  "github.com/lestrrat-go/jsschema"
+  "github.com/lestrrat-go/jsval/builder"
 )
 
 func ExampleBuild() {
@@ -77,13 +77,13 @@ func ExampleManual() {
 # Install
 
 ```
-go get -u github.com/lestrrat/go-jsval
+go get -u github.com/lestrrat-go/jsval
 ```
 
 If you want to install the `jsval` tool, do
 
 ```
-go get -u github.com/lestrrat/go-jsval/cmd/jsval
+go get -u github.com/lestrrat-go/jsval/cmd/jsval
 ```
 
 # Features
@@ -166,8 +166,8 @@ the correct thing to process this field.
 
 | Name                                                     | Notes                            |
 |:--------------------------------------------------------:|:---------------------------------|
-| [go-jsschema](https://github.com/lestrrat/go-jsschema)   | JSON Schema implementation       |
-| [go-jshschema](https://github.com/lestrrat/go-jshschema) | JSON Hyper Schema implementation |
-| [go-jsref](https://github.com/lestrrat/go-jsref)         | JSON Reference implementation    |
-| [go-jspointer](https://github.com/lestrrat/go-jspointer) | JSON Pointer implementations     |
+| [go-jsschema](https://github.com/lestrrat-go/jsschema)   | JSON Schema implementation       |
+| [go-jshschema](https://github.com/lestrrat-go/jshschema) | JSON Hyper Schema implementation |
+| [go-jsref](https://github.com/lestrrat-go/jsref)         | JSON Reference implementation    |
+| [go-jspointer](https://github.com/lestrrat-go/jspointer) | JSON Pointer implementations     |
 

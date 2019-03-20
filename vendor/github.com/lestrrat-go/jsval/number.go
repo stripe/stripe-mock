@@ -5,7 +5,7 @@ import (
 	"math"
 	"reflect"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 // Enum specifies the values that this constraint can have

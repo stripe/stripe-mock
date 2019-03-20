@@ -3,7 +3,7 @@ package jsval
 import (
 	"errors"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 func (c *comboconstraint) Add(v Constraint) {

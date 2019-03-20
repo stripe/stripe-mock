@@ -3,9 +3,9 @@ package builder
 import (
 	"errors"
 
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
+	"github.com/lestrrat-go/pdebug"
 )
 
 func buildReferenceConstraint(_ *buildctx, r *jsval.ReferenceConstraint, s *schema.Schema) error {

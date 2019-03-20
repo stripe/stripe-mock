@@ -1,9 +1,9 @@
 package builder
 
 import (
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
+	"github.com/lestrrat-go/pdebug"
 )
 
 func buildArrayConstraint(ctx *buildctx, c *jsval.ArrayConstraint, s *schema.Schema) (err error) {

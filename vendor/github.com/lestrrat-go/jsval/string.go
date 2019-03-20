@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 // Default sets the default value for this constraint.

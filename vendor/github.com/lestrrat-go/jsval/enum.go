@@ -3,7 +3,7 @@ package jsval
 import (
 	"errors"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 // Enum creates a new EnumConstraint

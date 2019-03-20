@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/lestrrat/go-pdebug"
+	"github.com/lestrrat-go/pdebug"
 )
 
 // RefResolver is a mandatory object that you must pass to a 
