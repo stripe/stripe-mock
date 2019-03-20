@@ -10,49 +10,49 @@
 		},
 		{
 			"checksumSHA1": "WSr7qrbD1n9LpDa2Ni9hedIhx48=",
-			"path": "github.com/lestrrat/go-jspointer",
+			"path": "github.com/lestrrat-go/jspointer",
 			"revision": "f4881e611bdbe9fb413a7780721ef8400a1f2341",
 			"revisionTime": "2016-02-29T02:13:54Z"
 		},
 		{
 			"checksumSHA1": "g3PaUmH3M26LguMIaSkfK2EeD70=",
-			"path": "github.com/lestrrat/go-jsref",
+			"path": "github.com/lestrrat-go/jsref",
 			"revision": "50df7b2d07d799426a9ac43fa24bdb4785f72a54",
 			"revisionTime": "2017-02-15T06:28:19Z"
 		},
 		{
 			"checksumSHA1": "7mUX40UybmO/CvoMPrvUmhPsgCc=",
-			"path": "github.com/lestrrat/go-jsref/provider",
+			"path": "github.com/lestrrat-go/jsref/provider",
 			"revision": "50df7b2d07d799426a9ac43fa24bdb4785f72a54",
 			"revisionTime": "2017-02-15T06:28:19Z"
 		},
 		{
 			"checksumSHA1": "iJ7/4QGUusvnzS9azOXRLw9OOmA=",
-			"path": "github.com/lestrrat/go-jsschema",
+			"path": "github.com/lestrrat-go/jsschema",
 			"revision": "a6a42341b50d8d7e2a733db922eefaa756321021",
 			"revisionTime": "2016-10-18T21:35:30Z"
 		},
 		{
 			"checksumSHA1": "lergv0YBmGCzivt0CVH2lMYM07c=",
-			"path": "github.com/lestrrat/go-jsval",
+			"path": "github.com/lestrrat-go/jsval",
 			"revision": "cf70aae60f5b41a32922066c41287b0168e55904",
 			"revisionTime": "2016-10-21T06:59:34Z"
 		},
 		{
 			"checksumSHA1": "4fk2fOvVWY7VQaup/cVErTeHuWY=",
-			"path": "github.com/lestrrat/go-jsval/builder",
+			"path": "github.com/lestrrat-go/jsval/builder",
 			"revision": "cf70aae60f5b41a32922066c41287b0168e55904",
 			"revisionTime": "2016-10-21T06:59:34Z"
 		},
 		{
 			"checksumSHA1": "1HxhrwI9/pjdHFgdEN7lHhDtLj8=",
-			"path": "github.com/lestrrat/go-pdebug",
+			"path": "github.com/lestrrat-go/pdebug",
 			"revision": "2e6eaaa5717f81bda41d27070d3c966f40a1e75f",
 			"revisionTime": "2016-08-17T06:33:33Z"
 		},
 		{
 			"checksumSHA1": "wprUmpUjY+BamhlCb3XGI61QonU=",
-			"path": "github.com/lestrrat/go-structinfo",
+			"path": "github.com/lestrrat-go/structinfo",
 			"revision": "f74c056fe41f860aa6264478c664a6fff8a64298",
 			"revisionTime": "2016-03-08T13:11:05Z"
 		},
