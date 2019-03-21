@@ -154,6 +154,17 @@ pushd openapi/ && git pull origin master && popd
 go generate
 ```
 
+## Dependencies
+
+`vendor` was generated with the help of [dep][dep]. Generally, adding or
+updating a dependency will be done with:
+
+``` sh
+dep ensure
+```
+
+More [day-to-day operations with dep here][depdaily].
+
 ## Release
 
 Release builds are generated with [goreleaser]. Make sure you have the software
@@ -180,6 +191,8 @@ goreleaser --rm-dist
 ```
 
 [apiref]: https://stripe.com/docs/api
+[dep]: https://github.com/golang/dep
+[depdaily]: https://golang.github.io/dep/docs/daily-dep.html
 [go-bindata]: https://github.com/jteeuwen/go-bindata
 [goreleaser]: https://github.com/goreleaser/goreleaser
 [openapi]: https://github.com/stripe/openapi
