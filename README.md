@@ -165,6 +165,11 @@ dep ensure
 
 More [day-to-day operations with dep here][depdaily].
 
+Note that there is a patch in the `jsval` dependency to enrich the error
+message for failures on `additionalProperties`. I'm still looking for a better
+solution to this, but for now make sure that a patch like the one in 0b26185 is
+applied to get the test suite passing.
+
 ## Release
 
 Release builds are generated with [goreleaser]. Make sure you have the software
