@@ -1,9 +1,9 @@
 package spec
 
 import (
-	"github.com/lestrrat/go-jsschema"
-	"github.com/lestrrat/go-jsval"
-	"github.com/lestrrat/go-jsval/builder"
+	"github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsval"
+	"github.com/lestrrat-go/jsval/builder"
 )
 
 // ComponentsForValidation is a collection of components for an OpenAPI
