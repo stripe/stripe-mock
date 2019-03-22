@@ -318,6 +318,12 @@ func (s *StubServer) initializeRouter() error {
 
 			// We use whether the route ends with a parameter as a heuristic as
 			// to whether we should expect an object's primary ID in the URL.
+			//
+			// The most common suffix in hasPrimaryIDSuffixes is just `}` which
+			// represents the end of a parameter.
+			//
+			// It also has a lot of other special cases for RPC-style actions
+			// like `/approve`.
 			var hasPrimaryID bool
 			for _, suffix := range hasPrimaryIDSuffixes {
 				if strings.HasSuffix(string(path), suffix) {
