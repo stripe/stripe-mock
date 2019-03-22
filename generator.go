@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/stripe/stripe-mock/generator/datareplacer"
 	"github.com/stripe/stripe-mock/spec"
@@ -114,14 +116,20 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		return nil, err
 	}
 
-	if params.PathParams != nil {
+	// Maybe generate a new primary ID. This kicks in when no primary ID was
+	// extracted from the path, which usually means this is a "create" API
+	// endpoint. This nicety allows create endpoints to return a new ID every
+	// time like the real API would.
+	pathParams := maybeGeneratePrimaryID(params.PathParams, data)
+
+	if pathParams != nil {
 		// Passses through the generated data and replaces IDs that existed in
 		// the fixtures with IDs that were extracted from the request path, if
 		// and where appropriate.
 		//
 		// Note that the path params are mutated by the function, but we return
 		// them anyway to make the control flow here more clear.
-		pathParams := recordAndReplaceIDs(params.PathParams, data)
+		pathParams := recordAndReplaceIDs(pathParams, data)
 
 		// Passes through the generated data again to replace the values of any old
 		// IDs that we replaced. This is a separate step because IDs could have
@@ -468,10 +476,32 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 }
 
 //
+// Private constants
+//
+
+// randomIDRandomLength is the length of the random part of a random ID.
+const randomIDRandomLength = 10
+
+// randomIDTimeLength is the length of the time part of a random ID.
+const randomIDTimeLength = 5
+
+// randomIDTimeReference is a reference time used for generating random IDs
+// that's used to truncate the total amount of information that we need to
+// encode.
+//
+// Its original choice was somewhat arbitrary, but it doesn't matter that much
+// as long as it stays stable.
+const randomIDTimeReference = 1342389380
+
+//
 // Private values
 //
 
 var errExpansionNotSupported = fmt.Errorf("Expansion not supported")
+
+// randomIDRunes are the set of possible runes that may appear in the time part
+// of a random ID.
+var randomIDRunes = []rune("01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
 //
 // Private types
@@ -719,6 +749,56 @@ func logReplacedID(prevID, newID string) {
 		prevID, newID)
 }
 
+// maybeGeneratePrimaryID generates a new primary ID and returns it as part of
+// a `PathParamsMap` if (1) the given data has an `id` field which can be used
+// to determine the correct prefix that should be used, and (2) there isn't a
+// primary ID already set.
+//
+// The main case where it'll kick in is if there was no primary ID extracted
+// from the incoming path, in which case a primary ID is generated so that
+// simulated new objects from stripe-mock all have unique IDs.
+//
+// So for example, a `POST /v1/charges` will result in a newly generated ID
+// with a `ch` prefix like `ch_123`.
+func maybeGeneratePrimaryID(pathParams *PathParamsMap, data interface{}) *PathParamsMap {
+	// Do nothing in case we already have a primary ID.
+	if pathParams != nil && pathParams.PrimaryID != nil {
+		return pathParams
+	}
+
+	idObj, ok := data.(map[string]interface{})["id"]
+
+	// If we don't have an appropriate ID field to look like at the root of the
+	// object, do nothing.
+	//
+	// This will filter out list endpoints, for example.
+	if !ok {
+		return pathParams
+	}
+
+	id, ok := idObj.(string)
+
+	// If the ID isn't a string, do nothing.
+	if !ok {
+		return pathParams
+	}
+
+	// Splits something like `ch_123` into `["ch", "123"]`.
+	idParts := strings.Split(id, "_")
+
+	// Like `ch`.
+	prefix := idParts[0]
+
+	newID := randomID(prefix)
+
+	if pathParams == nil {
+		return &PathParamsMap{PrimaryID: &newID}
+	}
+
+	pathParams.PrimaryID = &newID
+	return pathParams
+}
+
 // propertyNames returns the names of all properties of a schema joined
 // together and comma-separated.
 //
@@ -734,6 +814,59 @@ func propertyNames(schema *spec.Schema) string {
 	sort.Strings(names)
 
 	return strings.Join(names, ", ")
+}
+
+// randomID generates a Stripe-like ID suitable for use identifying an object.
+//
+// As with the real Stripe API, the general format looks like:
+//
+//     <prefix>_<time_part><random_part>
+//
+// The prefix helps identify the type of object. For example, charges have a
+// `ch` prefix.
+//
+// The time part is based on the current time encoded in a more succinct form
+// using a wider character set (0-9A-Za-z instead of just the numbers of a Unix
+// timestamp). It's present so that newly generated IDs come back in roughly
+// ascending order (although they are not *guaranteed* to be ascending).
+//
+// The random part is a random number encoded to a wider character set.
+func randomID(prefix string) string {
+	return prefix + "_" + randomIDTimePart() + randomIDRandomPart()
+}
+
+// randomIDRandomPart generates the random part of a new ID.
+func randomIDRandomPart() string {
+	runes := make([]rune, randomIDRandomLength)
+	for i := 0; i < randomIDRandomLength; i++ {
+		runes[i] = randomIDRunes[rand.Intn(len(randomIDRunes))]
+	}
+	return string(runes)
+}
+
+// randomIDTimePart generates the time part of a new ID using only a slightly
+// simplified methodology compared to the real Stripe API.
+func randomIDTimePart() string {
+	delta := int(time.Now().Unix() - randomIDTimeReference)
+
+	runes := make([]rune, randomIDTimeLength)
+	for i := 0; i < randomIDTimeLength; i++ {
+		// Note that new characters go in backwards
+		runes[i] = randomIDRunes[delta%len(randomIDRunes)]
+		delta /= len(randomIDRunes)
+	}
+
+	// As we continue to mod on delta in iterations above, the runes produced
+	// get ever more stable.
+	//
+	// Here we reverse the slice so that the more changeable runes (i.e. those
+	// representing small time components) appear on the rightmost side of the
+	// final string.
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+
+	return string(runes)
 }
 
 // recordAndReplaceIDs descends through a generated data structure recursively

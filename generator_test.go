@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"sync"
 	"testing"
 
@@ -75,8 +76,8 @@ func TestGenerateResponseData(t *testing.T) {
 		})
 		assert.Nil(t, err)
 		assert.Equal(t,
-			testFixtures.Resources["charge"].(map[string]interface{})["id"],
-			data.(map[string]interface{})["id"])
+			testFixtures.Resources["charge"].(map[string]interface{})["object"],
+			data.(map[string]interface{})["object"])
 
 		// Makes sure that customer is *not* expanded
 		assert.Equal(t,
@@ -192,6 +193,56 @@ func TestGenerateResponseData(t *testing.T) {
 			chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
 	}
 
+	// generated primary ID
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					"id": "ch_123",
+				},
+			},
+		}}
+		data, err := generator.Generate(&GenerateParams{
+			PathParams: &PathParamsMap{},
+			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+
+		// Should not be equal to our fixture's ID because it's generated.
+		assert.NotEqual(t, "ch_123",
+			data.(map[string]interface{})["id"])
+
+		// However, the fixture's ID's prefix will have been used to generate
+		// the new ID, so it should share a prefix.
+		assert.Regexp(t, regexp.MustCompile("^ch_"),
+			data.(map[string]interface{})["id"])
+	}
+
+	// generated primary ID (nil PathParamsMap)
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					"id": "ch_123",
+				},
+			},
+		}}
+		data, err := generator.Generate(&GenerateParams{
+			PathParams: nil,
+			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+
+		// Should not be equal to our fixture's ID because it's generated.
+		assert.NotEqual(t, "ch_123",
+			data.(map[string]interface{})["id"])
+
+		// However, the fixture's ID's prefix will have been used to generate
+		// the new ID, so it should share a prefix.
+		assert.Regexp(t, regexp.MustCompile("^ch_"),
+			data.(map[string]interface{})["id"])
+	}
+
 	// injected ID
 	{
 		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
@@ -250,9 +301,9 @@ func TestGenerateResponseData(t *testing.T) {
 		})
 		assert.Nil(t, err)
 
-		// The top level ID. This should have stayed the same.
-		assert.Equal(t,
-			"ch_123",
+		// The top level ID. It will have been randomized, but should still be
+		// a charge.
+		assert.Regexp(t, regexp.MustCompile("^ch_"),
 			data.(map[string]interface{})["id"])
 
 		// The nested customer ID. This should have changed.
