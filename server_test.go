@@ -248,24 +248,27 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	server := getStubServer(t, nil)
 
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, chargeAllMethod, route.operation)
 		assert.Nil(t, pathParams)
 	}
 
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, chargeCreateMethod, route.operation)
 		assert.Nil(t, pathParams)
 	}
 
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, chargeGetMethod, route.operation)
 		assert.Equal(t, "ch_123", *(*pathParams).PrimaryID)
@@ -273,8 +276,9 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/customers/cus_123"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, customerDeleteMethod, route.operation)
 		assert.Equal(t, "cus_123", *(*pathParams).PrimaryID)
@@ -282,17 +286,19 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/doesnt-exist"}})
+		assert.NoError(t, err)
 		assert.Equal(t, (*stubServerRoute)(nil), route)
 		assert.Nil(t, pathParams)
 	}
 
 	// Route with a parameter, but not an object's primary ID
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST",
 				URL: &url.URL{Path: "/v1/invoices/in_123/pay"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, invoicePayMethod, route.operation)
 		assert.Equal(t, "in_123", *(*pathParams).PrimaryID)
@@ -301,9 +307,10 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with a parameter, but not an object's primary ID
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, invoicePayMethod, route.operation)
 		assert.Equal(t, (*string)(nil), (*pathParams).PrimaryID)
@@ -314,15 +321,26 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with multiple parameters in its URL
 	{
-		route, pathParams := server.routeRequest(
+		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds/fr_123"}})
+		assert.NoError(t, err)
 		assert.NotNil(t, route)
 		assert.Equal(t, applicationFeeRefundGetMethod, route.operation)
 		assert.Equal(t, "fr_123", *(*pathParams).PrimaryID)
 		assert.Equal(t, 1, len((*pathParams).SecondaryIDs))
 		assert.Equal(t, "fee_123", (*pathParams).SecondaryIDs[0].ID)
 		assert.Equal(t, "fee", (*pathParams).SecondaryIDs[0].Name)
+	}
+
+	// Routes with special symbols and spaces in path
+	{
+		_, _, err := server.routeRequest(
+			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/%0"}})
+		assert.Error(t, err)
+		assert.Equal(t,
+			`Failed to unescape path parameter 1: invalid URL escape "%0"`,
+			err.Error())
 	}
 }
 
@@ -430,8 +448,29 @@ func TestCompilePath(t *testing.T) {
 
 	{
 		pattern, pathParamNames := compilePath(spec.Path("/v1/charges/{id}"))
-		assert.Equal(t, `\A/v1/charges/(?P<id>[\w-_.]+)\z`, pattern.String())
+		assert.Equal(t, `\A/v1/charges/(?P<id>[\w@:%-._~!$&'()*+,;=]+)\z`, pattern.String())
 		assert.Equal(t, []string{"id"}, pathParamNames)
+
+		// Match
+		{
+			matches := pattern.FindAllStringSubmatch("/v1/charges/ch_123", -1)
+			assert.Equal(t, 1, len(matches))
+			assert.Equal(t, []string{"/v1/charges/ch_123", "ch_123"}, matches[0])
+		}
+
+		// No match
+		{
+			matches := pattern.FindAllStringSubmatch("/v1/charges", -1)
+			assert.Equal(t, 0, len(matches))
+		}
+
+		// Special characters
+		{
+			special := "%-._~!$&'()*+,;="
+			matches := pattern.FindAllStringSubmatch("/v1/charges/"+special, -1)
+			assert.Equal(t, 1, len(matches))
+			assert.Equal(t, []string{"/v1/charges/" + special, special}, matches[0])
+		}
 	}
 }
 

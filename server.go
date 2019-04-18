@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -171,7 +172,15 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// Route request
 	//
 
-	route, pathParams := s.routeRequest(r)
+	route, pathParams, err := s.routeRequest(r)
+	if err != nil {
+		message := fmt.Sprintf("Couldn't parse path parameters: %v", err)
+		fmt.Printf(message + "\n")
+		stripeError := createStripeError(typeInvalidRequestError, message)
+		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+		return
+	}
+
 	if route == nil {
 		message := fmt.Sprintf(invalidRoute, r.Method, r.URL.Path)
 		stripeError := createStripeError(typeInvalidRequestError, message)
@@ -374,7 +383,7 @@ func (s *StubServer) initializeRouter() error {
 // if it looks like it's supposed to be the primary identifier of the returned
 // object (i.e., the route's pattern ended with a parameter). A nil is returned
 // as the second return value when no primary ID is available.
-func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParamsMap) {
+func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParamsMap, error) {
 	verbRoutes := s.routes[spec.HTTPVerb(r.Method)]
 	for _, route := range verbRoutes {
 		matches := route.pattern.FindAllStringSubmatch(r.URL.Path, -1)
@@ -385,12 +394,22 @@ func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParam
 
 		// There are no path parameters. Return the route only.
 		if len(route.pathParamNames) < 1 {
-			return &route, nil
+			return &route, nil, nil
 		}
 
 		// There will only ever be a single match in the string (this match
 		// contains the entire match plus all capture groups).
 		firstMatch := matches[0]
+
+		// Unescape each parameter in the path. Converts hex-encoded bytes like
+		// `%AB` into the byte itself and `+`s into spaces.
+		for i := 1; i < len(firstMatch); i++ {
+			unescaped, err := url.QueryUnescape(firstMatch[i])
+			if err != nil {
+				return nil, nil, fmt.Errorf("Failed to unescape path parameter %v: %v", i, err)
+			}
+			firstMatch[i] = unescaped
+		}
 
 		// Secondary IDs are any IDs in the URL that are *not* the primary ID
 		// (which you'll see if say a resource is nested under another
@@ -438,9 +457,9 @@ func (s *StubServer) routeRequest(r *http.Request) (*stubServerRoute, *PathParam
 		return &route, &PathParamsMap{
 			PrimaryID:    primaryID,
 			SecondaryIDs: secondaryIDs,
-		}
+		}, nil
 	}
-	return nil, nil
+	return nil, nil, nil
 }
 
 //
@@ -537,7 +556,10 @@ func compilePath(path spec.Path) (*regexp.Regexp, []string) {
 		if submatches == nil {
 			pattern += `/` + part
 		} else {
-			pattern += `/(?P<` + submatches[0][1] + `>[\w-_.]+)`
+			// Special characters as defined by:
+			//
+			// https://tools.ietf.org/html/rfc3986#section-3.3
+			pattern += `/(?P<` + submatches[0][1] + `>[\w@:%-._~!$&'()*+,;=]+)`
 			pathParamNames = append(pathParamNames, submatches[0][1])
 		}
 	}
