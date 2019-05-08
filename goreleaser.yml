@@ -13,6 +13,9 @@ brew:
     name: homebrew-stripe-mock
   homepage: "https://github.com/stripe/stripe-mock"
   description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
+  commit_author:
+    name: stripe-ci
+    email: support@stripe.com
 
   plist: |
     <?xml version="1.0" encoding="UTF-8"?>
