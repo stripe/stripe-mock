@@ -88,7 +88,12 @@ func main() {
 		abort(fmt.Sprintf("Error initializing router: %v\n", err))
 	}
 
-	http.HandleFunc("/", stub.HandleRequest)
+	httpMux := http.NewServeMux()
+	httpMux.HandleFunc("/", stub.HandleRequest)
+
+	// Deduplicates doubled slashes in paths. e.g. `//v1/charges` becomes
+	// `/v1/charges`.
+	handler := &DoubleSlashFixHandler{httpMux}
 
 	httpListener, err := options.getHTTPListener()
 	if err != nil {
@@ -98,7 +103,9 @@ func main() {
 	// Only start HTTP if requested (it will activate by default with no arguments, but it won't start if
 	// HTTPS is explicitly requested and HTTP is not).
 	if httpListener != nil {
-		server := http.Server{}
+		server := http.Server{
+			Handler: handler,
+		}
 
 		// Listen in a new Goroutine that so we can start a simultaneous HTTPS
 		// listener if necessary.
@@ -138,7 +145,10 @@ func main() {
 			NextProtos: []string{"h2"},
 		}
 
-		server := http.Server{TLSConfig: tlsConfig}
+		server := http.Server{
+			Handler:   handler,
+			TLSConfig: tlsConfig,
+		}
 		tlsListener := tls.NewListener(httpsListener, tlsConfig)
 
 		go func() {

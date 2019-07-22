@@ -21,6 +21,25 @@ import (
 // Public types
 //
 
+// DoubleSlashFixHandler is a specialized handler that wraps an HTTP mux and
+// deduplicates any doubled slashes that are included in an incoming path. So
+// `//v1/charges` would become `/v1/charges`. This works around the standard Go
+// behavior, which is to redirect the request with a 301 before it reaches the
+// underlying handler.
+//
+// The reason we deduplicate is that in some API libraries occasionally
+// generate paths with double slashes, and the real Stripe API responds to
+// these requests normally, so stripe-mock emulates that behavior.
+type DoubleSlashFixHandler struct {
+	Mux http.Handler
+}
+
+// ServeHTTP serves an HTTP request.
+func (h *DoubleSlashFixHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	r.URL.Path = strings.Replace(r.URL.Path, "//", "/", -1)
+	h.Mux.ServeHTTP(w, r)
+}
+
 // ExpansionLevel represents expansions on a single "level" of resource. It may
 // have subexpansions that are meant to take effect on resources that are
 // nested below it (on other levels).

@@ -19,6 +19,62 @@ import (
 // Tests
 //
 
+func TestDoubleSlashFixHandler(t *testing.T) {
+	var lastPath string
+
+	httpMux := http.NewServeMux()
+	httpMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		lastPath = r.URL.Path
+	})
+
+	doubleSlashFixHandler := &DoubleSlashFixHandler{httpMux}
+
+	// Slash deduplication
+	{
+		lastPath = ""
+
+		req := httptest.NewRequest(
+			http.MethodGet, "http://example.com//v1/charges", nil)
+		w := httptest.NewRecorder()
+
+		doubleSlashFixHandler.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "/v1/charges", lastPath)
+	}
+
+	// Requests without duplicated slashes work normally
+	{
+		lastPath = ""
+
+		req := httptest.NewRequest(
+			http.MethodGet, "http://example.com/v1/charges", nil)
+		w := httptest.NewRecorder()
+
+		doubleSlashFixHandler.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, "/v1/charges", lastPath)
+	}
+
+	// Demonstrates the (undesirable) standard Go behavior without the handler
+	{
+		lastPath = ""
+
+		req := httptest.NewRequest(
+			http.MethodGet, "http://example.com//v1/charges", nil)
+		w := httptest.NewRecorder()
+
+		// Note that we skip the double slash fix handler and have the mux
+		// serve directly
+		httpMux.ServeHTTP(w, req)
+
+		// This is the default Go behavior (301)
+		assert.Equal(t, http.StatusMovedPermanently, w.Code)
+		assert.Equal(t, "", lastPath)
+	}
+}
+
 func TestStubServer(t *testing.T) {
 	resp, body := sendRequest(t, "POST", "/v1/charges",
 		"amount=123", getDefaultHeaders(), nil)
