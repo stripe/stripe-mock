@@ -176,7 +176,7 @@ Release builds are generated with [goreleaser]. Make sure you have the software
 and a `GITHUB_TOKEN`:
 
 ``` sh
-go get -u github.com/goreleaser/goreleaser
+brew install goreleaser/tap/goreleaser
 export GITHUB_TOKEN=...
 ```
 
