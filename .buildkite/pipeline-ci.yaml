@@ -1,0 +1,23 @@
+env:
+  APP_NAME: stripe-mock
+  BASE_IMAGE_REPO_PATH: ${BUILDKITE_AGENT_META_DATA_AWS_ACCOUNT_ID?}.dkr.ecr.${BUILDKITE_AGENT_META_DATA_AWS_REGION?}.amazonaws.com
+  APP_IMAGE_NAME: application/${APP_NAME}
+  APP_IMAGE_REPO_PATH: ${BASE_IMAGE_REPO_PATH}/${APP_IMAGE_NAME}
+
+steps:
+  - label: "PR - :docker: :package:"
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
+    plugins:
+      - yougroupteam/github-checks:
+          debug: true
+          output_title: PR build
+          output_summary: pr_build_summary.md
+      - seek-oss/github-merged-pr#v1.0.1:
+          mode: checkout
+      - docker-compose#v3.0.1:
+          build:
+            - app
+          config: .container/docker-compose.yaml
+          image-repository: ${APP_IMAGE_REPO_PATH}
+          dependencies: false
