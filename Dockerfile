@@ -9,7 +9,7 @@
 # Uses a Go image to build a release binary.
 #
 
-FROM golang:1.9-alpine AS builder
+FROM golang:1.12-alpine AS builder
 WORKDIR /go/src/github.com/stripe/stripe-mock/
 ADD ./ ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o stripe-mock .

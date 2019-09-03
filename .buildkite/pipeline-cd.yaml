@@ -1,0 +1,22 @@
+env:
+  APP_NAME: stripe-mock
+  APP_NAMESPACE: app
+  DEPLOY_TO_ENV: dev
+  BASE_IMAGE_REPO_PATH: ${BUILDKITE_AGENT_META_DATA_AWS_ACCOUNT_ID?}.dkr.ecr.${BUILDKITE_AGENT_META_DATA_AWS_REGION?}.amazonaws.com
+  APP_IMAGE_NAME: application/${APP_NAME}
+  APP_IMAGE_REPO_PATH: ${BASE_IMAGE_REPO_PATH}/${APP_IMAGE_NAME}
+  APP_IMAGE_TAG: ${BUILDKITE_COMMIT}
+  K8S_CLUSTER: app.k8s.${DEPLOY_TO_ENV}.you.co
+  K8S_STATE: s3://app-k8s-${DEPLOY_TO_ENV}-you-co-state-bucket
+  HELM_CHART_REPO: s3://app-helm-chart-repo/charts
+
+steps:
+  - label: ":docker: :package: app :raised_hands: :ecr:"
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE}"
+    plugins:
+      - docker-compose#v3.0.1:
+          push:
+            - app:${APP_IMAGE_REPO_PATH}:${APP_IMAGE_TAG}
+          config: .container/docker-compose.yaml
+  
