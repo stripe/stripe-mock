@@ -4,4 +4,3 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-      target: app
