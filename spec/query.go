@@ -5,7 +5,7 @@ package spec
 // query parameters in a different, non-JSON schema part of an operation.
 func BuildQuerySchema(operation *Operation) *Schema {
 	schema := &Schema{
-		AdditionalProperties: false,
+		AdditionalProperties: true,
 		Properties:           make(map[string]*Schema),
 		Required:             make([]string, 0),
 		Type:                 TypeObject,
