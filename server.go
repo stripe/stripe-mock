@@ -732,12 +732,13 @@ func validateAndCoerceRequest(
 	}
 
 	fmt.Printf("Request data = %+v\n", requestData)
-	err = route.requestValidator.Validate(requestData)
-	if err != nil {
-		message := fmt.Sprintf("Request validation error: %v", err)
-		fmt.Printf(message + "\n")
-		return nil, createStripeError(typeInvalidRequestError, message)
-	}
+	// skip request validation
+	// err = route.requestValidator.Validate(requestData)
+	// if err != nil {
+	// 	message := fmt.Sprintf("Request validation error: %v", err)
+	// 	fmt.Printf(message + "\n")
+	// 	return nil, createStripeError(typeInvalidRequestError, message)
+	// }
 
 	// All checks were successful.
 	return requestData, nil
