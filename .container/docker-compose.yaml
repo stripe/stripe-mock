@@ -4,3 +4,8 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+  builder:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: builder
