@@ -17,6 +17,7 @@ steps:
     plugins:
       - docker-compose#v3.0.1:
           push:
+            - builder:${APP_IMAGE_REPO_PATH}:${APP_IMAGE_TAG}-builder
             - app:${APP_IMAGE_REPO_PATH}:${APP_IMAGE_TAG}
             - app:${APP_IMAGE_REPO_PATH}:latest
           config: .container/docker-compose.yaml
