@@ -80,7 +80,7 @@ func main() {
 
 	stub := StubServer{
 		fixtures:           fixtures,
-		spec:               stripeSpecx,
+		spec:               stripeSpec,
 		strictVersionCheck: options.strictVersionCheck,
 	}
 	err = stub.initializeRouter()
