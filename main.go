@@ -80,7 +80,7 @@ func main() {
 
 	stub := StubServer{
 		fixtures:           fixtures,
-		spec:               stripeSpec,
+		spec:               stripeSpecx,
 		strictVersionCheck: options.strictVersionCheck,
 	}
 	err = stub.initializeRouter()
@@ -304,12 +304,12 @@ func abort(message string) {
 // getTLSCertificate reads a certificate and key from the assets built by
 // go-bindata.
 func getTLSCertificate() (tls.Certificate, error) {
-	cert, err := Asset("cert/cert.pem")
+	cert, err := Asset("cert.pem")
 	if err != nil {
 		return tls.Certificate{}, err
 	}
 
-	key, err := Asset("cert/key.pem")
+	key, err := Asset("key.pem")
 	if err != nil {
 		return tls.Certificate{}, err
 	}
@@ -323,7 +323,7 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 
 	if fixturesPath == "" {
 		// And do the same for fixtures
-		data, err = Asset("openapi/openapi/fixtures3.json")
+		data, err = Asset("fixtures3.json")
 	} else {
 		if !isJSONFile(fixturesPath) {
 			return nil, fmt.Errorf("Fixtures should come from a JSON file")
@@ -376,7 +376,7 @@ func getSpec(specPath string) (*spec.Spec, error) {
 
 	if specPath == "" {
 		// Load the spec information from go-bindata
-		data, err = Asset("openapi/openapi/spec3.json")
+		data, err = Asset("spec3.json")
 	} else {
 		if !isJSONFile(specPath) {
 			return nil, fmt.Errorf("spec should come from a JSON file")
