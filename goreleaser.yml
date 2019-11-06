@@ -1,49 +1,75 @@
-build:
-  binary: stripe-mock
-  goos:
-    - windows
-    - darwin
-    - linux
-  goarch:
-    - amd64
+project_name: stripe-mock
 
-brew:
-  github:
-    owner: stripe
-    name: homebrew-stripe-mock
-  homepage: "https://github.com/stripe/stripe-mock"
-  description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
-  commit_author:
-    name: stripe-ci
-    email: support@stripe.com
+builds:
+  - binary: stripe-mock
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
 
-  plist: |
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+archives:
+  - format_overrides:
+      - goos: windows
+        format: zip
+
+brews:
+  - github:
+      owner: stripe
+      name: homebrew-stripe-mock
+    homepage: "https://github.com/stripe/stripe-mock"
+    description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
+    commit_author:
+      name: stripe-ci
+      email: support@stripe.com
+
+    plist: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
         <dict>
-          <key>SuccessfulExit</key>
-          <false/>
+          <key>KeepAlive</key>
+          <dict>
+            <key>SuccessfulExit</key>
+            <false/>
+          </dict>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/stripe-mock</string>
+            <string>-http-port</string>
+            <string>12111</string>
+            <string>-https-port</string>
+            <string>12112</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/stripe-mock.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/stripe-mock.log</string>
         </dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/stripe-mock</string>
-          <string>-http-port</string>
-          <string>12111</string>
-          <string>-https-port</string>
-          <string>12112</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{var}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/log/stripe-mock.log</string>
-        <key>StandardOutPath</key>
-        <string>#{var}/log/stripe-mock.log</string>
-      </dict>
-    </plist>
+      </plist>
+
+nfpms:
+  - vendor: Stripe
+    homepage:  https://stripe.com
+    maintainer: Stripe <support@stripe.com>
+    license: MIT
+    formats:
+    - deb
+    - rpm
+
+dockers:
+  - binaries:
+    - stripe-mock
+    image_templates:
+    - "stripemock/stripe-mock:latest"
+    - "stripemock/stripe-mock:{{ .Tag }}"
