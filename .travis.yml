@@ -1,10 +1,12 @@
+sudo: false
+
 language: go
 
 go:
   - 1.13
 
-# magic word to use faster/newer container-based architecture
-sudo: false
+services:
+  - docker
 
 before_install:
   - go get -u golang.org/x/lint/golint
@@ -15,6 +17,9 @@ script:
   - make
   - git --no-pager status
   - git --no-pager diff
+
+  after_success:
+  - test -n "$TRAVIS_TAG" && docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
 deploy:
 - provider: script
