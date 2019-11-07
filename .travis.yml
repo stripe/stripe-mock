@@ -13,6 +13,8 @@ before_install:
 script:
   - go generate
   - make
+  - git --no-pager status
+  - git --no-pager diff
 
 deploy:
 - provider: script
