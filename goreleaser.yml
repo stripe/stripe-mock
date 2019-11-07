@@ -1,5 +1,9 @@
 project_name: stripe-mock
 
+before:
+  hooks:
+    - go generate
+
 builds:
   - binary: stripe-mock
     goos:
