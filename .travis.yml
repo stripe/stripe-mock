@@ -15,8 +15,6 @@ before_install:
 script:
   - go generate
   - make
-  - git --no-pager status
-  - git --no-pager diff
 
   after_success:
   - test -n "$TRAVIS_TAG" && docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
