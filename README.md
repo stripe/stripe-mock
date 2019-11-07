@@ -100,6 +100,9 @@ brew services start stripe-mock
 
 # upgrade if you already have it
 brew upgrade stripe-mock
+
+# restart the service after upgrading
+brew services restart stripe-mock
 ```
 
 The Homebrew service listens on port `12111` for HTTP and `12112` for HTTPS and
@@ -108,10 +111,7 @@ HTTP/2.
 ### Docker
 
 ``` sh
-# build
-docker build . -t stripe-mock
-# run
-docker run -p 12111-12112:12111-12112 stripe-mock
+docker run --rm -it -p 12111-12112:12111-12112 stripemock/stripe-mock:latest
 ```
 
 The default Docker `ENTRYPOINT` listens on port `12111` for HTTP and `12112`
@@ -172,27 +172,13 @@ applied to get the test suite passing.
 
 ## Release
 
-Release builds are generated with [goreleaser]. Make sure you have the software
-and a `GITHUB_TOKEN`:
-
-``` sh
-brew install goreleaser/tap/goreleaser
-export GITHUB_TOKEN=...
-```
-
-Commit changes and tag `HEAD`:
+Releases are automatically published by Travis CI using [goreleaser] when a
+new tag is pushed:
 
 ``` sh
 git pull origin --tags
 git tag v0.1.1
 git push origin --tags
-```
-
-Then run goreleaser and you're done! Check [releases] (it also pushes to the
-Homebrew tap).
-
-``` sh
-goreleaser --rm-dist
 ```
 
 [apiref]: https://stripe.com/docs/api
