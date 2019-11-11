@@ -778,7 +778,7 @@ func validateAuth(auth string) bool {
 		return false
 	}
 
-	if keyParts[0] != "sk" {
+	if keyParts[0] != "rk" && keyParts[0] != "sk" {
 		return false
 	}
 
