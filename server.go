@@ -524,6 +524,7 @@ var hasPrimaryIDSuffixes = [...]string{
 	"/finalize",
 	"/mark_uncollectible",
 	"/pay",
+	"/preview",
 	"/refund",
 	"/reject",
 	"/release",
