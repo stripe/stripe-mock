@@ -36,15 +36,28 @@ func main() {
 		httpsPortDefault: defaultPortHTTPS,
 	}
 
+	// As you can probably tell, there are just too many HTTP/HTTPS binding
+	// options, which is a result of me not thinking through the original
+	// interface well enough.
+	//
+	// I've left them all in place for now for backwards compatibility, but we
+	// should probably deprecate `-http-port`, `-https-port`, `-port`, and
+	// `-unix` in favor of the remaining more expressive and more versatile
+	// alternatives.
+	//
+	// Eventually, `-http` and `-https` could become shorthand synonyms for
+	// `-http-addr` and `-https-addr`.
 	flag.BoolVar(&options.http, "http", false, "Run with HTTP")
-	flag.IntVar(&options.httpPort, "http-port", -1, "Port to listen on for HTTP")
+	flag.StringVar(&options.httpAddr, "http-addr", "", fmt.Sprintf("Host and port to listen on for HTTP as `<ip>:<port>`; empty <ip> to bind all system IPs, empty <port> to have system choose; e.g. ':%v', '127.0.0.1:%v'", defaultPortHTTP, defaultPortHTTP))
+	flag.IntVar(&options.httpPort, "http-port", -1, "Port to listen on for HTTP; same as '-http-addr :<port>'")
 	flag.StringVar(&options.httpUnixSocket, "http-unix", "", "Unix socket to listen on for HTTP")
 
-	flag.BoolVar(&options.https, "https", false, "Run with HTTPS (which also allows HTTP/2 to be activated)")
-	flag.IntVar(&options.httpsPort, "https-port", -1, "Port to listen on for HTTPS")
+	flag.BoolVar(&options.https, "https", false, "Run with HTTPS; also enables HTTP/2")
+	flag.StringVar(&options.httpsAddr, "https-addr", "", fmt.Sprintf("Host and port to listen on for HTTPS as `<ip>:<port>`; empty <ip> to bind all system IPs, empty <port> to have system choose; e.g. ':%v', '127.0.0.1:%v'", defaultPortHTTPS, defaultPortHTTPS))
+	flag.IntVar(&options.httpsPort, "https-port", -1, "Port to listen on for HTTPS; same as '-https-addr :<port>'")
 	flag.StringVar(&options.httpsUnixSocket, "https-unix", "", "Unix socket to listen on for HTTPS")
 
-	flag.IntVar(&options.port, "port", -1, "Port to listen on (also respects PORT from environment)")
+	flag.IntVar(&options.port, "port", -1, "Port to listen on; also respects PORT from environment")
 	flag.StringVar(&options.fixturesPath, "fixtures", "", "Path to fixtures to use instead of bundled version (should be JSON)")
 	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
 	flag.BoolVar(&options.strictVersionCheck, "strict-version-check", false, "Errors if version sent in Stripe-Version doesn't match the one in OpenAPI")
@@ -173,11 +186,13 @@ type options struct {
 	fixturesPath string
 
 	http            bool
+	httpAddr        string
 	httpPortDefault int // For testability -- in practice always defaultPortHTTP
 	httpPort        int
 	httpUnixSocket  string
 
 	https            bool
+	httpsAddr        string
 	httpsPortDefault int // For testability -- in practice always defaultPortHTTPS
 	httpsPort        int
 	httpsUnixSocket  string
@@ -198,32 +213,56 @@ func (o *options) checkConflictingOptions() error {
 	// HTTP
 	//
 
-	if o.http && (o.httpUnixSocket != "" || o.httpPort != -1) {
-		return fmt.Errorf("Please don't specify -http when using -http-port or -http-unix")
+	if o.http && (o.httpUnixSocket != "" || o.httpAddr != "" || o.httpPort != -1) {
+		return fmt.Errorf("Please don't specify -http when using -http-addr, -http-port, or -http-unix")
 	}
 
-	if (o.unixSocket != "" || o.port != -1) && (o.httpUnixSocket != "" || o.httpPort != -1) {
-		return fmt.Errorf("Please don't specify -port or -unix when using -http-port or -http-unix")
+	if (o.unixSocket != "" || o.port != -1) && (o.httpUnixSocket != "" || o.httpAddr != "" || o.httpPort != -1) {
+		return fmt.Errorf("Please don't specify -port or -unix when using -http-addr, -http-port, or -http-unix")
 	}
 
-	if o.httpUnixSocket != "" && o.httpPort != -1 {
-		return fmt.Errorf("Please specify only one of -http-port or -http-unix")
+	var numHTTPOptions int
+
+	if o.httpUnixSocket != "" {
+		numHTTPOptions++
+	}
+	if o.httpAddr != "" {
+		numHTTPOptions++
+	}
+	if o.httpPort != -1 {
+		numHTTPOptions++
+	}
+
+	if numHTTPOptions > 1 {
+		return fmt.Errorf("Please specify only one of -http-addr, -http-port, or -http-unix")
 	}
 
 	//
 	// HTTPS
 	//
 
-	if o.https && (o.httpsUnixSocket != "" || o.httpsPort != -1) {
-		return fmt.Errorf("Please don't specify -https when using -https-port or -https-unix")
+	if o.https && (o.httpsUnixSocket != "" || o.httpsAddr != "" || o.httpsPort != -1) {
+		return fmt.Errorf("Please don't specify -https when using -https-addr, -https-port, or -https-unix")
 	}
 
-	if (o.unixSocket != "" || o.port != -1) && (o.httpsUnixSocket != "" || o.httpsPort != -1) {
-		return fmt.Errorf("Please don't specify -port or -unix when using -https-port or -https-unix")
+	if (o.unixSocket != "" || o.port != -1) && (o.httpsUnixSocket != "" || o.httpAddr != "" || o.httpsPort != -1) {
+		return fmt.Errorf("Please don't specify -port or -unix when using -https-addr, -https-port, or -https-unix")
 	}
 
-	if o.httpsUnixSocket != "" && o.httpsPort != -1 {
-		return fmt.Errorf("Please specify only one of -https-port or -https-unix")
+	var numHTTPSOptions int
+
+	if o.httpsUnixSocket != "" {
+		numHTTPSOptions++
+	}
+	if o.httpsAddr != "" {
+		numHTTPSOptions++
+	}
+	if o.httpsPort != -1 {
+		numHTTPSOptions++
+	}
+
+	if numHTTPSOptions > 1 {
+		return fmt.Errorf("Please specify only one of -https-addr, -https-port, or -https-unix")
 	}
 
 	return nil
@@ -234,8 +273,12 @@ func (o *options) checkConflictingOptions() error {
 func (o *options) getHTTPListener() (net.Listener, error) {
 	protocol := "HTTP"
 
+	if o.httpAddr != "" {
+		return getPortListener(o.httpAddr, protocol)
+	}
+
 	if o.httpPort != -1 {
-		return getPortListener(o.httpPort, protocol)
+		return getPortListener(fmt.Sprintf(":%v", o.httpPort), protocol)
 	}
 
 	if o.httpUnixSocket != "" {
@@ -249,7 +292,7 @@ func (o *options) getHTTPListener() (net.Listener, error) {
 	}
 
 	if o.port != -1 {
-		return getPortListener(o.port, protocol)
+		return getPortListener(fmt.Sprintf(":%v", o.port), protocol)
 	}
 
 	if o.unixSocket != "" {
@@ -265,8 +308,12 @@ func (o *options) getHTTPListener() (net.Listener, error) {
 func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 	protocol := "HTTPS"
 
+	if o.httpsAddr != "" {
+		return getPortListener(o.httpsAddr, protocol)
+	}
+
 	if o.httpsPort != -1 {
-		return getPortListener(o.httpsPort, protocol)
+		return getPortListener(fmt.Sprintf(":%v", o.httpsPort), protocol)
 	}
 
 	if o.httpsUnixSocket != "" {
@@ -282,7 +329,7 @@ func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 	}
 
 	if o.port != -1 {
-		return getPortListener(o.port, protocol)
+		return getPortListener(fmt.Sprintf(":%v", o.port), protocol)
 	}
 
 	if o.unixSocket != "" {
@@ -345,13 +392,13 @@ func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	return &fixtures, nil
 }
 
-func getPortListener(port int, protocol string) (net.Listener, error) {
-	listener, err := net.Listen("tcp", ":"+strconv.Itoa(port))
+func getPortListener(addr string, protocol string) (net.Listener, error) {
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return nil, fmt.Errorf("error listening on port: %v", err)
+		return nil, fmt.Errorf("error listening at address: %v", err)
 	}
 
-	fmt.Printf("Listening for %s on port: %v\n", protocol, listener.Addr().(*net.TCPAddr).Port)
+	fmt.Printf("Listening for %s at address: %v\n", protocol, listener.Addr())
 	return listener, nil
 }
 
@@ -364,10 +411,10 @@ func getPortListenerDefault(defaultPort int, protocol string) (net.Listener, err
 		if err != nil {
 			return nil, err
 		}
-		return getPortListener(envPort, protocol)
+		return getPortListener(fmt.Sprintf(":%v", envPort), protocol)
 	}
 
-	return getPortListener(defaultPort, protocol)
+	return getPortListener(fmt.Sprintf(":%v", defaultPort), protocol)
 }
 
 func getSpec(specPath string) (*spec.Spec, error) {
