@@ -141,7 +141,11 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 	// simulate a more realistic create or update operation.
 	if params.RequestMethod == http.MethodPost {
 		if mapData, ok := data.(map[string]interface{}); ok {
-			mapData = datareplacer.ReplaceData(params.RequestData, mapData)
+			replacer := datareplacer.DataReplacer{
+				Definitions: g.definitions,
+				Schema:      params.Schema,
+			}
+			mapData = replacer.ReplaceData(params.RequestData, mapData)
 		}
 	}
 

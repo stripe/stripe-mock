@@ -1,16 +1,40 @@
 package datareplacer
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
+
+	"github.com/stripe/stripe-mock/spec"
 )
 
-// ReplaceData takes a generated response and replaces values in it that share
-// a name and type of parameters that were sent in with the request.
+// DataReplacer takes a generated response and replaces values in it that share
+// a name and type of parameters that were sent in with the request, as
+// determined by the associated OpenAPI schema and the types of incoming
+// values.
 //
 // This is designed to have the effect of making returned fixtures more
 // realistic while also staying a simple heuristic that doesn't require very
 // much maintenance.
-func ReplaceData(requestData map[string]interface{}, responseData map[string]interface{}) map[string]interface{} {
+type DataReplacer struct {
+	Definitions map[string]*spec.Schema
+	Schema      *spec.Schema
+}
+
+// ReplaceData projects data from the incoming request into response data as
+// appropriate.
+func (r *DataReplacer) ReplaceData(requestData map[string]interface{}, responseData map[string]interface{}) map[string]interface{} {
+	schema := r.Schema
+	if schema != nil {
+		schema, _ = r.maybeDereference(r.Schema, "")
+	}
+
+	return r.replaceDataInternal(requestData, responseData, schema)
+}
+
+// Identical to the above except that we pass a schema as argument so that we
+// can easily have the relevant one during recursion.
+func (r *DataReplacer) replaceDataInternal(requestData map[string]interface{}, responseData map[string]interface{}, schema *spec.Schema) map[string]interface{} {
 	for k, requestValue := range requestData {
 		responseValue, ok := responseData[k]
 
@@ -27,8 +51,17 @@ func ReplaceData(requestData map[string]interface{}, responseData map[string]int
 			requestKeyMap, requestKeyOK := requestValue.(map[string]interface{})
 			responseKeyMap, responseKeyOK := responseValue.(map[string]interface{})
 
+			var kSchema *spec.Schema
+			if schema != nil {
+				kSchema = schema.Properties[k]
+
+				if kSchema != nil {
+					kSchema, _ = r.maybeDereference(kSchema, "")
+				}
+			}
+
 			if requestKeyOK && responseKeyOK {
-				responseData[k] = ReplaceData(requestKeyMap, responseKeyMap)
+				responseData[k] = r.replaceDataInternal(requestKeyMap, responseKeyMap, kSchema)
 			} else {
 				// In the non-map case, just set the respons key's value to
 				// what was in the request, but only if both values are the
@@ -41,7 +74,7 @@ func ReplaceData(requestData map[string]interface{}, responseData map[string]int
 				// index-based array updates (e.g.,
 				// `additional_owners[1][name]=...`). I'll have to iron out
 				// that rough edges later on.
-				if isSameType(requestValue, responseValue) {
+				if r.isSameType(kSchema, requestValue) {
 					responseData[k] = requestValue
 				}
 			}
@@ -51,9 +84,12 @@ func ReplaceData(requestData map[string]interface{}, responseData map[string]int
 	return responseData
 }
 
-func isSameType(v1, v2 interface{}) bool {
-	v1Value := reflect.ValueOf(v1)
-	v2Value := reflect.ValueOf(v2)
+func (r *DataReplacer) isSameType(schema *spec.Schema, requestValue interface{}) bool {
+	if schema == nil {
+		return false
+	}
+
+	value := reflect.ValueOf(requestValue)
 
 	// Reflect in Go has the concept of a "zero Value" (not be confused with a
 	// type's zero value with a lowercase "v") and asking for Type on one will
@@ -61,44 +97,130 @@ func isSameType(v1, v2 interface{}) bool {
 	// but they are occasionally, so here we hedge against them.
 	//
 	// https://github.com/stripe/stripe-mock/issues/75
-	if !v1Value.IsValid() || !v2Value.IsValid() {
+	if !value.IsValid() {
 		return false
 	}
 
-	v1Type := v1Value.Type()
-	v2Type := v2Value.Type()
+	valueType := value.Type()
+	valueKind := valueType.Kind()
 
-	// If we're *not* dealing with slices, we can short circuit right away by
-	// just comparing types.
-	if v1Type.Kind() != reflect.Slice || v2Type.Kind() != reflect.Slice {
-		return v1Type == v2Type
-	}
+	switch {
+	// In the case of `anyOf`, allow replacement if any of the schema branches apply.
+	case len(schema.AnyOf) > 0:
+		for _, anyOfSchema := range schema.AnyOf {
+			anyOfSchema, _ := r.maybeDereference(anyOfSchema, "")
+			if r.isSameType(anyOfSchema, requestValue) {
+				return true
+			}
+		}
 
+	case schema.Type == spec.TypeArray:
+		valueSlice, ok := requestValue.([]interface{})
 
-	// When working with slices we have to be a bit careful to make sure that
-	// we're only replacing slices with slices of the same type because there
-	// are certain endpoints that take one sort of slice and return another
-	// under the same name.
-	//	
-	// For example, `default_tax_rates` under "create subscription" takes an
-	// array of strings, but then returns an array of objects.
-	//
-	// Ideally we'd decide whether we can do the replacement based on what the
-	// types are supposed to be as determined by OpenAPI or based on the
-	// slice's type, but unfortunately this code is not set up to read OpenAPI,
-	// and all types are just `[]interface{}`, so instead we have to inspect
-	// the first element of each slice and determine whether we can do the
-	// replacement based off whether they're the same.
-	//
-	// This approach is conservative in that if either slice is empty, we don't
-	// have enough information to determine whether the replacement is safe.
-	// This isn't ideal, but is the only decent option we have right now.
-	v1Slice := v1Value.Interface().([]interface{})
-	v2Slice := v2Value.Interface().([]interface{})
+		// Incoming value is not an array
+		if !ok {
+			return false
+		}
 
-	if len(v1Slice) < 1 || len(v2Slice) < 1 {
+		// Allow the replacement if completely empty. In practice, this
+		// should never happen because you can't send an empty array via
+		// form data, but we'll cover the case anyway.
+		if len(valueSlice) < 1 {
+			return true
+		}
+
+		itemsSchema := schema.Items
+		if itemsSchema == nil {
+			return true
+		}
+
+		itemsSchema, _ = r.maybeDereference(itemsSchema, "")
+
+		// Allow the replacement if the first item in the incoming slice is
+		// compatible with the array's `items` schema.
+		return r.isSameType(itemsSchema, valueSlice[0])
+
+	case schema.Type == spec.TypeBoolean:
+		return valueKind == reflect.Bool
+
+	case schema.Type == spec.TypeInteger:
+		return isIntegerKind(valueKind)
+
+	case schema.Type == spec.TypeNumber:
+		return isIntegerKind(valueKind) || valueKind == reflect.Float32 || valueKind == reflect.Float64
+
+	// Don't try to replace objects for now, the likelihood is that they're
+	// not compatible between request and response anyway.
+	case schema.Type == spec.TypeObject:
 		return false
+
+	case schema.Type == spec.TypeString:
+		return valueKind == reflect.String
+
+	default:
+		panic(fmt.Sprintf("Data replacer doesn't know how to handle schema: %+v", schema))
 	}
 
-	return reflect.ValueOf(v1Slice[0]).Type() == reflect.ValueOf(v2Slice[0]).Type()
+	// Unreachable because of `default` above
+	return false
+}
+
+func (r *DataReplacer) maybeDereference(schema *spec.Schema, context string) (*spec.Schema, string) {
+	if schema.Ref != "" {
+		definition := definitionFromJSONPointer(schema.Ref)
+
+		newSchema, ok := r.Definitions[definition]
+		if !ok {
+			panic(fmt.Sprintf("Couldn't dereference: %v", schema.Ref))
+		}
+		context = fmt.Sprintf("%sDereferencing '%s':\n", context, schema.Ref)
+		schema = newSchema
+	}
+	return schema, context
+}
+
+// definitionFromJSONPointer extracts the name of a JSON schema definition from
+// a JSON pointer, so "#/components/schemas/charge" would become just "charge".
+// This is a simplified workaround to avoid bringing in JSON schema
+// infrastructure because we can guarantee that the spec we're producing will
+// take a certain shape. If this gets too hacky, it will be better to put a more
+// legitimate JSON schema parser in place.
+func definitionFromJSONPointer(pointer string) string {
+	parts := strings.Split(pointer, "/")
+
+	if len(parts) != 4 ||
+		parts[0] != "#" ||
+		parts[1] != "components" ||
+		parts[2] != "schemas" {
+		panic(fmt.Sprintf("Expected '#/components/schemas/...' but got '%v'", pointer))
+	}
+	return parts[3]
+}
+
+func isIntegerKind(kind reflect.Kind) bool {
+	switch kind {
+	case reflect.Int:
+		return true
+	case reflect.Int8:
+		return true
+	case reflect.Int16:
+		return true
+	case reflect.Int32:
+		return true
+	case reflect.Int64:
+		return true
+
+	case reflect.Uint:
+		return true
+	case reflect.Uint8:
+		return true
+	case reflect.Uint16:
+		return true
+	case reflect.Uint32:
+		return true
+	case reflect.Uint64:
+		return true
+	}
+
+	return false
 }
