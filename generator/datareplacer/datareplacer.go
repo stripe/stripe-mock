@@ -65,5 +65,40 @@ func isSameType(v1, v2 interface{}) bool {
 		return false
 	}
 
-	return v1Value.Type() == v2Value.Type()
+	v1Type := v1Value.Type()
+	v2Type := v2Value.Type()
+
+	// If we're *not* dealing with slices, we can short circuit right away by
+	// just comparing types.
+	if v1Type.Kind() != reflect.Slice || v2Type.Kind() != reflect.Slice {
+		return v1Type == v2Type
+	}
+
+
+	// When working with slices we have to be a bit careful to make sure that
+	// we're only replacing slices with slices of the same type because there
+	// are certain endpoints that take one sort of slice and return another
+	// under the same name.
+	//	
+	// For example, `default_tax_rates` under "create subscription" takes an
+	// array of strings, but then returns an array of objects.
+	//
+	// Ideally we'd decide whether we can do the replacement based on what the
+	// types are supposed to be as determined by OpenAPI or based on the
+	// slice's type, but unfortunately this code is not set up to read OpenAPI,
+	// and all types are just `[]interface{}`, so instead we have to inspect
+	// the first element of each slice and determine whether we can do the
+	// replacement based off whether they're the same.
+	//
+	// This approach is conservative in that if either slice is empty, we don't
+	// have enough information to determine whether the replacement is safe.
+	// This isn't ideal, but is the only decent option we have right now.
+	v1Slice := v1Value.Interface().([]interface{})
+	v2Slice := v2Value.Interface().([]interface{})
+
+	if len(v1Slice) < 1 || len(v2Slice) < 1 {
+		return false
+	}
+
+	return reflect.ValueOf(v1Slice[0]).Type() == reflect.ValueOf(v2Slice[0]).Type()
 }
