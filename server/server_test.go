@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"bytes"
@@ -191,7 +191,7 @@ func TestStubServer_InvalidStripeVersion(t *testing.T) {
 		message, ok := errorInfo["message"]
 		assert.True(t, ok)
 		assert.Equal(t,
-			fmt.Sprintf(invalidStripeVersion, testBadVersion, testSpecAPIVersion),
+			fmt.Sprintf(invalidStripeVersion, testBadVersion, spec.TestAPIVersion),
 			message)
 	}
 
@@ -214,13 +214,13 @@ func TestStubServer_AllowsContentTypeWithParameters(t *testing.T) {
 func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	resp, _ := sendRequest(t, "POST", "/", "", nil, nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
-	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
+	assert.Equal(t, Version, resp.Header.Get("Stripe-Mock-Version"))
 	_, ok := resp.Header["Request-Id"]
 	assert.False(t, ok)
 
 	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
-	assert.Equal(t, version, resp.Header.Get("Stripe-Mock-Version"))
+	assert.Equal(t, Version, resp.Header.Get("Stripe-Mock-Version"))
 	assert.Equal(t, "req_123", resp.Header.Get("Request-Id"))
 }
 
@@ -304,6 +304,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	server := getStubServer(t, nil)
 
 	{
+		chargeAllMethod := testSpec.Paths[spec.Path("/v1/charges")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
 		assert.NoError(t, err)
@@ -313,6 +314,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
+		chargeCreateMethod := testSpec.Paths[spec.Path("/v1/charges")]["post"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
 		assert.NoError(t, err)
@@ -322,6 +324,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
+		chargeGetMethod := testSpec.Paths[spec.Path("/v1/charges/{id}")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 		assert.NoError(t, err)
@@ -332,6 +335,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
+		customerDeleteMethod := testSpec.Paths[spec.Path("/v1/customers/{id}")]["delete"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/customers/cus_123"}})
 		assert.NoError(t, err)
@@ -351,6 +355,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with a parameter, but not an object's primary ID
 	{
+		invoicePayMethod := testSpec.Paths[spec.Path("/v1/invoices/{id}/pay")]["post"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST",
 				URL: &url.URL{Path: "/v1/invoices/in_123/pay"}})
@@ -363,6 +368,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with a parameter, but not an object's primary ID
 	{
+		invoicePayMethod := testSpec.Paths[spec.Path("/v1/application_fees/{fee}/refunds")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds"}})
@@ -377,6 +383,7 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with multiple parameters in its URL
 	{
+		applicationFeeRefundGetMethod := testSpec.Paths[spec.Path("/v1/application_fees/{fee}/refunds/{id}")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds/fr_123"}})

@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/base64"
@@ -16,6 +16,12 @@ import (
 	"github.com/stripe/stripe-mock/param/coercer"
 	"github.com/stripe/stripe-mock/spec"
 )
+
+//Version of the server is set by the main package.
+var Version = "embedded"
+
+//Verbose sets the server to run in verbose mode.
+var Verbose bool
 
 //
 // Public types
@@ -137,9 +143,25 @@ type ResponseError struct {
 // based off the set of OpenAPI routes that it's been configured with.
 type StubServer struct {
 	fixtures           *spec.Fixtures
-	routes             map[spec.HTTPVerb][]stubServerRoute
 	spec               *spec.Spec
 	strictVersionCheck bool
+
+	routes map[spec.HTTPVerb][]stubServerRoute
+}
+
+//NewStubServer creates a new StubServer from the given spec values.
+func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck bool) (*StubServer, error) {
+	stub := StubServer{
+		fixtures:           fixtures,
+		spec:               spec,
+		strictVersionCheck: strictVersionCheck,
+	}
+
+	if err := stub.initializeRouter(); err != nil {
+		return nil, err
+	}
+
+	return &stub, nil
 }
 
 // HandleRequest handes an HTTP request directed at the API stub.
@@ -222,7 +244,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if verbose {
+	if Verbose {
 		fmt.Printf("IDs extracted from route: %+v\n", pathParams)
 		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
@@ -236,7 +258,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if verbose {
+	if Verbose {
 		if requestData != nil {
 			fmt.Printf("Request data: %+v\n", requestData)
 		} else {
@@ -254,7 +276,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expansions, rawExpansions := extractExpansions(requestData)
-	if verbose {
+	if Verbose {
 		fmt.Printf("Expansions: %+v\n", rawExpansions)
 	}
 
@@ -273,7 +295,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			createInternalServerError())
 		return
 	}
-	if verbose {
+	if Verbose {
 		responseDataJSON, err := json.MarshalIndent(responseData, "", "  ")
 		if err != nil {
 			panic(err)
@@ -297,7 +319,7 @@ func (s *StubServer) initializeRouter() error {
 
 		pathPattern, pathParamNames := compilePath(path)
 
-		if verbose {
+		if Verbose {
 			fmt.Printf("Compiled path: %v\n", pathPattern.String())
 		}
 
@@ -816,7 +838,7 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 		return
 	}
 
-	w.Header().Set("Stripe-Mock-Version", version)
+	w.Header().Set("Stripe-Mock-Version", Version)
 
 	w.WriteHeader(status)
 	_, err = w.Write(encodedData)
