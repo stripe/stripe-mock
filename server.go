@@ -529,6 +529,7 @@ var hasPrimaryIDSuffixes = [...]string{
 	"/reject",
 	"/release",
 	"/send",
+	"/submit",
 	"/verify",
 	"/void",
 }
