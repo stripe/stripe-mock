@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 //

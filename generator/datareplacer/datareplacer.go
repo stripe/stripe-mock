@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 // DataReplacer takes a generated response and replaces values in it that share
@@ -96,7 +96,7 @@ func (r *DataReplacer) isSameType(schema *spec.Schema, requestValue interface{})
 	// panic. I'm not exactly sure under what conditions these are generated,
 	// but they are occasionally, so here we hedge against them.
 	//
-	// https://github.com/stripe/stripe-mock/issues/75
+	// https://github.com/0SmooK0/stripe-mock/issues/75
 	if !value.IsValid() {
 		return false
 	}

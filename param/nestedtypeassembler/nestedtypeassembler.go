@@ -10,7 +10,7 @@ package nestedtypeassembler
 import (
 	"fmt"
 
-	"github.com/stripe/stripe-mock/param/form"
+	"github.com/0SmooK0/stripe-mock/param/form"
 )
 
 //

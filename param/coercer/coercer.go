@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 // CoerceParams coerces the types of certain parameters according to typing

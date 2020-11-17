@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 const defaultPortHTTP = 12111

@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/lestrrat-go/jsval"
-	"github.com/stripe/stripe-mock/param"
-	"github.com/stripe/stripe-mock/param/coercer"
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/param"
+	"github.com/0SmooK0/stripe-mock/param/coercer"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 //

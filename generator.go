@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stripe/stripe-mock/generator/datareplacer"
-	"github.com/stripe/stripe-mock/spec"
+	"github.com/0SmooK0/stripe-mock/generator/datareplacer"
+	"github.com/0SmooK0/stripe-mock/spec"
 )
 
 // GenerateParams is a parameters structure that's used to invoke Generate and

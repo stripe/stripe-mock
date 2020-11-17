@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/stripe/stripe-mock/param/form"
-	"github.com/stripe/stripe-mock/param/nestedtypeassembler"
-	"github.com/stripe/stripe-mock/param/parser"
+	"github.com/0SmooK0/stripe-mock/param/form"
+	"github.com/0SmooK0/stripe-mock/param/nestedtypeassembler"
+	"github.com/0SmooK0/stripe-mock/param/parser"
 )
 
 //
