@@ -1,0 +1,364 @@
+#!/usr/bin/env ruby
+
+require "fileutils"
+require "json"
+require "yaml"
+require "net/http"
+require "json"
+require "uri"
+
+# This exists so that we can stub out various calls to system commands (e.g.
+# copying files, running Git operations) which would otherwise be difficult or
+# fragile to test.
+class SystemUtils
+  def abort(message)
+    Kernel.abort(message)
+  end
+
+  def abort_success(message)
+    puts message
+    exit 0
+  end
+
+  def clean_git_repository?(dir)
+    changes = `git -C #{dir} status -uno --porcelain`.strip
+    changes.empty?
+  end
+
+  def copy_file(source, target)
+    FileUtils.copy(source, target)
+  end
+
+  def dir_exists?(dir)
+    Dir.exists?(dir)
+  end
+
+  def dir_glob(pattern)
+    Dir.glob(pattern)
+  end
+
+  def git_add(files)
+    `git add #{files.join(" ")}`
+  end
+
+  def git_any_files_staged?
+    files = `git diff --name-only --cached`
+    !files.empty?
+  end
+
+  def git_commit(message)
+    execute_subshell(%{git commit -vem "#{message}"})
+  end
+
+  def git_current_branch(dir)
+    `cd #{dir} && git rev-parse --abbrev-ref HEAD`.strip
+  end
+
+  def get_github_token(username)
+    `fetch-password --quiet --raw bindings/gh-tokens/#{username}`.strip
+  end
+
+  def create_github_release(repo_org, repo_name, github_token, version)
+    uri = URI.parse("https://api.github.com/repos/#{repo_org}/#{repo_name}/releases")
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request['Accept'] = "application/vnd.github.v3+json"
+    request['Authorization'] = "token #{github_token}"
+    request.body = {'tag_name': "#{version}"}.to_json
+    response = http.request(request)
+    JSON.parse(response.body)
+  end
+
+  def get_latest_github_release(repo_org, repo_name, github_token)
+    uri = URI.parse("https://api.github.com/repos/#{repo_org}/#{repo_name}/releases/latest")
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(uri.request_uri)
+    request['Accept'] = "application/vnd.github.v3+json"
+    request['Authorization'] = "token #{github_token}"
+    response = http.request(request)
+    if response.code == "404" 
+      return "v0"  
+    else
+      JSON.parse(response.body)["tag_name"]
+    end
+  end
+
+  def increment_version(version)
+    version = version[1..-1].to_i
+    "v#{version + 1}"
+  end
+
+  def git_pull_origin_master
+    execute_subshell(%{git pull origin master})
+  end
+
+  def git_push_origin_master
+    execute_subshell(%{git push origin master})
+  end
+
+  def write_file(file, data)
+    File.write(file, data)
+  end
+
+  private def execute_subshell(*args)
+    ret = system(*args)
+    if ret.nil? || !ret
+      abort("Failed to execute subshell (status #{$?}): #{args}")
+    end
+  end
+end
+
+# Encapsulates our scripted update logic so that we can test it.
+class Updater
+  SOURCE_DIR = File.expand_path("~/stripe/pay-server/")
+  TARGET_DIR = File.expand_path("../../", __FILE__)
+  REPO_NAME = "openapi"
+  REPO_ORG = "stripe"
+
+  def initialize(dry_run: false, out: nil, utils: nil)
+    self.dry_run = dry_run
+    self.out = out || $stdout
+    self.utils = utils || SystemUtils.new
+  end
+
+  def publish_new_version(github_token, repo_org, repo_name) 
+    tag_name = utils.get_latest_github_release(repo_org, repo_name, github_token)
+    github_release_response = utils.create_github_release(REPO_ORG, REPO_NAME, github_token, utils.increment_version(tag_name))
+    github_release_response['html_url']
+  end
+
+  def run
+    github_token = utils.get_github_token(ENV['USER'])
+    if github_token == ""
+      utils.abort("Maybe you need to run `sc-2fa`?")
+      return # reachable in testing
+    end
+
+    unless utils.dir_exists?(SOURCE_DIR)
+      utils.abort("Source directory does not exist: #{SOURCE_DIR}")
+      return # reachable in testing
+    end
+
+    unless utils.git_current_branch(SOURCE_DIR) == "master"
+      utils.abort("Source repository should be on master branch: #{SOURCE_DIR}")
+      return # reachable in testing
+    end
+
+    unless utils.clean_git_repository?(TARGET_DIR)
+      utils.abort("Repository must be unmodified to continue: #{TARGET_DIR}")
+      return # reachable in testing
+    end
+
+    out.puts "--> Pulling from origin"
+    out.puts utils.git_pull_origin_master
+
+    ["fixtures3", "spec3", "spec3.sdk", "spec3.java.sdk"].each do |file|
+      source = File.join(SOURCE_DIR, "openapi", file + ".yaml")
+      target = File.join(TARGET_DIR, "openapi", file + ".yaml")
+
+      out.puts "--> Copying #{source} to #{target}"
+      out.puts utils.copy_file(source, target)
+
+      out.puts "--> Rewriting #{source} as JSON"
+      utils.write_file(File.join(TARGET_DIR, "openapi", file + ".json"),
+        JSON.pretty_generate(YAML.load(File.read(target))))
+    end
+
+    if utils.clean_git_repository?(TARGET_DIR)
+      utils.abort_success("No changes to commit (fixtures and spec unchanged)")
+      return # reachable in testing
+    end
+
+    out.puts "--> Commiting fixtures"
+    out.puts utils.git_add(utils.dir_glob("#{TARGET_DIR}/openapi/fixtures*"))
+    if utils.git_any_files_staged?
+      out.puts utils.git_commit("Update fixture data")
+    else
+      out.puts "--> No fixture changes to commit"
+    end
+    
+    committed = false 
+    out.puts "--> Commiting specification"
+    out.puts utils.git_add(utils.dir_glob("#{TARGET_DIR}/openapi/spec*"))
+    if utils.git_any_files_staged?
+      out.puts utils.git_commit("Update OpenAPI specification")
+      committed = true
+    else
+      out.puts "--> No OpenAPI specification changes to commit"
+    end
+
+    if dry_run
+      out.puts "--> Not pushing to origin because DRY_RUN=true"
+    else
+      out.puts "--> Pushing to origin"
+      out.puts utils.git_push_origin_master
+    end
+
+    if dry_run
+      out.puts "--> Not publishing new version because DRY_RUN=true"
+    else
+      if committed
+        out.puts "--> Publishing new version to github"
+        out.puts publish_new_version(github_token, REPO_ORG, REPO_NAME)
+      else 
+        out.puts "--> We did not commit so we did not create a release"
+      end
+    end
+
+  end
+
+  private
+
+  attr_accessor :dry_run
+  attr_accessor :out
+  attr_accessor :utils
+end
+
+if ENV['RUN_TESTS'] != 'true'
+  dry_run = (ENV['DRY_RUN'] == 'true')
+  Updater.new(dry_run: dry_run).run
+else
+  require "minitest/autorun"
+  require "minitest/mock"
+
+  class UpdateTest < Minitest::Test
+    def setup
+      self.utils = Minitest::Mock.new
+      self.updater = Updater.new(out: StringIO.new, utils: utils)
+    end
+
+    def test_runs_successfully
+      utils.expect(:get_github_token, "TOKEN",[ENV["USER"]])
+      utils.expect(:dir_exists?, true,
+        [Updater::SOURCE_DIR])
+      utils.expect(:git_current_branch, "master",
+        [Updater::SOURCE_DIR])
+      utils.expect(:clean_git_repository?, true,
+        [Updater::TARGET_DIR])
+
+      utils.expect(:git_pull_origin_master, "")
+
+      ["fixtures3", "spec3", "spec3.sdk", "spec3.java.sdk"].each do |file|
+        source = File.join(Updater::SOURCE_DIR, "openapi", file + ".yaml")
+        target = File.join(Updater::TARGET_DIR, "openapi", file + ".yaml")
+
+        utils.expect(:copy_file, "", [source, target])
+
+        json_data = JSON.pretty_generate(YAML.load(File.read(target)))
+        json_target = File.join(Updater::TARGET_DIR, "openapi", file + ".json")
+
+        utils.expect(:write_file, "", [json_target, json_data])
+      end
+
+      utils.expect(:clean_git_repository?, false,
+        [Updater::TARGET_DIR])
+
+      utils.expect(:dir_glob,
+        ["fixtures3.json", "fixtures3.yaml"],
+        ["#{Updater::TARGET_DIR}/openapi/fixtures*"])
+      utils.expect(:git_add, "",
+        [["fixtures3.json", "fixtures3.yaml"]])
+      utils.expect(:git_any_files_staged?, true)
+      utils.expect(:git_commit, "",
+        ["Update fixture data"])
+
+      utils.expect(:dir_glob,
+        ["spec3.json", "spec3.yaml", "spec3.sdk.yaml", "spec3.sdk.json", "spec3.java.sdk.yaml", "spec3.java.sdk.json"],
+        ["#{Updater::TARGET_DIR}/openapi/spec*"])
+      utils.expect(:git_add, "",
+        [["spec3.json", "spec3.yaml", "spec3.sdk.yaml", "spec3.sdk.json", "spec3.java.sdk.yaml", "spec3.java.sdk.json"]])
+      utils.expect(:git_any_files_staged?, true)
+      utils.expect(:git_commit, "",
+        ["Update OpenAPI specification"])
+
+      utils.expect(:git_push_origin_master, "")
+
+      utils.expect(:get_latest_github_release, "v4",[Updater::REPO_ORG, Updater::REPO_NAME, "TOKEN"])
+
+      utils.expect(:increment_version, "v5",["v4"])
+
+      utils.expect(:create_github_release, "example.com",[Updater::REPO_ORG, Updater::REPO_NAME, "TOKEN", "v5"])
+
+      updater.run
+      utils.verify
+    end
+
+    def test_checks_source_and_aborts
+      utils.expect(:get_github_token, "TOKEN",[ENV["USER"]])
+      utils.expect(:dir_exists?, false,
+        [Updater::SOURCE_DIR])
+      utils.expect(:abort, nil,
+        ["Source directory does not exist: #{Updater::SOURCE_DIR}"])
+      updater.run
+      utils.verify
+    end
+
+    def test_checks_source_on_master_and_aborts
+      utils.expect(:get_github_token, "TOKEN",[ENV["USER"]])
+      utils.expect(:dir_exists?, true,
+        [Updater::SOURCE_DIR])
+      utils.expect(:git_current_branch, "my-feature-branch",
+        [Updater::SOURCE_DIR])
+      utils.expect(:abort, nil,
+        ["Source repository should be on master branch: #{Updater::SOURCE_DIR}"])
+      updater.run
+      utils.verify
+    end
+
+    def test_checks_target_unmodified_and_aborts
+      utils.expect(:get_github_token, "TOKEN",[ENV["USER"]])
+      utils.expect(:dir_exists?, true,
+        [Updater::SOURCE_DIR])
+      utils.expect(:git_current_branch, "master",
+        [Updater::SOURCE_DIR])
+      utils.expect(:clean_git_repository?, false,
+        [Updater::TARGET_DIR])
+      utils.expect(:abort, nil,
+        ["Repository must be unmodified to continue: #{Updater::TARGET_DIR}"])
+      updater.run
+      utils.verify
+    end
+
+    def test_checks_target_modified_after_copy_and_aborts
+      utils.expect(:get_github_token, "TOKEN",[ENV["USER"]])
+      utils.expect(:dir_exists?, true,
+        [Updater::SOURCE_DIR])
+      utils.expect(:git_current_branch, "master",
+        [Updater::SOURCE_DIR])
+      utils.expect(:clean_git_repository?, true,
+        [Updater::TARGET_DIR])
+
+      utils.expect(:git_pull_origin_master, "")
+
+      ["fixtures3", "spec3", "spec3.sdk", "spec3.java.sdk"].each do |file|
+        source = File.join(Updater::SOURCE_DIR, "openapi", file + ".yaml")
+        target = File.join(Updater::TARGET_DIR, "openapi", file + ".yaml")
+
+        utils.expect(:copy_file, "", [source, target])
+
+        json_data = JSON.pretty_generate(YAML.load(File.read(target)))
+        json_target = File.join(Updater::TARGET_DIR, "openapi", file + ".json")
+
+        utils.expect(:write_file, "", [json_target, json_data])
+      end
+
+      utils.expect(:clean_git_repository?, true,
+        [Updater::TARGET_DIR])
+
+      utils.expect(:abort_success, nil,
+        ["No changes to commit (fixtures and spec unchanged)"])
+
+      updater.run
+      utils.verify
+    end
+
+    private
+
+    attr_accessor :updater
+    attr_accessor :utils
+  end
+end
