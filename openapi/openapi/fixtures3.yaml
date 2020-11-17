@@ -1871,7 +1871,7 @@ resources:
     payment_method_types:
     - card
     single_use_mandate: 
-    status: requires_payment_method
+    status: requires_capture
     usage: off_session
   sku:
     active: true
