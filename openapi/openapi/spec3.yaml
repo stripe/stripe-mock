@@ -11802,6 +11802,7 @@ components:
           - requires_action
           - requires_capture
           - requires_confirmation
+          - requires_payment_method
           - succeeded
           type: string
         transfer_data:
@@ -16861,6 +16862,7 @@ components:
           - processing
           - requires_action
           - requires_confirmation
+          - requires_payment_method
           - succeeded
           type: string
         usage:

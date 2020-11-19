@@ -1762,7 +1762,7 @@
       "shipping": null,
       "statement_descriptor": null,
       "statement_descriptor_suffix": null,
-      "status": "requires_capture",
+      "status": "succeeded",
       "transfer_data": null,
       "transfer_group": null
     },

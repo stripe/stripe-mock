@@ -1414,7 +1414,7 @@ resources:
     shipping: 
     statement_descriptor: 
     statement_descriptor_suffix: 
-    status: requires_capture
+    status: succeeded
     transfer_data: 
     transfer_group: 
   payment_method:
