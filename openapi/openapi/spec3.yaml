@@ -51080,7 +51080,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/payment_intent"
+                "$ref": "#/components/schemas/charge"
           description: Successful response.
         default:
           content:
