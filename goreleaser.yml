@@ -24,7 +24,7 @@ archives:
         format: zip
 
 brews:
-  - github:
+  - tap:
       owner: stripe
       name: homebrew-stripe-mock
     homepage: "https://github.com/stripe/stripe-mock"
