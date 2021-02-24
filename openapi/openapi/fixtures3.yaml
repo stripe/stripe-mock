@@ -2,15 +2,15 @@
 resources:
   account:
     business_profile:
-      mcc: 
-      name: 
-      product_description: 
-      support_address: 
-      support_email: 
-      support_phone: 
-      support_url: 
-      url: 
-    business_type: 
+      mcc:
+      name:
+      product_description:
+      support_address:
+      support_email:
+      support_phone:
+      support_url:
+      url:
+    business_type:
     capabilities:
       card_payments: active
       transfers: active
@@ -30,7 +30,7 @@ resources:
     object: account
     payouts_enabled: false
     requirements:
-      current_deadline: 
+      current_deadline:
       currently_due:
       - business_profile.product_description
       - business_profile.support_phone
@@ -52,32 +52,32 @@ resources:
     settings:
       bacs_debit_payments: {}
       branding:
-        icon: 
-        logo: 
-        primary_color: 
-        secondary_color: 
+        icon:
+        logo:
+        primary_color:
+        secondary_color:
       card_payments:
         decline_on:
           avs_failure: true
           cvc_failure: true
-        statement_descriptor_prefix: 
+        statement_descriptor_prefix:
       dashboard:
-        display_name: 
+        display_name:
         timezone: Etc/UTC
       payments:
-        statement_descriptor: 
-        statement_descriptor_kana: 
-        statement_descriptor_kanji: 
+        statement_descriptor:
+        statement_descriptor_kana:
+        statement_descriptor_kanji:
       payouts:
         debit_negative_balances: true
         schedule:
           delay_days: 2
           interval: daily
-        statement_descriptor: 
+        statement_descriptor:
     tos_acceptance:
-      date: 
-      ip: 
-      user_agent: 
+      date:
+      ip:
+      user_agent:
     type: standard
   account_link:
     created: 1234567890
@@ -86,7 +86,7 @@ resources:
     url: https://remi-manage-mydev.dev.stripe.me/setup/s/oqeABBXSB260
   alipay_account:
     created: 1234567890
-    customer: 
+    customer:
     fingerprint: 3nS4DVkFKTtHTEBO
     id: aliacc_1HbxcxIigeqZG9AmqN9VEsEO
     livemode: false
@@ -115,7 +115,7 @@ resources:
     id: fee_1HbxcyIigeqZG9AmczSXg3Jk
     livemode: false
     object: application_fee
-    originating_transaction: 
+    originating_transaction:
     refunded: false
     refunds:
       data: []
@@ -144,7 +144,7 @@ resources:
     created: 1234567890
     currency: usd
     description: My First Test Charge (created for API docs)
-    exchange_rate: 
+    exchange_rate:
     fee: 0
     fee_details: []
     id: txn_1HbxcuIigeqZG9Am2p6S3dx9
@@ -160,7 +160,7 @@ resources:
     bank_name: STRIPE TEST BANK
     country: US
     currency: usd
-    customer: 
+    customer:
     fingerprint: 1JWtPxqbdX5Gamtz
     id: ba_1HbxcxIigeqZG9AmGJNgw1bl
     last4: '6789'
@@ -185,7 +185,7 @@ resources:
     bitcoin_uri: bitcoin:test_7i9Fo4b5wXcUAuoVBFrc7nc9HDxD1?amount=0.01757908
     created: 1234567890
     currency: usd
-    customer: 
+    customer:
     description: Receiver for John Doe
     email: test@example.com
     filled: false
@@ -194,8 +194,8 @@ resources:
     livemode: false
     metadata: {}
     object: bitcoin_receiver
-    payment: 
-    refund_address: 
+    payment:
+    refund_address:
     transactions:
       data: []
       has_more: false
@@ -218,28 +218,28 @@ resources:
     requested: true
     requested_at: 1234567890
     requirements:
-      current_deadline: 
+      current_deadline:
       currently_due: []
-      disabled_reason: 
+      disabled_reason:
       errors: []
       eventually_due: []
       past_due: []
       pending_verification: []
     status: inactive
   card:
-    address_city: 
-    address_country: 
-    address_line1: 
-    address_line1_check: 
-    address_line2: 
-    address_state: 
-    address_zip: 
-    address_zip_check: 
+    address_city:
+    address_country:
+    address_line1:
+    address_line1_check:
+    address_line2:
+    address_state:
+    address_zip:
+    address_zip_check:
     brand: Visa
     country: US
-    customer: 
+    customer:
     cvc_check: pass
-    dynamic_last4: 
+    dynamic_last4:
     exp_month: 8
     exp_year: 2021
     fingerprint: jMcXpDDw2Zj0qZTv
@@ -247,69 +247,70 @@ resources:
     id: card_1HbxcuIigeqZG9AmsusBRPOf
     last4: '4242'
     metadata: {}
-    name: 
+    name:
     object: card
-    tokenization_method: 
+    tokenization_method:
   charge:
     amount: 100
     amount_captured: 0
     amount_refunded: 0
-    application: 
-    application_fee: 
-    application_fee_amount: 
+    application:
+    application_fee:
+    application_fee_amount:
+    authorization_code: 123456
     balance_transaction: txn_1HbxcuIigeqZG9Am2p6S3dx9
     billing_details:
       address:
-        city: 
-        country: 
-        line1: 
-        line2: 
-        postal_code: 
-        state: 
-      email: 
-      name: 
-      phone: 
-    calculated_statement_descriptor: 
+        city:
+        country:
+        line1:
+        line2:
+        postal_code:
+        state:
+      email:
+      name:
+      phone:
+    calculated_statement_descriptor:
     captured: false
     created: 1234567890
     currency: usd
-    customer: 
+    customer:
     description: My First Test Charge (created for API docs)
     disputed: false
-    failure_code: 
-    failure_message: 
+    failure_code:
+    failure_message:
     fraud_details: {}
     id: ch_1HbxcuIigeqZG9AmJjlrtyPc
-    invoice: 
+    invoice:
     livemode: false
     metadata: {}
     object: charge
-    on_behalf_of: 
-    order: 
-    outcome: 
+    on_behalf_of:
+    order:
+    outcome:
     paid: true
-    payment_intent: 
+    payment_intent:
     payment_method: card_1HbxcuIigeqZG9AmY1dydbsX
     payment_method_details:
       card:
         brand: visa
         checks:
-          address_line1_check: 
-          address_postal_code_check: 
+          address_line1_check:
+          address_postal_code_check:
           cvc_check: pass
         country: US
         exp_month: 8
         exp_year: 2021
         fingerprint: jMcXpDDw2Zj0qZTv
         funding: credit
-        installments: 
+        installments:
         last4: '4242'
         network: visa
-        three_d_secure: 
-        wallet: 
+        three_d_secure:
+        wallet:
       type: card
-    receipt_email: 
-    receipt_number: 
+    receipt_email:
+    receipt_number:
     receipt_url: https://remi-manage-mydev.dev.stripe.me/receipts/acct_1HbxcnIigeqZG9Am/ch_1HbxcuIigeqZG9AmJjlrtyPc/rcpt_ICMLcvwddqVBuRMMnVSyHhq0mjFHCyR
     refunded: false
     refunds:
@@ -317,27 +318,27 @@ resources:
       has_more: false
       object: list
       url: "/v1/charges/ch_1HbxcuIigeqZG9AmJjlrtyPc/refunds"
-    review: 
-    shipping: 
-    source_transfer: 
-    statement_descriptor: 
-    statement_descriptor_suffix: 
+    review:
+    shipping:
+    source_transfer:
+    statement_descriptor:
+    statement_descriptor_suffix:
     status: succeeded
-    transfer_data: 
-    transfer_group: 
+    transfer_data:
+    transfer_group:
   checkout.session:
-    allow_promotion_codes: 
-    amount_subtotal: 
-    amount_total: 
-    billing_address_collection: 
+    allow_promotion_codes:
+    amount_subtotal:
+    amount_total:
+    billing_address_collection:
     cancel_url: https://example.com/cancel
-    client_reference_id: 
-    currency: 
-    customer: 
-    customer_email: 
+    client_reference_id:
+    currency:
+    customer:
+    customer_email:
     id: cs_test_WlshA9CRruNPE2lv1c343vTnCFb8MtvcteSWUdjCgZVzkX4b3radLnjc
     livemode: false
-    locale: 
+    locale:
     metadata: {}
     mode: payment
     object: checkout.session
@@ -345,13 +346,13 @@ resources:
     payment_method_types:
     - card
     payment_status: unpaid
-    setup_intent: 
-    shipping: 
-    shipping_address_collection: 
-    submit_type: 
-    subscription: 
+    setup_intent:
+    shipping:
+    shipping_address_collection:
+    submit_type:
+    subscription:
     success_url: https://example.com/success
-    total_details: 
+    total_details:
   country_spec:
     default_currency: usd
     id: US
@@ -459,14 +460,14 @@ resources:
         - tos_acceptance.date
         - tos_acceptance.ip
   coupon:
-    amount_off: 
+    amount_off:
     created: 1234567890
     currency: usd
     duration: repeating
     duration_in_months: 3
     id: 25_5OFF
     livemode: false
-    max_redemptions: 
+    max_redemptions:
     metadata: {}
     name: 25.5% off
     object: coupon
@@ -479,7 +480,7 @@ resources:
     created: 1234567890
     currency: usd
     customer: cus_ICMLqBncOkbXq7
-    customer_balance_transaction: 
+    customer_balance_transaction:
     discount_amount: 0
     discount_amounts: []
     id: cn_1Hbxd0IigeqZG9AmDwwJWSiG
@@ -512,8 +513,8 @@ resources:
           object: tax_rate
           percentage: 19.0
         type: invoice_line_item
-        unit_amount: 
-        unit_amount_decimal: 
+        unit_amount:
+        unit_amount_decimal:
       - amount: 500
         description: Service credit
         discount_amount: 0
@@ -531,14 +532,14 @@ resources:
       object: list
       url: "/v1/credit_notes/cn_1Hbxd0IigeqZG9AmDwwJWSiG/lines"
     livemode: false
-    memo: 
+    memo:
     metadata: {}
     number: ABCD-1234-CN-01
     object: credit_note
-    out_of_band_amount: 
+    out_of_band_amount:
     pdf: https://remi-manage-mydev.dev.stripe.me/credit_notes/acct_1HbxcnIigeqZG9Am/cnst_123456789/pdf
-    reason: 
-    refund: 
+    reason:
+    refund:
     status: issued
     subtotal: 1690
     tax_amounts:
@@ -561,45 +562,45 @@ resources:
     tax_amounts: []
     tax_rates: []
     type: invoice_line_item
-    unit_amount: 
-    unit_amount_decimal: 
+    unit_amount:
+    unit_amount_decimal:
   customer:
-    address: 
+    address:
     balance: 0
     created: 1234567890
     currency: usd
-    default_source: 
+    default_source:
     delinquent: false
-    description: 
-    discount: 
-    email: 
+    description:
+    discount:
+    email:
     id: cus_ICMLN96DUWUKqw
     invoice_prefix: '3835363'
     invoice_settings:
-      custom_fields: 
-      default_payment_method: 
-      footer: 
+      custom_fields:
+      default_payment_method:
+      footer:
     livemode: false
     metadata: {}
-    name: 
+    name:
     next_invoice_sequence: 1
     object: customer
-    phone: 
+    phone:
     preferred_locales: []
-    shipping: 
+    shipping:
     tax_exempt: none
   customer_balance_transaction:
     amount: -500
     created: 1234567890
-    credit_note: 
+    credit_note:
     currency: usd
     customer: cus_ICMLqBncOkbXq7
-    description: 
+    description:
     ending_balance: -500
     id: cbtxn_1HbxcwIigeqZG9Am936GCHtF
-    invoice: 
+    invoice:
     livemode: false
-    metadata: 
+    metadata:
     object: customer_balance_transaction
     type: adjustment
   deleted_account:
@@ -620,21 +621,21 @@ resources:
     object: customer
   deleted_discount:
     coupon:
-      amount_off: 
+      amount_off:
       applies_to:
         products: []
       created: 0
-      currency: 
+      currency:
       duration: forever
-      duration_in_months: 
+      duration_in_months:
       id: ''
       livemode: false
-      max_redemptions: 
-      metadata: 
-      name: 
+      max_redemptions:
+      metadata:
+      name:
       object: coupon
-      percent_off: 
-      redeem_by: 
+      percent_off:
+      redeem_by:
       times_redeemed: 0
       valid: false
     deleted: true
@@ -706,32 +707,32 @@ resources:
     id: we_1HbxcyIigeqZG9AmsRMDtHjE
     object: webhook_endpoint
   discount:
-    checkout_session: 
+    checkout_session:
     coupon:
-      amount_off: 
+      amount_off:
       created: 1602634439
       currency: usd
       duration: repeating
       duration_in_months: 3
       id: 25_5OFF
       livemode: false
-      max_redemptions: 
+      max_redemptions:
       metadata: {}
       name: 25.5% off
       object: coupon
       percent_off: 25.5
-      redeem_by: 
+      redeem_by:
       times_redeemed: 0
       valid: true
     customer: cus_ICMLN96DUWUKqw
     end: 1234567890
     id: di_1HbxcxIigeqZG9AmYtX4XxVr
-    invoice: 
-    invoice_item: 
+    invoice:
+    invoice_item:
     object: discount
-    promotion_code: 
+    promotion_code:
     start: 1234567890
-    subscription: 
+    subscription:
   dispute:
     amount: 1000
     balance_transactions: []
@@ -739,33 +740,33 @@ resources:
     created: 1234567890
     currency: usd
     evidence:
-      access_activity_log: 
-      billing_address: 
-      cancellation_policy: 
-      cancellation_policy_disclosure: 
-      cancellation_rebuttal: 
-      customer_communication: 
-      customer_email_address: 
-      customer_name: 
-      customer_purchase_ip: 
-      customer_signature: 
-      duplicate_charge_documentation: 
-      duplicate_charge_explanation: 
-      duplicate_charge_id: 
-      product_description: 
-      receipt: 
-      refund_policy: 
-      refund_policy_disclosure: 
-      refund_refusal_explanation: 
-      service_date: 
-      service_documentation: 
-      shipping_address: 
-      shipping_carrier: 
-      shipping_date: 
-      shipping_documentation: 
-      shipping_tracking_number: 
-      uncategorized_file: 
-      uncategorized_text: 
+      access_activity_log:
+      billing_address:
+      cancellation_policy:
+      cancellation_policy_disclosure:
+      cancellation_rebuttal:
+      customer_communication:
+      customer_email_address:
+      customer_name:
+      customer_purchase_ip:
+      customer_signature:
+      duplicate_charge_documentation:
+      duplicate_charge_explanation:
+      duplicate_charge_id:
+      product_description:
+      receipt:
+      refund_policy:
+      refund_policy_disclosure:
+      refund_refusal_explanation:
+      service_date:
+      service_documentation:
+      shipping_address:
+      shipping_carrier:
+      shipping_date:
+      shipping_documentation:
+      shipping_tracking_number:
+      uncategorized_file:
+      uncategorized_text:
     evidence_details:
       due_by: 1604361599
       has_evidence: false
@@ -776,7 +777,7 @@ resources:
     livemode: false
     metadata: {}
     object: dispute
-    payment_intent: 
+    payment_intent:
     reason: general
     status: warning_needs_response
   ephemeral_key:
@@ -786,12 +787,12 @@ resources:
     livemode: false
     object: ephemeral_key
   event:
-    api_version: 
+    api_version:
     created: 1234567890
     data:
       object:
         active: true
-        aggregate_usage: 
+        aggregate_usage:
         amount: 2000
         amount_decimal: '2000'
         billing_scheme: per_unit
@@ -802,20 +803,20 @@ resources:
         interval_count: 1
         livemode: false
         metadata: {}
-        nickname: 
+        nickname:
         object: plan
         product: prod_ICMLTtPysRtMBE
-        tiers_mode: 
-        transform_usage: 
-        trial_period_days: 
+        tiers_mode:
+        transform_usage:
+        trial_period_days:
         usage_type: licensed
     id: evt_1HbxcyIigeqZG9Am6aCWNpIs
     livemode: false
     object: event
     pending_webhooks: 0
     request:
-      id: 
-      idempotency_key: 
+      id:
+      idempotency_key:
     type: plan.created
   exchange_rate:
     id: rate_7573642d636164
@@ -827,7 +828,7 @@ resources:
     bank_name: STRIPE TEST BANK
     country: US
     currency: usd
-    customer: 
+    customer:
     fingerprint: 1JWtPxqbdX5Gamtz
     id: ba_1HbxcxIigeqZG9AmGJNgw1bl
     last4: '6789'
@@ -837,7 +838,7 @@ resources:
     status: new
   fee_refund:
     amount: 100
-    balance_transaction: 
+    balance_transaction:
     created: 1234567890
     currency: usd
     fee: fee_1HbxcyIigeqZG9AmczSXg3Jk
@@ -857,7 +858,7 @@ resources:
     object: file
     purpose: dispute_evidence
     size: 9863
-    title: 
+    title:
     type: png
     url: https://remi-upload-mydev.dev.stripe.me/v1/files/file_1Hbxd0IigeqZG9Amq5VVKfBL/contents
   file_link:
@@ -872,40 +873,40 @@ resources:
     url: https://remi-upload-mydev.dev.stripe.me/links/fl_test_FUcG5n6INzHV1p6SLRLwrh6w
   invoice:
     account_country: US
-    account_name: 
+    account_name:
     amount_due: 0
     amount_paid: 0
     amount_remaining: 0
-    application_fee_amount: 
+    application_fee_amount:
     attempt_count: 0
     attempted: false
     auto_advance: true
     billing_reason: manual
-    charge: 
+    charge:
     collection_method: charge_automatically
     created: 1234567890
     currency: usd
-    custom_fields: 
+    custom_fields:
     customer: cus_ICMLN96DUWUKqw
-    customer_address: 
-    customer_email: 
-    customer_name: 
-    customer_phone: 
-    customer_shipping: 
+    customer_address:
+    customer_email:
+    customer_name:
+    customer_phone:
+    customer_shipping:
     customer_tax_exempt: none
     customer_tax_ids: []
-    default_payment_method: 
-    default_source: 
+    default_payment_method:
+    default_source:
     default_tax_rates: []
-    description: 
-    discount: 
+    description:
+    discount:
     discounts: []
     due_date: 1234567890
-    ending_balance: 
-    footer: 
-    hosted_invoice_url: 
+    ending_balance:
+    footer:
+    hosted_invoice_url:
     id: in_1HbxcwIigeqZG9Amx0a4GCNo
-    invoice_pdf: 
+    invoice_pdf:
     lines:
       data:
       - amount: 2000
@@ -928,18 +929,18 @@ resources:
           currency: usd
           id: price_1HbxcwIigeqZG9Am37aJKWtR
           livemode: false
-          lookup_key: 
+          lookup_key:
           metadata: {}
-          nickname: 
+          nickname:
           object: price
           product: prod_ICMLTtPysRtMBE
           recurring:
-            aggregate_usage: 
+            aggregate_usage:
             interval: month
             interval_count: 1
             usage_type: licensed
-          tiers_mode: 
-          transform_quantity: 
+          tiers_mode:
+          transform_quantity:
           type: recurring
           unit_amount: 2000
           unit_amount_decimal: '2000'
@@ -956,30 +957,30 @@ resources:
     livemode: false
     metadata: {}
     next_payment_attempt: 1234567890
-    number: 
+    number:
     object: invoice
     paid: false
-    payment_intent: 
+    payment_intent:
     period_end: 1234567890
     period_start: 1234567890
     post_payment_credit_notes_amount: 0
     pre_payment_credit_notes_amount: 0
-    receipt_number: 
+    receipt_number:
     starting_balance: 0
-    statement_descriptor: 
+    statement_descriptor:
     status: draft
     status_transitions:
-      finalized_at: 
-      marked_uncollectible_at: 
-      paid_at: 
-      voided_at: 
-    subscription: 
+      finalized_at:
+      marked_uncollectible_at:
+      paid_at:
+      voided_at:
+    subscription:
     subtotal: 0
-    tax: 
+    tax:
     total: 0
     total_discount_amounts: []
     total_tax_amounts: []
-    transfer_data: 
+    transfer_data:
     webhooks_delivered_at: 1234567890
   invoiceitem:
     amount: 1000
@@ -990,17 +991,17 @@ resources:
     discountable: true
     discounts: []
     id: ii_1HbxcxIigeqZG9AmWg6WqgZa
-    invoice: 
+    invoice:
     livemode: false
     metadata: {}
     object: invoiceitem
     period:
       end: 1602634439
       start: 1602634439
-    price: 
+    price:
     proration: false
     quantity: 1
-    subscription: 
+    subscription:
     tax_rates: []
     unit_amount: 1000
     unit_amount_decimal: '1000'
@@ -1017,13 +1018,13 @@ resources:
   issuing.authorization:
     amount: 700
     amount_details:
-      atm_fee: 
+      atm_fee:
     approved: true
     authorization_method: keyed_in
     balance_transactions: []
     card:
       brand: Visa
-      cancellation_reason: 
+      cancellation_reason:
       cardholder:
         billing:
           address:
@@ -1033,24 +1034,24 @@ resources:
             line2: Apt 3
             postal_code: '90210'
             state: CA
-        company: 
+        company:
         created: 1602634441
         email: jenny@example.com
         id: ich_1HbxczIigeqZG9AmSL7YpWvG
-        individual: 
+        individual:
         livemode: false
         metadata: {}
         name: Jenny Rosen
         object: issuing.cardholder
         phone_number: "+18008675309"
         requirements:
-          disabled_reason: 
+          disabled_reason:
           past_due: []
         spending_controls:
           allowed_categories: []
           blocked_categories: []
           spending_limits: []
-          spending_limits_currency: 
+          spending_limits_currency:
         status: active
         type: individual
       created: 1602634441
@@ -1062,18 +1063,18 @@ resources:
       livemode: false
       metadata: {}
       object: issuing.card
-      replaced_by: 
-      replacement_for: 
-      replacement_reason: 
-      shipping: 
+      replaced_by:
+      replacement_for:
+      replacement_reason:
+      shipping:
       spending_controls:
-        allowed_categories: 
-        blocked_categories: 
+        allowed_categories:
+        blocked_categories:
         spending_limits: []
-        spending_limits_currency: 
+        spending_limits_currency:
       status: active
       type: physical
-    cardholder: 
+    cardholder:
     created: 1234567890
     currency: usd
     id: iauth_1HbxczIigeqZG9AmgAlWTVig
@@ -1090,7 +1091,7 @@ resources:
       state: CA
     metadata: {}
     object: issuing.authorization
-    pending_request: 
+    pending_request:
     request_history: []
     status: closed
     transactions: []
@@ -1099,10 +1100,10 @@ resources:
       address_postal_code_check: match
       cvc_check: match
       expiry_check: match
-    wallet: 
+    wallet:
   issuing.card:
     brand: Visa
-    cancellation_reason: 
+    cancellation_reason:
     cardholder:
       billing:
         address:
@@ -1112,24 +1113,24 @@ resources:
           line2: Apt 3
           postal_code: '90210'
           state: CA
-      company: 
+      company:
       created: 1602634441
       email: jenny@example.com
       id: ich_1HbxczIigeqZG9AmSL7YpWvG
-      individual: 
+      individual:
       livemode: false
       metadata: {}
       name: Jenny Rosen
       object: issuing.cardholder
       phone_number: "+18008675309"
       requirements:
-        disabled_reason: 
+        disabled_reason:
         past_due: []
       spending_controls:
         allowed_categories: []
         blocked_categories: []
         spending_limits: []
-        spending_limits_currency: 
+        spending_limits_currency:
       status: active
       type: individual
     created: 1234567890
@@ -1141,15 +1142,15 @@ resources:
     livemode: false
     metadata: {}
     object: issuing.card
-    replaced_by: 
-    replacement_for: 
-    replacement_reason: 
-    shipping: 
+    replaced_by:
+    replacement_for:
+    replacement_reason:
+    shipping:
     spending_controls:
-      allowed_categories: 
-      blocked_categories: 
+      allowed_categories:
+      blocked_categories:
       spending_limits: []
-      spending_limits_currency: 
+      spending_limits_currency:
     status: active
     type: physical
   issuing.cardholder:
@@ -1161,24 +1162,24 @@ resources:
         line2: Apt 3
         postal_code: '90210'
         state: CA
-    company: 
+    company:
     created: 1234567890
     email: jenny@example.com
     id: ich_1HbxczIigeqZG9AmSL7YpWvG
-    individual: 
+    individual:
     livemode: false
     metadata: {}
     name: Jenny Rosen
     object: issuing.cardholder
     phone_number: "+18008675309"
     requirements:
-      disabled_reason: 
+      disabled_reason:
       past_due: []
     spending_controls:
       allowed_categories: []
       blocked_categories: []
       spending_limits: []
-      spending_limits_currency: 
+      spending_limits_currency:
     status: active
     type: individual
   issuing.dispute:
@@ -1187,7 +1188,7 @@ resources:
     currency: usd
     evidence:
       fraudulent:
-        additional_documentation: 
+        additional_documentation:
         explanation: Fraud; card reported lost on 10/14/2020
       reason: fraudulent
     id: idp_1HbxczIigeqZG9AmDz3dDvzz
@@ -1216,14 +1217,14 @@ resources:
   issuing.transaction:
     amount: -100
     amount_details:
-      atm_fee: 
+      atm_fee:
     authorization: iauth_1HbxczIigeqZG9Am1XdZA4Ye
-    balance_transaction: 
+    balance_transaction:
     card: ic_1HbxczIigeqZG9AmTjFvWoCA
     cardholder: ich_1HbxczIigeqZG9AmSL7YpWvG
     created: 1234567890
     currency: usd
-    dispute: 
+    dispute:
     id: ipi_1HbxczIigeqZG9AmGPqB1Xrs
     livemode: false
     merchant_amount: -100
@@ -1253,14 +1254,14 @@ resources:
       currency: usd
       id: price_1HbxcwIigeqZG9AmAEG6VDrH
       livemode: false
-      lookup_key: 
+      lookup_key:
       metadata: {}
-      nickname: 
+      nickname:
       object: price
       product: prod_ICMLmKMAw6XMjd
-      recurring: 
-      tiers_mode: 
-      transform_quantity: 
+      recurring:
+      tiers_mode:
+      transform_quantity:
       type: one_time
       unit_amount: 1000
       unit_amount_decimal: '1000'
@@ -1281,10 +1282,10 @@ resources:
     period:
       end: 1602634439
       start: 1602634439
-    price: 
+    price:
     proration: false
     quantity: 1
-    subscription: 
+    subscription:
     tax_amounts: []
     tax_rates: []
     type: invoiceitem
@@ -1313,14 +1314,14 @@ resources:
     type: multi_use
   order:
     amount: 1500
-    amount_returned: 
-    application: 
-    application_fee: 
-    charge: 
+    amount_returned:
+    application:
+    application_fee:
+    charge:
     created: 1234567890
     currency: usd
-    customer: 
-    email: 
+    customer:
+    email:
     id: or_1HbxcyIigeqZG9AmjvG5JneD
     items:
     - amount: 1500
@@ -1328,7 +1329,7 @@ resources:
       description: T-shirt
       object: order_item
       parent: sk_1HbxcyIigeqZG9AmmBHRPTjr
-      quantity: 
+      quantity:
       type: sku
     livemode: false
     metadata: {}
@@ -1338,26 +1339,26 @@ resources:
       has_more: false
       object: list
       url: "/v1/order_returns?order=or_1HbxcyIigeqZG9AmjvG5JneD"
-    selected_shipping_method: 
+    selected_shipping_method:
     shipping:
       address:
         city: San Francisco
         country: US
         line1: 1234 Fake Street
-        line2: 
+        line2:
         postal_code: '94102'
-        state: 
-      carrier: 
+        state:
+      carrier:
       name: Jenny Rosen
-      phone: 
-      tracking_number: 
-    shipping_methods: 
+      phone:
+      tracking_number:
+    shipping_methods:
     status: created
     status_transitions:
-      canceled: 
-      fulfiled: 
-      paid: 
-      returned: 
+      canceled:
+      fulfiled:
+      paid:
+      returned:
     updated: 1234567890
   order_return:
     amount: 1500
@@ -1370,7 +1371,7 @@ resources:
       description: T-shirt
       object: order_item
       parent: sk_1HbxcyIigeqZG9AmmBHRPTjr
-      quantity: 
+      quantity:
       type: sku
     livemode: false
     object: order_return
@@ -1380,10 +1381,10 @@ resources:
     amount: 1099
     amount_capturable: 0
     amount_received: 0
-    application: 
-    application_fee_amount: 
+    application:
+    application_fee_amount:
     canceled_at: 1234567890
-    cancellation_reason: 
+    cancellation_reason:
     capture_method: automatic
     charges:
       data: []
@@ -1394,63 +1395,63 @@ resources:
     confirmation_method: automatic
     created: 1234567890
     currency: usd
-    customer: 
-    description: 
+    customer:
+    description:
     id: pi_1HbxczIigeqZG9AmRBlrJ8u9
-    invoice: 
-    last_payment_error: 
+    invoice:
+    last_payment_error:
     livemode: false
     metadata: {}
-    next_action: 
+    next_action:
     object: payment_intent
-    on_behalf_of: 
-    payment_method: 
+    on_behalf_of:
+    payment_method:
     payment_method_options: {}
     payment_method_types:
     - card
-    receipt_email: 
-    review: 
-    setup_future_usage: 
-    shipping: 
-    statement_descriptor: 
-    statement_descriptor_suffix: 
+    receipt_email:
+    review:
+    setup_future_usage:
+    shipping:
+    statement_descriptor:
+    statement_descriptor_suffix:
     status: requires_capture
-    transfer_data: 
-    transfer_group: 
+    transfer_data:
+    transfer_group:
   payment_method:
     billing_details:
       address:
         city: San Francisco
         country: US
         line1: 1234 Fake Street
-        line2: 
+        line2:
         postal_code: '94102'
-        state: 
+        state:
       email: jenny@example.com
-      name: 
+      name:
       phone: "+15555555555"
     card:
       brand: visa
       checks:
-        address_line1_check: 
-        address_postal_code_check: 
+        address_line1_check:
+        address_postal_code_check:
         cvc_check: pass
       country: US
       exp_month: 8
       exp_year: 2021
       fingerprint: jMcXpDDw2Zj0qZTv
       funding: credit
-      generated_from: 
+      generated_from:
       last4: '4242'
       networks:
         available:
         - visa
-        preferred: 
+        preferred:
       three_d_secure_usage:
         supported: true
-      wallet: 
+      wallet:
     created: 1234567890
-    customer: 
+    customer:
     id: pm_1HbxczIigeqZG9Am2KqJXfIW
     livemode: false
     metadata:
@@ -1459,15 +1460,15 @@ resources:
     type: card
   payment_source:
     business_profile:
-      mcc: 
-      name: 
-      product_description: 
-      support_address: 
-      support_email: 
-      support_phone: 
-      support_url: 
-      url: 
-    business_type: 
+      mcc:
+      name:
+      product_description:
+      support_address:
+      support_email:
+      support_phone:
+      support_url:
+      url:
+    business_type:
     capabilities:
       card_payments: active
       transfers: active
@@ -1487,7 +1488,7 @@ resources:
     object: account
     payouts_enabled: false
     requirements:
-      current_deadline: 
+      current_deadline:
       currently_due:
       - business_profile.product_description
       - business_profile.support_phone
@@ -1509,32 +1510,32 @@ resources:
     settings:
       bacs_debit_payments: {}
       branding:
-        icon: 
-        logo: 
-        primary_color: 
-        secondary_color: 
+        icon:
+        logo:
+        primary_color:
+        secondary_color:
       card_payments:
         decline_on:
           avs_failure: true
           cvc_failure: true
-        statement_descriptor_prefix: 
+        statement_descriptor_prefix:
       dashboard:
-        display_name: 
+        display_name:
         timezone: Etc/UTC
       payments:
-        statement_descriptor: 
-        statement_descriptor_kana: 
-        statement_descriptor_kanji: 
+        statement_descriptor:
+        statement_descriptor_kana:
+        statement_descriptor_kanji:
       payouts:
         debit_negative_balances: true
         schedule:
           delay_days: 2
           interval: daily
-        statement_descriptor: 
+        statement_descriptor:
     tos_acceptance:
-      date: 
-      ip: 
-      user_agent: 
+      date:
+      ip:
+      user_agent:
     type: standard
   payout:
     amount: 1100
@@ -1545,38 +1546,38 @@ resources:
     currency: usd
     description: STRIPE PAYOUT
     destination: ba_1HbxcxIigeqZG9Am7aZf6EpL
-    failure_balance_transaction: 
-    failure_code: 
-    failure_message: 
+    failure_balance_transaction:
+    failure_code:
+    failure_message:
     id: po_1HbxcxIigeqZG9AmcFQB9FMV
     livemode: false
     metadata: {}
     method: standard
     object: payout
     source_type: card
-    statement_descriptor: 
+    statement_descriptor:
     status: in_transit
     type: bank_account
   person:
     account: acct_1HbxcnIigeqZG9Am
     created: 1234567890
     dob:
-      day: 
-      month: 
-      year: 
-    first_name: 
+      day:
+      month:
+      year:
+    first_name:
     id: person_ICMLeAvPSnvuPi
     id_number_provided: false
-    last_name: 
+    last_name:
     metadata: {}
     object: person
     relationship:
       director: false
       executive: false
       owner: false
-      percent_ownership: 
+      percent_ownership:
       representative: false
-      title: 
+      title:
     requirements:
       currently_due: []
       errors: []
@@ -1586,21 +1587,21 @@ resources:
     ssn_last_4_provided: false
     verification:
       additional_document:
-        back: 
-        details: 
-        details_code: 
-        front: 
-      details: 
-      details_code: 
+        back:
+        details:
+        details_code:
+        front:
+      details:
+      details_code:
       document:
-        back: 
-        details: 
-        details_code: 
-        front: 
+        back:
+        details:
+        details_code:
+        front:
       status: unverified
   plan:
     active: true
-    aggregate_usage: 
+    aggregate_usage:
     amount: 2000
     amount_decimal: '2000'
     billing_scheme: per_unit
@@ -1611,12 +1612,12 @@ resources:
     interval_count: 1
     livemode: false
     metadata: {}
-    nickname: 
+    nickname:
     object: plan
     product: prod_ICMLTtPysRtMBE
-    tiers_mode: 
-    transform_usage: 
-    trial_period_days: 
+    tiers_mode:
+    transform_usage:
+    trial_period_days:
     usage_type: licensed
   price:
     active: true
@@ -1625,18 +1626,18 @@ resources:
     currency: usd
     id: price_1HbxcwIigeqZG9Am37aJKWtR
     livemode: false
-    lookup_key: 
+    lookup_key:
     metadata: {}
-    nickname: 
+    nickname:
     object: price
     product: prod_ICMLTtPysRtMBE
     recurring:
-      aggregate_usage: 
+      aggregate_usage:
       interval: month
       interval_count: 1
       usage_type: licensed
-    tiers_mode: 
-    transform_quantity: 
+    tiers_mode:
+    transform_quantity:
     type: recurring
     unit_amount: 2000
     unit_amount_decimal: '2000'
@@ -1653,40 +1654,40 @@ resources:
     metadata: {}
     name: T-shirt
     object: product
-    statement_descriptor: 
-    unit_label: 
+    statement_descriptor:
+    unit_label:
     updated: 1234567890
   promotion_code:
     active: false
     code: FALL20
     coupon:
-      amount_off: 
+      amount_off:
       created: 1602634439
       currency: usd
       duration: repeating
       duration_in_months: 3
       id: 25_5OFF
       livemode: false
-      max_redemptions: 
+      max_redemptions:
       metadata: {}
       name: 25.5% off
       object: coupon
       percent_off: 25.5
-      redeem_by: 
+      redeem_by:
       times_redeemed: 0
       valid: true
     created: 1234567890
-    customer: 
+    customer:
     expires_at: 1234567890
     id: promo_1HbxcxIigeqZG9AmmkHmtc2f
     livemode: false
-    max_redemptions: 
+    max_redemptions:
     metadata: {}
     object: promotion_code
     restrictions:
       first_time_transaction: false
-      minimum_amount: 
-      minimum_amount_currency: 
+      minimum_amount:
+      minimum_amount_currency:
     times_redeemed: 0
   radar.early_fraud_warning:
     actionable: true
@@ -1720,41 +1721,41 @@ resources:
     value: 1.2.3.4
     value_list: rsl_1HbxczIigeqZG9Amvx2cFfuw
   recipient:
-    active_account: 
+    active_account:
     cards:
       data: []
       has_more: false
       object: list
       url: "/v1/recipients/rp_1HbxcyIigeqZG9AmFUV0f8NE/cards"
     created: 1234567890
-    default_card: 
+    default_card:
     description: Recipient for John Doe
     email: test@example.com
     id: rp_1HbxcyIigeqZG9AmFUV0f8NE
     livemode: false
     metadata: {}
-    migrated_to: 
+    migrated_to:
     name: John Doe
     object: recipient
     type: individual
   refund:
     amount: 100
-    balance_transaction: 
+    balance_transaction:
     charge: ch_1HbxcuIigeqZG9AmJjlrtyPc
     created: 1234567890
     currency: usd
     id: re_1HbxcvIigeqZG9AmY5Ax0BCC
     metadata: {}
     object: refund
-    payment_intent: 
-    reason: 
-    receipt_number: 
-    source_transfer_reversal: 
+    payment_intent:
+    reason:
+    receipt_number:
+    source_transfer_reversal:
     status: succeeded
-    transfer_reversal: 
+    transfer_reversal:
   reporting.report_run:
     created: 1234567890
-    error: 
+    error:
     id: frr_1Hbxd0IigeqZG9AmDDSPGle3
     livemode: true
     object: reporting.report_run
@@ -1775,7 +1776,7 @@ resources:
       object: file
       purpose: finance_report_run
       size: 16890
-      title: 
+      title:
       type: csv
       url: https://remi-upload-mydev.dev.stripe.me/v1/files/file_1Hbxd0IigeqZG9Am8qymEzwm/contents
     status: succeeded
@@ -1794,25 +1795,25 @@ resources:
     updated: 1234567890
     version: 1
   review:
-    billing_zip: 
+    billing_zip:
     charge: ch_1HbxcuIigeqZG9AmymL47rMV
-    closed_reason: 
+    closed_reason:
     created: 1234567890
     id: prv_1HbxczIigeqZG9Am7yQqo6cc
-    ip_address: 
-    ip_address_location: 
+    ip_address:
+    ip_address_location:
     livemode: false
     object: review
     open: true
     opened_reason: rule
     reason: rule
-    session: 
+    session:
   scheduled_query_run:
     created: 1234567890
     data_load_time: 1234567890
     file:
       created: 1602634441
-      expires_at: 
+      expires_at:
       filename: path
       id: file_1HbxczIigeqZG9AmGayNdkMN
       links:
@@ -1823,7 +1824,7 @@ resources:
       object: file
       purpose: sigma_scheduled_query
       size: 500
-      title: 
+      title:
       type: csv
       url: https://remi-upload-mydev.dev.stripe.me/v1/files/file_1HbxczIigeqZG9AmGayNdkMN/contents
     id: sqr_1HbxczIigeqZG9AmXa2sTG5Y
@@ -1834,43 +1835,43 @@ resources:
     status: completed
     title: Count all charges
   setup_attempt:
-    application: 
+    application:
     created: 1234567890
-    customer: 
+    customer:
     id: setatt_123456789012345678901234
     livemode: false
     object: setup_attempt
-    on_behalf_of: 
+    on_behalf_of:
     payment_method: card_1HbxcuIigeqZG9AmY1dydbsX
     payment_method_details:
       card:
-        three_d_secure: 
+        three_d_secure:
       type: card
-    setup_error: 
+    setup_error:
     setup_intent: seti_1HbxczIigeqZG9Am8swp7LKh
     status: succeeded
     usage: off_session
   setup_intent:
-    application: 
-    cancellation_reason: 
+    application:
+    cancellation_reason:
     client_secret: seti_1HbxczIigeqZG9Am8swp7LKh_secret_ICMLLqS7uRgJ0a4yNwRMm15piqAr1FD
     created: 1234567890
-    customer: 
-    description: 
+    customer:
+    description:
     id: seti_1HbxczIigeqZG9Am8swp7LKh
-    last_setup_error: 
-    latest_attempt: 
+    last_setup_error:
+    latest_attempt:
     livemode: false
-    mandate: 
+    mandate:
     metadata: {}
-    next_action: 
+    next_action:
     object: setup_intent
-    on_behalf_of: 
-    payment_method: 
+    on_behalf_of:
+    payment_method:
     payment_method_options: {}
     payment_method_types:
     - card
-    single_use_mandate: 
+    single_use_mandate:
     status: requires_capture
     usage: off_session
   sku:
@@ -1881,15 +1882,15 @@ resources:
     created: 1234567890
     currency: usd
     id: sku_ICML1Tw7KyPqCs
-    image: 
+    image:
     inventory:
       quantity: 50
       type: finite
-      value: 
+      value:
     livemode: false
     metadata: {}
     object: sku
-    package_dimensions: 
+    package_dimensions:
     price: 1500
     product: prod_ICML80lmy1g2H9
     updated: 1234567890
@@ -1900,7 +1901,7 @@ resources:
       fingerprint: ecpwEzmBOSMOqQTL
       routing_number: '110000000'
       swift_code: TSTEZ122
-    amount: 
+    amount:
     client_secret: src_client_secret_OjK2BMakVLuTsef3XOuSmbHc
     created: 1234567890
     currency: usd
@@ -1910,14 +1911,14 @@ resources:
     metadata: {}
     object: source
     owner:
-      address: 
+      address:
       email: jenny.rosen@example.com
-      name: 
-      phone: 
-      verified_address: 
-      verified_email: 
-      verified_name: 
-      verified_phone: 
+      name:
+      phone:
+      verified_address:
+      verified_email:
+      verified_name:
+      verified_phone:
     receiver:
       address: 121042882-38381234567890123
       amount_charged: 0
@@ -1925,7 +1926,7 @@ resources:
       amount_returned: 0
       refund_attributes_method: email
       refund_attributes_status: missing
-    statement_descriptor: 
+    statement_descriptor:
     status: pending
     type: ach_credit_transfer
     usage: reusable
@@ -1947,7 +1948,7 @@ resources:
         fingerprint: ecpwEzmBOSMOqQTL
         routing_number: '110000000'
         swift_code: TSTEZ122
-      amount: 
+      amount:
       client_secret: src_client_secret_cTCMOtgFJa8bJYd22Dcwztp5
       created: 1602634441
       currency: usd
@@ -1957,14 +1958,14 @@ resources:
       metadata: {}
       object: source
       owner:
-        address: 
+        address:
         email: jenny.rosen@example.com
-        name: 
-        phone: 
-        verified_address: 
-        verified_email: 
-        verified_name: 
-        verified_phone: 
+        name:
+        phone:
+        verified_address:
+        verified_email:
+        verified_name:
+        verified_phone:
       receiver:
         address: 121042882-38381234567890123
         amount_charged: 0
@@ -1972,7 +1973,7 @@ resources:
         amount_returned: 0
         refund_attributes_method: email
         refund_attributes_status: missing
-      statement_descriptor: 
+      statement_descriptor:
       status: pending
       type: ach_credit_transfer
       usage: reusable
@@ -1990,9 +1991,9 @@ resources:
     status: succeeded
     type: ach_credit_transfer
   subscription:
-    application_fee_percent: 
+    application_fee_percent:
     billing_cycle_anchor: 1234567890
-    billing_thresholds: 
+    billing_thresholds:
     cancel_at: 1234567890
     cancel_at_period_end: false
     canceled_at: 1234567890
@@ -2001,16 +2002,16 @@ resources:
     current_period_end: 1234567890
     current_period_start: 1234567890
     customer: cus_ICMLqBncOkbXq7
-    days_until_due: 
-    default_payment_method: 
-    default_source: 
+    days_until_due:
+    default_payment_method:
+    default_source:
     default_tax_rates: []
-    discount: 
+    discount:
     ended_at: 1234567890
     id: sub_ICMLlL6wbSG7Kz
     items:
       data:
-      - billing_thresholds: 
+      - billing_thresholds:
         created: 1602634439
         id: si_ICMLvoloAPY4LG
         metadata: {}
@@ -2022,18 +2023,18 @@ resources:
           currency: usd
           id: price_1HbxcwIigeqZG9Am37aJKWtR
           livemode: false
-          lookup_key: 
+          lookup_key:
           metadata: {}
-          nickname: 
+          nickname:
           object: price
           product: prod_ICMLTtPysRtMBE
           recurring:
-            aggregate_usage: 
+            aggregate_usage:
             interval: month
             interval_count: 1
             usage_type: licensed
-          tiers_mode: 
-          transform_quantity: 
+          tiers_mode:
+          transform_quantity:
           type: recurring
           unit_amount: 2000
           unit_amount_decimal: '2000'
@@ -2043,23 +2044,23 @@ resources:
       has_more: false
       object: list
       url: "/v1/subscription_items?subscription=sub_ICMLlL6wbSG7Kz"
-    latest_invoice: 
+    latest_invoice:
     livemode: false
     metadata: {}
     next_pending_invoice_item_invoice: 1234567890
     object: subscription
-    pause_collection: 
-    pending_invoice_item_interval: 
-    pending_setup_intent: 
-    pending_update: 
-    schedule: 
+    pause_collection:
+    pending_invoice_item_interval:
+    pending_setup_intent:
+    pending_update:
+    schedule:
     start_date: 1234567890
     status: active
-    transfer_data: 
+    transfer_data:
     trial_end: 1234567890
     trial_start: 1234567890
   subscription_item:
-    billing_thresholds: 
+    billing_thresholds:
     created: 1602634439
     id: si_ICMLV9Xgf77qUA
     metadata: {}
@@ -2071,18 +2072,18 @@ resources:
       currency: usd
       id: price_1HbxcwIigeqZG9Am37aJKWtR
       livemode: false
-      lookup_key: 
+      lookup_key:
       metadata: {}
-      nickname: 
+      nickname:
       object: price
       product: prod_ICMLTtPysRtMBE
       recurring:
-        aggregate_usage: 
+        aggregate_usage:
         interval: month
         interval_count: 1
         usage_type: licensed
-      tiers_mode: 
-      transform_quantity: 
+      tiers_mode:
+      transform_quantity:
       type: recurring
       unit_amount: 2000
       unit_amount_decimal: '2000'
@@ -2093,15 +2094,15 @@ resources:
     canceled_at: 1234567890
     completed_at: 1234567890
     created: 1234567890
-    current_phase: 
+    current_phase:
     customer: cus_ICMLN96DUWUKqw
     default_settings:
       billing_cycle_anchor: automatic
-      billing_thresholds: 
+      billing_thresholds:
       collection_method: charge_automatically
-      default_payment_method: 
-      invoice_settings: 
-      transfer_data: 
+      default_payment_method:
+      invoice_settings:
+      transfer_data:
     end_behavior: release
     id: sub_sched_1HbxcwIigeqZG9AmL0xnUEQF
     livemode: false
@@ -2109,28 +2110,28 @@ resources:
     object: subscription_schedule
     phases:
     - add_invoice_items: []
-      application_fee_percent: 
-      billing_cycle_anchor: 
-      billing_thresholds: 
-      collection_method: 
-      coupon: 
-      default_payment_method: 
+      application_fee_percent:
+      billing_cycle_anchor:
+      billing_thresholds:
+      collection_method:
+      coupon:
+      default_payment_method:
       default_tax_rates: []
       end_date: 1634688838
-      invoice_settings: 
+      invoice_settings:
       items:
-      - billing_thresholds: 
+      - billing_thresholds:
         price: price_1HbxcwIigeqZG9Am37aJKWtR
         quantity: 1
         tax_rates: []
       proration_behavior: create_prorations
       start_date: 1603239238
-      transfer_data: 
-      trial_end: 
+      transfer_data:
+      trial_end:
     released_at: 1234567890
-    released_subscription: 
+    released_subscription:
     status: not_started
-    subscription: 
+    subscription:
   tax_id:
     country: DE
     created: 1234567890
@@ -2142,8 +2143,8 @@ resources:
     value: DE123456789
     verification:
       status: pending
-      verified_address: 
-      verified_name: 
+      verified_address:
+      verified_name:
   tax_rate:
     active: true
     created: 1234567890
@@ -2164,22 +2165,22 @@ resources:
       city: San Francisco
       country: US
       line1: 1234 Fake Street
-      line2: 
+      line2:
       postal_code: '94102'
-      state: 
+      state:
     display_name: My First Store
     id: tml_7qoh7J7i76DLzJo3yoTQHUxO
     livemode: false
     metadata: {}
     object: terminal.location
   terminal.reader:
-    device_sw_version: 
+    device_sw_version:
     device_type: verifone_P400
     id: tmr_P400-123-456-789
     ip_address: 192.168.2.2
     label: Blue Rabbit
     livemode: false
-    location: 
+    location:
     metadata: {}
     object: terminal.reader
     serial_number: 123-456-789
@@ -2188,19 +2189,19 @@ resources:
     amount: 1500
     authenticated: false
     card:
-      address_city: 
-      address_country: 
-      address_line1: 
-      address_line1_check: 
-      address_line2: 
-      address_state: 
-      address_zip: 
-      address_zip_check: 
+      address_city:
+      address_country:
+      address_line1:
+      address_line1_check:
+      address_line2:
+      address_state:
+      address_zip:
+      address_zip_check:
       brand: Visa
       country: US
-      customer: 
+      customer:
       cvc_check: pass
-      dynamic_last4: 
+      dynamic_last4:
       exp_month: 8
       exp_year: 2021
       fingerprint: jMcXpDDw2Zj0qZTv
@@ -2208,9 +2209,9 @@ resources:
       id: card_1HbxcuIigeqZG9AmY1dydbsX
       last4: '4242'
       metadata: {}
-      name: 
+      name:
       object: card
-      tokenization_method: 
+      tokenization_method:
     created: 1234567890
     currency: usd
     id: tdsrc_1HbxczIigeqZG9Am8p1A9qkO
@@ -2220,18 +2221,18 @@ resources:
     status: redirect_pending
   token:
     card:
-      address_city: 
-      address_country: 
-      address_line1: 
-      address_line1_check: 
-      address_line2: 
-      address_state: 
-      address_zip: 
-      address_zip_check: 
+      address_city:
+      address_country:
+      address_line1:
+      address_line1_check:
+      address_line2:
+      address_state:
+      address_zip:
+      address_zip_check:
       brand: Visa
       country: US
       cvc_check: pass
-      dynamic_last4: 
+      dynamic_last4:
       exp_month: 8
       exp_year: 2021
       fingerprint: jMcXpDDw2Zj0qZTv
@@ -2239,10 +2240,10 @@ resources:
       id: card_1HbxcxIigeqZG9AmGDT01SNX
       last4: '4242'
       metadata: {}
-      name: 
+      name:
       object: card
-      tokenization_method: 
-    client_ip: 
+      tokenization_method:
+    client_ip:
     created: 1234567890
     id: tok_1HbxcxIigeqZG9Amm4px3QOh
     livemode: false
@@ -2251,13 +2252,13 @@ resources:
     used: false
   topup:
     amount: 1000
-    balance_transaction: 
+    balance_transaction:
     created: 1234567890
     currency: usd
     description: Top-up description
     expected_availability_date: 123456789
-    failure_code: 
-    failure_message: 
+    failure_code:
+    failure_message:
     id: tu_1HbxcyIigeqZG9AmC53QSEpD
     livemode: false
     metadata:
@@ -2271,7 +2272,7 @@ resources:
         last4: '6789'
         routing_number: '110000000'
         type: individual
-      amount: 
+      amount:
       client_secret: src_client_secret_Gwnhmjsk95SyoLWV5Njd99I8
       created: 1602634440
       currency: usd
@@ -2281,28 +2282,28 @@ resources:
       metadata: {}
       object: source
       owner:
-        address: 
+        address:
         email: jenny.rosen@example.com
         name: Jenny Rosen
-        phone: 
-        verified_address: 
-        verified_email: 
-        verified_name: 
-        verified_phone: 
-      statement_descriptor: 
+        phone:
+        verified_address:
+        verified_email:
+        verified_name:
+        verified_phone:
+      statement_descriptor:
       status: pending
       type: ach_debit
       usage: reusable
-    statement_descriptor: 
+    statement_descriptor:
     status: pending
-    transfer_group: 
+    transfer_group:
   transfer:
     amount: 1100
     amount_reversed: 0
     balance_transaction: txn_1HbxcuIigeqZG9Am2p6S3dx9
     created: 1234567890
     currency: usd
-    description: 
+    description:
     destination: acct_1HbxcnIigeqZG9Am
     destination_payment: py_ICMLMO9vqZBAyh
     id: tr_1HbxcxIigeqZG9Amu8Cd6vuN
@@ -2315,19 +2316,19 @@ resources:
       object: list
       url: "/v1/transfers/tr_1HbxcxIigeqZG9Amu8Cd6vuN/reversals"
     reversed: false
-    source_transaction: 
+    source_transaction:
     source_type: card
-    transfer_group: 
+    transfer_group:
   transfer_reversal:
     amount: 1100
-    balance_transaction: 
+    balance_transaction:
     created: 1234567890
     currency: usd
-    destination_payment_refund: 
+    destination_payment_refund:
     id: trr_1HbxcxIigeqZG9AmGm5Nelq9
     metadata: {}
     object: transfer_reversal
-    source_refund: 
+    source_refund:
     transfer: tr_1HbxcxIigeqZG9Amu8Cd6vuN
   usage_record:
     id: mbur_1HbxcxIigeqZG9Am4rtUpP87
@@ -2347,8 +2348,8 @@ resources:
     subscription_item: si_ICMLPcWcr3mBrL
     total_usage: 123
   webhook_endpoint:
-    api_version: 
-    application: 
+    api_version:
+    application:
     created: 1234567890
     description: This is my webhook, I like it a lot
     enabled_events:

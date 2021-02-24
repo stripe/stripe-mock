@@ -329,6 +329,7 @@
       "application": null,
       "application_fee": null,
       "application_fee_amount": null,
+      "authorization_code": "123456",
       "balance_transaction": "txn_1HbxcuIigeqZG9Am2p6S3dx9",
       "billing_details": {
         "address": {
@@ -1754,7 +1755,7 @@
       "payment_method_options": {
       },
       "payment_method_types": [
-        "card" 
+        "card"
       ],
       "receipt_email": null,
       "review": null,

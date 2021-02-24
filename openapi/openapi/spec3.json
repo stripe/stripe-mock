@@ -2694,6 +2694,12 @@
             "nullable": true,
             "type": "integer"
           },
+          "authorization_code": {
+            "description": "Identifier for this transaction.",
+            "maxLength": 5000,
+            "nullable": true,
+            "type": "string"
+          },
           "balance_transaction": {
             "anyOf": [
               {
