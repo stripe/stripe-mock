@@ -531,6 +531,7 @@ var hasPrimaryIDSuffixes = [...]string{
 	"/send",
 	"/submit",
 	"/verify",
+	"/verify_microdeposits",
 	"/void",
 }
 
