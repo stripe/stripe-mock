@@ -400,6 +400,13 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 }
 
+func TestStubServer_BinaryResponse(t *testing.T) {
+	resp, body := sendRequest(t, "GET", "/v1/quotes/qt_123/pdf",
+		"", getDefaultHeaders(), nil)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "Stripe binary response", string(body[:]))
+}
+
 func TestGetValidator(t *testing.T) {
 	operation := &spec.Operation{RequestBody: &spec.RequestBody{
 		Content: map[string]spec.MediaType{

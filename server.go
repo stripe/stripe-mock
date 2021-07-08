@@ -214,9 +214,15 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			createInternalServerError())
 		return
 	}
-	responseContent, ok := response.Content["application/json"]
-	if !ok || responseContent.Schema == nil {
-		fmt.Printf("Couldn't find application/json in response\n")
+
+	var responseContent spec.MediaType
+
+	if jsonResponseContent, ok := response.Content["application/json"]; ok && jsonResponseContent.Schema != nil {
+		responseContent = jsonResponseContent
+	} else if pdfResponseContent, ok := response.Content["application/pdf"]; ok && pdfResponseContent.Schema != nil {
+		responseContent = pdfResponseContent
+	} else {
+		fmt.Printf("Couldn't find application/json or application/pdf in response\n")
 		writeResponse(w, r, start, http.StatusInternalServerError,
 			createInternalServerError())
 		return
@@ -806,7 +812,9 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	var encodedData []byte
 	var err error
 
-	if !isCurl(r.Header.Get("User-Agent")) {
+	if dataString, ok := data.(string); ok {
+		encodedData = []byte(dataString)
+	} else if !isCurl(r.Header.Get("User-Agent")) {
 		encodedData, err = json.Marshal(&data)
 	} else {
 		encodedData, err = json.MarshalIndent(&data, "", "  ")

@@ -18,6 +18,7 @@ var chargeCreateMethod *spec.Operation
 var chargeGetMethod *spec.Operation
 var customerDeleteMethod *spec.Operation
 var invoicePayMethod *spec.Operation
+var quotePdfMethod *spec.Operation
 
 // Try to avoid using the real spec as much as possible because it's more
 // complicated and slower. A test spec is provided below. If you do use it,
@@ -144,6 +145,31 @@ func initTestSpec() {
 		},
 	}
 
+	quotePdfMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": {
+					Schema: &spec.Schema{
+						AdditionalProperties: false,
+						Type:                 spec.TypeObject,
+					},
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/pdf": {
+						Schema: &spec.Schema{
+							Format: "binary",
+							Type:   "string",
+						},
+					},
+				},
+			},
+		},
+	}
+
 	// Here so we can test the relatively rare "action" operations (e.g.,
 	// `POST` to `/pay` on an invoice).
 	invoicePayMethod = &spec.Operation{}
@@ -223,6 +249,9 @@ func initTestSpec() {
 			},
 			spec.Path("/v1/invoices/{id}/pay"): {
 				"post": invoicePayMethod,
+			},
+			spec.Path("/v1/quotes/{quote}/pdf"): {
+				"get": quotePdfMethod,
 			},
 		},
 	}
