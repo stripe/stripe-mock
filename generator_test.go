@@ -409,6 +409,21 @@ func TestGenerateResponseData(t *testing.T) {
 		_, ok := data.(map[string]interface{})["deleted"]
 		assert.True(t, ok)
 	}
+
+	// binary schema
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestMethod: http.MethodGet,
+			Schema: &spec.Schema{
+				Format: "binary",
+				Type:   "string",
+			}})
+
+		assert.Nil(t, err)
+		assert.Equal(t, data, "Stripe binary response")
+	}
+
 }
 
 func TestValidFixtures(t *testing.T) {
@@ -431,11 +446,21 @@ func TestValidFixtures(t *testing.T) {
 func TestResourcesCanBeGenerated(t *testing.T) {
 	for url, operations := range realSpec.Paths {
 		for method, operation := range operations {
-			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Run(
-				fmt.Sprintf("%s %s (without expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, url, schema, false) },
-			)
+			response := operation.Responses[spec.StatusCode("200")]
+
+			if jsonMediaType, ok := response.Content["application/json"]; ok {
+				t.Run(
+					fmt.Sprintf("%s %s (without expansions)", method, url),
+					func(t2 *testing.T) { testCanGenerate(t2, url, jsonMediaType.Schema, false) },
+				)
+			} else if pdfMediaType, ok := response.Content["application/pdf"]; ok {
+				t.Run(
+					fmt.Sprintf("%s %s PDF", method, url),
+					func(t2 *testing.T) { testCanGeneratePdf(t2, url, pdfMediaType.Schema) },
+				)
+			} else {
+				t.Errorf("%s %s does not have a supported content type. Content types: %s", method, url, response.Content)
+			}
 		}
 	}
 }
@@ -445,11 +470,17 @@ func TestResourcesCanBeGeneratedAndExpanded(t *testing.T) {
 		"expandable subresources.")
 	for url, operations := range realSpec.Paths {
 		for method, operation := range operations {
-			schema := operation.Responses[spec.StatusCode("200")].Content["application/json"].Schema
-			t.Run(
-				fmt.Sprintf("%s %s (with expansions)", method, url),
-				func(t2 *testing.T) { testCanGenerate(t2, url, schema, true) },
-			)
+			response := operation.Responses[spec.StatusCode("200")]
+			if jsonMediaType, ok := response.Content["application/json"]; ok {
+				t.Run(
+					fmt.Sprintf("%s %s (with expansions)", method, url),
+					func(t2 *testing.T) { testCanGenerate(t2, url, jsonMediaType.Schema, true) },
+				)
+			} else if _, ok := response.Content["application/pdf"]; ok {
+				// Do nothing for PDFs as expansion doesn't mean anything.
+			} else {
+				t.Errorf("%s %s does not have a supported content type. Content types: %s", method, url, response.Content)
+			}
 		}
 	}
 }
@@ -901,4 +932,26 @@ func testCanGenerate(t *testing.T, path spec.Path, schema *spec.Schema, expand b
 		t.Logf("Example is: %s", exampleJSON)
 	}
 	assert.NoError(t, err)
+}
+
+func testCanGeneratePdf(t *testing.T, path spec.Path, schema *spec.Schema) {
+	assert.NotNil(t, schema)
+
+	generator := DataGenerator{
+		definitions: realSpec.Components.Schemas,
+		fixtures:    &realFixtures,
+	}
+
+	var example interface{}
+	var err error
+	assert.NotPanics(t, func() {
+		example, err = generator.Generate(&GenerateParams{
+			Expansions:  nil,
+			RequestPath: string(path),
+			Schema:      schema,
+		})
+	})
+	assert.NoError(t, err)
+
+	assert.NotNil(t, example)
 }

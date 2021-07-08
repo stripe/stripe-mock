@@ -116,6 +116,12 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		return nil, err
 	}
 
+	// Binary resources don't return JSON, so perform no mutations and just
+	// return the data as is.
+	if isBinaryResource(params.Schema) {
+		return data, nil
+	}
+
 	// Maybe generate a new primary ID. This kicks in when no primary ID was
 	// extracted from the path, which usually means this is a "create" API
 	// endpoint. This nicety allows create endpoints to return a new ID every
@@ -284,6 +290,10 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 			example: example,
 		})
 		return listData, err
+	}
+
+	if isBinaryResource(schema) {
+		return "Stripe binary response", nil
 	}
 
 	// Generate a synthethic schema as a last ditch effort
@@ -728,6 +738,10 @@ func isListResource(schema *spec.Schema) bool {
 	}
 
 	return true
+}
+
+func isBinaryResource(schema *spec.Schema) bool {
+	return schema.Format == "binary" && schema.Type == "string"
 }
 
 // isRequiredProperty checks whether the given property name is required for
