@@ -22,7 +22,8 @@ after_success:
 deploy:
 - provider: script
   skip_cleanup: true
-  script: curl -sL https://git.io/goreleaser | bash -s -- --rm-dist
+  # script: curl -sL https://git.io/goreleaser | bash -s -- --rm-dist
+  script: echo "releases are disabled on travis for now, migrating to GHA..."
   verbose: true
   on:
     tags: true
