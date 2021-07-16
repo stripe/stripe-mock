@@ -1,7 +1,9 @@
-project_name: stripe-mock
+project_name: richardm-stripe-mock
 
 before:
   hooks:
+    - go install golang.org/x/lint/golint@latest
+    - go install github.com/go-bindata/go-bindata/...@latest
     - go generate
 
 builds:
@@ -25,9 +27,9 @@ archives:
 
 brews:
   - tap:
-      owner: stripe
+      owner: richardm-stripe
       name: homebrew-stripe-mock
-    homepage: "https://github.com/stripe/stripe-mock"
+    homepage: "https://github.com/richardm-stripe/stripe-mock"
     description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
     commit_author:
       name: stripe-ci
@@ -63,19 +65,3 @@ brews:
           <string>#{var}/log/stripe-mock.log</string>
         </dict>
       </plist>
-
-nfpms:
-  - vendor: Stripe
-    homepage:  https://stripe.com
-    maintainer: Stripe <support@stripe.com>
-    license: MIT
-    formats:
-    - deb
-    - rpm
-
-dockers:
-  - binaries:
-    - stripe-mock
-    image_templates:
-    - "stripemock/stripe-mock:latest"
-    - "stripemock/stripe-mock:{{ .Tag }}"
