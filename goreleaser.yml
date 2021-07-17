@@ -4,13 +4,12 @@ before:
   hooks:
     - go get -u golang.org/x/lint/golint
     - go get -u github.com/jteeuwen/go-bindata/...
-    - go generate
+    - GO111MODULE=off go generate
 
 builds:
   - binary: stripe-mock
     env:
       - CGO_ENABLED=0
-      - GO111MODULE=off
     goos:
       - windows
       - darwin
