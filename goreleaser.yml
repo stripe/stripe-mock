@@ -10,6 +10,7 @@ builds:
   - binary: stripe-mock
     env:
       - CGO_ENABLED=0
+      - GO111MODULE=off
     goos:
       - windows
       - darwin
