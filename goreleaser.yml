@@ -4,7 +4,7 @@ before:
   hooks:
     - go get -u golang.org/x/lint/golint
     - go get -u github.com/jteeuwen/go-bindata/...
-    - GO111MODULE=off go generate
+    - bash -c "GO111MODULE=off go generate"
 
 builds:
   - binary: stripe-mock
