@@ -13,6 +13,7 @@ import (
 )
 
 var listSchema *spec.Schema
+var searchResultSchema *spec.Schema
 
 func init() {
 	listSchema = &spec.Schema{
@@ -35,6 +36,30 @@ func init() {
 			"url": {
 				Type:    "string",
 				Pattern: "^/v1/charges",
+			},
+		},
+	}
+
+	searchResultSchema = &spec.Schema{
+		Type: "object",
+		Properties: map[string]*spec.Schema{
+			"data": {
+				Items: &spec.Schema{
+					Ref: "#/components/schemas/charge",
+				},
+			},
+			"has_more": {
+				Type: "boolean",
+			},
+			"object": {
+				Enum: []interface{}{"search_result"},
+			},
+			"total_count": {
+				Type: "integer",
+			},
+			"url": {
+				Type:    "string",
+				Pattern: "^/v1/search/charges",
 			},
 		},
 	}
@@ -191,6 +216,21 @@ func TestGenerateResponseData(t *testing.T) {
 		assert.Equal(t,
 			testFixtures.Resources["charge"].(map[string]interface{})["id"],
 			chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
+	}
+
+	// search result
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		data, err := generator.Generate(&GenerateParams{
+			RequestPath: "/v1/search/charges",
+			Schema:      searchResultSchema,
+		})
+		assert.Nil(t, err)
+		assert.Equal(t, "search_result", data.(map[string]interface{})["object"])
+		assert.Equal(t, "/v1/search/charges", data.(map[string]interface{})["url"])
+		assert.Equal(t,
+			testFixtures.Resources["charge"].(map[string]interface{})["id"],
+			data.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
 	}
 
 	// generated primary ID
