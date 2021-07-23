@@ -503,7 +503,7 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 		case "total_count":
 			val = 1
 		case "url":
-			val = g.generateUrlForListableResource(subSchema, params)
+			val = g.generateURLForListableResource(subSchema, params)
 		default:
 			val = nil
 		}
