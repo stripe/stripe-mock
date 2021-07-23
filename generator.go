@@ -451,7 +451,7 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 	return schema, context, nil
 }
 
-func (g *DataGenerator) generateUrlForListableResource(schema *spec.Schema, params *GenerateParams) string {
+func (g *DataGenerator) generateURLForListableResource(schema *spec.Schema, params *GenerateParams) string {
 	var val string
 	if strings.HasPrefix(schema.Pattern, "^") {
 		// Many listable resources have a URL pattern of the form "^/v1/whatevers";
