@@ -292,6 +292,23 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 		return listData, err
 	}
 
+	if isSearchResultResource(schema) {
+		// We special-case search result resources and always fill in the result
+		// with at least one item of data, regardless of what was present in the
+		// example
+		searchResultData, err := g.generateSearchResultResource(&GenerateParams{
+			Expansions:    params.Expansions,
+			PathParams:    nil,
+			RequestMethod: params.RequestMethod,
+			RequestPath:   params.RequestPath,
+			Schema:        schema,
+
+			context: context,
+			example: example,
+		})
+		return searchResultData, err
+	}
+
 	if isBinaryResource(schema) {
 		return "Stripe binary response", nil
 	}
@@ -434,6 +451,22 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 	return schema, context, nil
 }
 
+func (g *DataGenerator) generateURLForListableResource(schema *spec.Schema, params *GenerateParams) string {
+	var val string
+	if strings.HasPrefix(schema.Pattern, "^") {
+		// Many listable resources have a URL pattern of the form "^/v1/whatevers";
+		// we cut off the "^" to leave the URL.
+		val = schema.Pattern[1:]
+	} else if params.example != nil {
+		// If an example was provided, we can assume it has the correct format
+		example := params.example.value.(map[string]interface{})
+		val = example["url"].(string)
+	} else {
+		val = params.RequestPath
+	}
+	return val
+}
+
 func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{}, error) {
 	var itemExpansions *ExpansionLevel
 	if params.Expansions != nil {
@@ -470,23 +503,61 @@ func (g *DataGenerator) generateListResource(params *GenerateParams) (interface{
 		case "total_count":
 			val = 1
 		case "url":
-			if strings.HasPrefix(subSchema.Pattern, "^") {
-				// Many list resources have a URL pattern of the form "^/v1/whatevers";
-				// we cut off the "^" to leave the URL.
-				val = subSchema.Pattern[1:]
-			} else if params.example != nil {
-				// If an example was provided, we can assume it has the correct format
-				example := params.example.value.(map[string]interface{})
-				val = example["url"].(string)
-			} else {
-				val = params.RequestPath
-			}
+			val = g.generateURLForListableResource(subSchema, params)
 		default:
 			val = nil
 		}
 		listData[key] = val
 	}
 	return listData, nil
+}
+
+func (g *DataGenerator) generateSearchResultResource(params *GenerateParams) (interface{}, error) {
+	var itemExpansions *ExpansionLevel
+	if params.Expansions != nil {
+		itemExpansions = params.Expansions.expansions["data"]
+	}
+
+	itemData, err := g.generateInternal(&GenerateParams{
+		Expansions:    itemExpansions,
+		PathParams:    nil,
+		RequestMethod: params.RequestMethod,
+		RequestPath:   params.RequestPath,
+		Schema:        params.Schema.Properties["data"].Items,
+
+		context: fmt.Sprintf("%sPopulating search_result resource:\n", params.context),
+		example: nil,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// This is written to hopefully be a little more forward compatible in that
+	// it respects the search_result properties dictated by the included schema rather
+	// than assuming its own.
+	searchResultData := make(map[string]interface{})
+	for key, subSchema := range params.Schema.Properties {
+		var val interface{}
+		switch key {
+		case "data":
+			val = []interface{}{itemData}
+		case "has_more":
+			val = false
+		case "next_page":
+			// We don't return `next_page` when `has_more` = false.
+			continue
+		case "object":
+			val = "search_result"
+		case "total_count":
+			val = 1
+		case "url":
+			val = g.generateURLForListableResource(subSchema, params)
+		default:
+			val = nil
+		}
+		searchResultData[key] = val
+	}
+	return searchResultData, nil
 }
 
 //
@@ -729,6 +800,24 @@ func isListResource(schema *spec.Schema) bool {
 
 	object, ok := schema.Properties["object"]
 	if !ok || object.Enum == nil || object.Enum[0] != "list" {
+		return false
+	}
+
+	data, ok := schema.Properties["data"]
+	if !ok || data.Items == nil {
+		return false
+	}
+
+	return true
+}
+
+func isSearchResultResource(schema *spec.Schema) bool {
+	if schema.Type != "object" || schema.Properties == nil {
+		return false
+	}
+
+	object, ok := schema.Properties["object"]
+	if !ok || object.Enum == nil || object.Enum[0] != "search_result" {
 		return false
 	}
 
