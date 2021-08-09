@@ -144,7 +144,7 @@ Rebuild it with:
 ``` sh
 # Make sure you have the go-bindata executable (it's not vendored into this
 # repository).
-go get -u github.com/jteeuwen/go-bindata/...
+go get -u github.com/go-bindata/go-bindata/...
 
 # Drop into the openapi/ Git submodule and update it (you may have to commit a
 # change).
@@ -170,7 +170,7 @@ git push origin --tags
 ```
 
 [apiref]: https://stripe.com/docs/api
-[go-bindata]: https://github.com/jteeuwen/go-bindata
+[go-bindata]: https://github.com/go-bindata/go-bindata
 [gomod]: https://golang.org/ref/mod
 [goreleaser]: https://github.com/goreleaser/goreleaser
 [openapi]: https://github.com/stripe/openapi
