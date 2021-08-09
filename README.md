@@ -156,19 +156,7 @@ go generate
 
 ## Dependencies
 
-`vendor` was generated with the help of [dep][dep]. Generally, adding or
-updating a dependency will be done with:
-
-``` sh
-dep ensure
-```
-
-More [day-to-day operations with dep here][depdaily].
-
-Note that there is a patch in the `jsval` dependency to enrich the error
-message for failures on `additionalProperties`. I'm still looking for a better
-solution to this, but for now make sure that a patch like the one in 0b26185 is
-applied to get the test suite passing.
+Dependencies are managed using [go modules][gomod] and require Go 1.11+ with `GO111MODULE=on`.
 
 ## Release
 
@@ -182,9 +170,8 @@ git push origin --tags
 ```
 
 [apiref]: https://stripe.com/docs/api
-[dep]: https://github.com/golang/dep
-[depdaily]: https://golang.github.io/dep/docs/daily-dep.html
 [go-bindata]: https://github.com/jteeuwen/go-bindata
+[gomod]: https://golang.org/ref/mod
 [goreleaser]: https://github.com/goreleaser/goreleaser
 [openapi]: https://github.com/stripe/openapi
 [releases]: https://github.com/stripe/stripe-mock/releases

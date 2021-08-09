@@ -120,7 +120,7 @@ func TestStubServer_ExtraParam(t *testing.T) {
 	assert.True(t, ok)
 	message, ok := errorInfo["message"]
 	assert.True(t, ok)
-	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
+	assert.Contains(t, message, "additional properties are not allowed")
 }
 
 func TestStubServer_QueryParam(t *testing.T) {
@@ -148,7 +148,7 @@ func TestStubServer_QueryExtraParam(t *testing.T) {
 	assert.True(t, ok)
 	message, ok := errorInfo["message"]
 	assert.True(t, ok)
-	assert.Contains(t, message, "additional properties are not allowed: doesntexist")
+	assert.Contains(t, message, "additional properties are not allowed")
 }
 
 func TestStubServer_InvalidAuthorization(t *testing.T) {
