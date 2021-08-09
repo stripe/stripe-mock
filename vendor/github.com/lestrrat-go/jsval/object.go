@@ -2,10 +2,8 @@ package jsval
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"regexp"
-	"strings"
 
 	"github.com/lestrrat-go/pdebug"
 )
@@ -465,12 +463,7 @@ func (o *ObjectConstraint) Validate(v interface{}) (err error) {
 	if len(premain) > 0 {
 		c := o.additionalProperties
 		if c == nil {
-			var additionalNames []string
-			for pname := range premain {
-				additionalNames = append(additionalNames, pname)
-			}
-			return fmt.Errorf(fmt.Sprintf("additional properties are not allowed: %s",
-				strings.Join(additionalNames, ", ")))
+			return errors.New("additional properties are not allowed")
 		}
 
 		for pname := range premain {

@@ -1,0 +1,30 @@
+# github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2
+## explicit
+github.com/davecgh/go-spew/spew
+# github.com/lestrrat-go/jspointer v0.0.0-20181205001929-82fadba7561c
+## explicit
+github.com/lestrrat-go/jspointer
+# github.com/lestrrat-go/jsref v0.0.0-20181205001954-1b590508f37d
+## explicit
+github.com/lestrrat-go/jsref
+github.com/lestrrat-go/jsref/provider
+# github.com/lestrrat-go/jsschema v0.0.0-20181205002244-5c81c58ffcc3
+## explicit
+github.com/lestrrat-go/jsschema
+# github.com/lestrrat-go/jsval v0.0.0-20181205002323-20277e9befc0
+## explicit
+github.com/lestrrat-go/jsval
+github.com/lestrrat-go/jsval/builder
+# github.com/lestrrat-go/pdebug v0.0.0-20180220043849-39f9a71bcabe
+## explicit
+github.com/lestrrat-go/pdebug
+# github.com/lestrrat-go/structinfo v0.0.0-20190212233437-acd51874663b
+## explicit
+github.com/lestrrat-go/structinfo
+# github.com/pkg/errors v0.8.1-0.20170505043639-c605e284fe17
+## explicit
+github.com/pkg/errors
+# github.com/stretchr/testify v0.0.0-20150620232711-089c7181b8c7
+## explicit
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
