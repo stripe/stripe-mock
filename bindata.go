@@ -93,7 +93,7 @@ func certCertPem() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "cert/cert.pem", size: 1671, mode: os.FileMode(444), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "cert/cert.pem", size: 1671, mode: os.FileMode(292), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -113,7 +113,7 @@ func certKeyPem() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "cert/key.pem", size: 3272, mode: os.FileMode(444), modTime: time.Unix(1, 0)}
+	info := bindataFileInfo{name: "cert/key.pem", size: 3272, mode: os.FileMode(292), modTime: time.Unix(1, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

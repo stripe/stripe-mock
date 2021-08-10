@@ -10,7 +10,7 @@ check-gofmt:
 	scripts/check_gofmt.sh
 
 lint:
-	golint
+	staticcheck
 
 test:
 	go test ./...

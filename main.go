@@ -1,5 +1,5 @@
-//go:generate go-bindata -mode 444 -modtime 1 cert/cert.pem cert/key.pem
-//go:generate go-bindata -o server/bindata.go -pkg server -mode 444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
+//go:generate go-bindata -mode 0444 -modtime 1 cert/cert.pem cert/key.pem
+//go:generate go-bindata -o server/bindata.go -pkg server -mode 0444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
 
 package main
 
@@ -338,7 +338,7 @@ func (o *options) getNonSecureHTTPSListener() (net.Listener, error) {
 //
 
 func abort(message string) {
-	fmt.Fprintf(os.Stderr, message)
+	fmt.Fprint(os.Stderr, message)
 	os.Exit(1)
 }
 
