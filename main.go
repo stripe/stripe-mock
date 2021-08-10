@@ -18,6 +18,9 @@ import (
 const defaultPortHTTP = 12111
 const defaultPortHTTPS = 12112
 
+// verbose tracks whether the program is operating in verbose mode
+var verbose bool
+
 // This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
 // as it's run. Versions built from source will always show master.
 var version = "master"
@@ -56,7 +59,7 @@ func main() {
 	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
 	flag.BoolVar(&options.strictVersionCheck, "strict-version-check", false, "Errors if version sent in Stripe-Version doesn't match the one in OpenAPI")
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
-	flag.BoolVar(&server.Verbose, "verbose", false, "Enable verbose mode")
+	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
 
 	flag.Parse()
@@ -87,7 +90,7 @@ func main() {
 		abort(err.Error())
 	}
 
-	stub, err := server.NewStubServer(fixtures, stripeSpec, options.strictVersionCheck)
+	stub, err := server.NewStubServer(fixtures, stripeSpec, options.strictVersionCheck, verbose)
 	if err != nil {
 		abort(fmt.Sprintf("Error initializing router: %v\n", err))
 	}

@@ -19,10 +19,9 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-// Verbose tracks whether the program is operating in verbose mode
-var Verbose bool
-
 // Version set in Stripe-Mock-Version response header
+// This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
+// as it's run. Versions built from source will always show master.
 var Version = "master"
 
 //
@@ -209,14 +208,16 @@ type StubServer struct {
 	routes             map[spec.HTTPVerb][]stubServerRoute
 	spec               *spec.Spec
 	strictVersionCheck bool
+	verbose            bool
 }
 
 // NewStubServer creates a new instance of StubServer
-func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck bool) (*StubServer, error) {
+func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck, verbose bool) (*StubServer, error) {
 	s := StubServer{
 		fixtures:           fixtures,
 		spec:               spec,
 		strictVersionCheck: strictVersionCheck,
+		verbose:            verbose,
 	}
 	err := s.initializeRouter()
 	if err != nil {
@@ -311,7 +312,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if Verbose {
+	if s.verbose {
 		fmt.Printf("IDs extracted from route: %+v\n", pathParams)
 		fmt.Printf("Response schema: %s\n", responseContent.Schema)
 	}
@@ -325,7 +326,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if Verbose {
+	if s.verbose {
 		if requestData != nil {
 			fmt.Printf("Request data: %+v\n", requestData)
 		} else {
@@ -343,11 +344,11 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	expansions, rawExpansions := extractExpansions(requestData)
-	if Verbose {
+	if s.verbose {
 		fmt.Printf("Expansions: %+v\n", rawExpansions)
 	}
 
-	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures}
+	generator := DataGenerator{s.spec.Components.Schemas, s.fixtures, s.verbose}
 	responseData, err := generator.Generate(&GenerateParams{
 		Expansions:    expansions,
 		PathParams:    pathParams,
@@ -362,7 +363,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			createInternalServerError())
 		return
 	}
-	if Verbose {
+	if s.verbose {
 		responseDataJSON, err := json.MarshalIndent(responseData, "", "  ")
 		if err != nil {
 			panic(err)
@@ -386,7 +387,7 @@ func (s *StubServer) initializeRouter() error {
 
 		pathPattern, pathParamNames := compilePath(path)
 
-		if Verbose {
+		if s.verbose {
 			fmt.Printf("Compiled path: %v\n", pathPattern.String())
 		}
 
