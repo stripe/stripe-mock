@@ -3,9 +3,6 @@ package spec
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
 )
 
 //
@@ -47,42 +44,6 @@ type ExpansionResources struct {
 // specification.
 type Fixtures struct {
 	Resources map[ResourceID]interface{} `json:"resources"`
-}
-
-// isJSONFile judges based on a file's extension whether it's a JSON file. It's
-// used to return a better error message if the user points to an unsupported
-// file.
-func isJSONFile(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".json"
-}
-
-//LoadFixtures attempts to loads the given embedded fixture.
-func LoadFixtures(fixturesPath string) (*Fixtures, error) {
-	var data []byte
-	var err error
-
-	if fixturesPath == "" {
-		// And do the same for fixtures
-		data, err = Asset("openapi/openapi/fixtures3.json")
-	} else {
-		if !isJSONFile(fixturesPath) {
-			return nil, fmt.Errorf("Fixtures should come from a JSON file")
-		}
-
-		data, err = ioutil.ReadFile(fixturesPath)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("error loading fixtures: %v", err)
-	}
-
-	var fixtures Fixtures
-	err = json.Unmarshal(data, &fixtures)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding spec: %v", err)
-	}
-
-	return &fixtures, nil
 }
 
 // HTTPVerb is a type for an HTTP verb like GET, POST, etc.
@@ -250,34 +211,6 @@ type Spec struct {
 	Components Components                       `json:"components"`
 	Info       *Info                            `json:"info"`
 	Paths      map[Path]map[HTTPVerb]*Operation `json:"paths"`
-}
-
-//LoadSpec attempts to load the given embedded Spec.
-func LoadSpec(specPath string) (*Spec, error) {
-	var data []byte
-	var err error
-
-	if specPath == "" {
-		// Load the spec information from go-bindata
-		data, err = Asset("openapi/openapi/spec3.json")
-	} else {
-		if !isJSONFile(specPath) {
-			return nil, fmt.Errorf("spec should come from a JSON file")
-		}
-
-		data, err = ioutil.ReadFile(specPath)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error loading spec: %v", err)
-	}
-
-	var stripeSpec Spec
-	err = json.Unmarshal(data, &stripeSpec)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding spec: %v", err)
-	}
-
-	return &stripeSpec, nil
 }
 
 // StatusCode is a type for the response status code of an HTTP operation in an

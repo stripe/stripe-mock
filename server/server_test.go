@@ -15,6 +15,254 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
+const testSpecAPIVersion = "2019-01-01"
+
+var applicationFeeRefundCreateMethod *spec.Operation
+var applicationFeeRefundGetMethod *spec.Operation
+var chargeAllMethod *spec.Operation
+var chargeCreateMethod *spec.Operation
+var chargeGetMethod *spec.Operation
+var customerDeleteMethod *spec.Operation
+var invoicePayMethod *spec.Operation
+var quotePdfMethod *spec.Operation
+
+// Try to avoid using the real spec as much as possible because it's more
+// complicated and slower. A test spec is provided below. If you do use it,
+// don't mutate it.
+var realSpec spec.Spec
+var realFixtures spec.Fixtures
+var realComponentsForValidation *spec.ComponentsForValidation
+
+var testSpec spec.Spec
+var testFixtures spec.Fixtures
+
+func init() {
+	initRealSpec()
+	initTestSpec()
+}
+
+func initRealSpec() {
+	// Load the spec information from go-bindata
+	data, err := Asset("openapi/openapi/spec3.json")
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(data, &realSpec)
+	if err != nil {
+		panic(err)
+	}
+
+	realComponentsForValidation =
+		spec.GetComponentsForValidation(&realSpec.Components)
+
+	// And do the same for fixtures
+	data, err = Asset("openapi/openapi/fixtures3.json")
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(data, &realFixtures)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func initTestSpec() {
+	// These are basically here to give us a URL to test against that has
+	// multiple parameters in it.
+	applicationFeeRefundCreateMethod = &spec.Operation{}
+	applicationFeeRefundGetMethod = &spec.Operation{}
+
+	chargeAllMethod = &spec.Operation{
+		Parameters: []*spec.Parameter{
+			{
+				In:       spec.ParameterQuery,
+				Name:     "limit",
+				Required: false,
+				Schema: &spec.Schema{
+					Type: spec.TypeInteger,
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/json": {
+						Schema: &spec.Schema{
+							Type: spec.TypeObject,
+						},
+					},
+				},
+			},
+		},
+	}
+	chargeCreateMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": {
+					Schema: &spec.Schema{
+						AdditionalProperties: false,
+						Properties: map[string]*spec.Schema{
+							"amount": {
+								Type: spec.TypeInteger,
+							},
+						},
+						Required: []string{"amount"},
+					},
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/json": {
+						Schema: &spec.Schema{
+							Ref: "#/components/schemas/charge",
+						},
+					},
+				},
+			},
+		},
+	}
+	chargeGetMethod = &spec.Operation{}
+
+	customerDeleteMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": {
+					Schema: &spec.Schema{
+						AdditionalProperties: false,
+						Type:                 spec.TypeObject,
+					},
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/json": {
+						Schema: &spec.Schema{
+							Ref: "#/components/schemas/deleted_customer",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	quotePdfMethod = &spec.Operation{
+		RequestBody: &spec.RequestBody{
+			Content: map[string]spec.MediaType{
+				"application/x-www-form-urlencoded": {
+					Schema: &spec.Schema{
+						AdditionalProperties: false,
+						Type:                 spec.TypeObject,
+					},
+				},
+			},
+		},
+		Responses: map[spec.StatusCode]spec.Response{
+			"200": {
+				Content: map[string]spec.MediaType{
+					"application/pdf": {
+						Schema: &spec.Schema{
+							Format: "binary",
+							Type:   "string",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Here so we can test the relatively rare "action" operations (e.g.,
+	// `POST` to `/pay` on an invoice).
+	invoicePayMethod = &spec.Operation{}
+
+	testFixtures =
+		spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					"customer": "cus_123",
+					"id":       "ch_123",
+				},
+				spec.ResourceID("customer"): map[string]interface{}{
+					"id": "cus_123",
+				},
+				spec.ResourceID("deleted_customer"): map[string]interface{}{
+					"deleted": true,
+				},
+			},
+		}
+
+	testSpec = spec.Spec{
+		Info: &spec.Info{
+			Version: testSpecAPIVersion,
+		},
+		Components: spec.Components{
+			Schemas: map[string]*spec.Schema{
+				"charge": {
+					Type: "object",
+					Properties: map[string]*spec.Schema{
+						"id": {Type: "string"},
+						// Normally a customer ID, but expandable to a full
+						// customer resource
+						"customer": {
+							AnyOf: []*spec.Schema{
+								{Type: "string"},
+								{Ref: "#/components/schemas/customer"},
+							},
+							XExpansionResources: &spec.ExpansionResources{
+								OneOf: []*spec.Schema{
+									{Ref: "#/components/schemas/customer"},
+								},
+							},
+						},
+					},
+					XExpandableFields: &[]string{"customer"},
+					XResourceID:       "charge",
+				},
+				"customer": {
+					Type:        "object",
+					XResourceID: "customer",
+				},
+				"deleted_customer": {
+					Properties: map[string]*spec.Schema{
+						"deleted": {Type: "boolean"},
+					},
+					Type:        "object",
+					XResourceID: "deleted_customer",
+				},
+			},
+		},
+		Paths: map[spec.Path]map[spec.HTTPVerb]*spec.Operation{
+			spec.Path("/v1/application_fees/{fee}/refunds"): {
+				"get": applicationFeeRefundCreateMethod,
+			},
+			spec.Path("/v1/application_fees/{fee}/refunds/{id}"): {
+				"get": applicationFeeRefundGetMethod,
+			},
+			spec.Path("/v1/charges"): {
+				"get":  chargeAllMethod,
+				"post": chargeCreateMethod,
+			},
+			spec.Path("/v1/charges/{id}"): {
+				"get": chargeGetMethod,
+			},
+			spec.Path("/v1/customers/{id}"): {
+				"delete": customerDeleteMethod,
+			},
+			spec.Path("/v1/invoices/{id}/pay"): {
+				"post": invoicePayMethod,
+			},
+			spec.Path("/v1/quotes/{quote}/pdf"): {
+				"get": quotePdfMethod,
+			},
+		},
+	}
+}
+
 //
 // Tests
 //
@@ -191,7 +439,7 @@ func TestStubServer_InvalidStripeVersion(t *testing.T) {
 		message, ok := errorInfo["message"]
 		assert.True(t, ok)
 		assert.Equal(t,
-			fmt.Sprintf(invalidStripeVersion, testBadVersion, spec.TestAPIVersion),
+			fmt.Sprintf(invalidStripeVersion, testBadVersion, testSpecAPIVersion),
 			message)
 	}
 
@@ -304,7 +552,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	server := getStubServer(t, nil)
 
 	{
-		chargeAllMethod := testSpec.Paths[spec.Path("/v1/charges")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges"}})
 		assert.NoError(t, err)
@@ -314,7 +561,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
-		chargeCreateMethod := testSpec.Paths[spec.Path("/v1/charges")]["post"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST", URL: &url.URL{Path: "/v1/charges"}})
 		assert.NoError(t, err)
@@ -324,7 +570,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
-		chargeGetMethod := testSpec.Paths[spec.Path("/v1/charges/{id}")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET", URL: &url.URL{Path: "/v1/charges/ch_123"}})
 		assert.NoError(t, err)
@@ -335,7 +580,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 
 	{
-		customerDeleteMethod := testSpec.Paths[spec.Path("/v1/customers/{id}")]["delete"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "DELETE", URL: &url.URL{Path: "/v1/customers/cus_123"}})
 		assert.NoError(t, err)
@@ -355,7 +599,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with a parameter, but not an object's primary ID
 	{
-		invoicePayMethod := testSpec.Paths[spec.Path("/v1/invoices/{id}/pay")]["post"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "POST",
 				URL: &url.URL{Path: "/v1/invoices/in_123/pay"}})
@@ -368,7 +611,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with a parameter, but not an object's primary ID
 	{
-		invoicePayMethod := testSpec.Paths[spec.Path("/v1/application_fees/{fee}/refunds")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds"}})
@@ -383,7 +625,6 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 
 	// Route with multiple parameters in its URL
 	{
-		applicationFeeRefundGetMethod := testSpec.Paths[spec.Path("/v1/application_fees/{fee}/refunds/{id}")]["get"]
 		route, pathParams, err := server.routeRequest(
 			&http.Request{Method: "GET",
 				URL: &url.URL{Path: "/v1/application_fees/fee_123/refunds/fr_123"}})

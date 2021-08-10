@@ -5,34 +5,7 @@ import (
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-mock/spec"
 )
-
-// Try to avoid using the real spec as much as possible because it's more
-// complicated and slower. A test spec is provided below. If you do use it,
-// don't mutate it.
-var realSpec spec.Spec
-var realFixtures spec.Fixtures
-var realComponentsForValidation *spec.ComponentsForValidation
-
-var testSpec, _ = spec.Test()
-
-func init() {
-	s, err := spec.LoadSpec("")
-	if err != nil {
-		panic(err)
-	}
-	realSpec = *s
-
-	realComponentsForValidation =
-		spec.GetComponentsForValidation(&realSpec.Components)
-
-	f, err := spec.LoadFixtures("")
-	if err != nil {
-		panic(err)
-	}
-	realFixtures = *f
-}
 
 func getDefaultOptions() *options {
 	return &options{

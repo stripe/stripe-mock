@@ -4,8 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -17,11 +19,11 @@ import (
 	"github.com/stripe/stripe-mock/spec"
 )
 
-//Version of the server is set by the main package.
-var Version = "embedded"
-
-//Verbose sets the server to run in verbose mode.
+// Verbose tracks whether the program is operating in verbose mode
 var Verbose bool
+
+// Version set in Stripe-Mock-Version response header
+var Version = "master"
 
 //
 // Public types
@@ -139,29 +141,88 @@ type ResponseError struct {
 	} `json:"error"`
 }
 
+// LoadFixtures load fixtures from a JSON file
+//
+// If path is empty, fixtures are loaded from internal embedded assets.
+func LoadFixtures(fixturesPath string) (*spec.Fixtures, error) {
+	var data []byte
+	var err error
+
+	if fixturesPath == "" {
+		// And do the same for fixtures
+		data, err = Asset("openapi/openapi/fixtures3.json")
+	} else {
+		if !isJSONFile(fixturesPath) {
+			return nil, fmt.Errorf("Fixtures should come from a JSON file")
+		}
+
+		data, err = ioutil.ReadFile(fixturesPath)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error loading fixtures: %v", err)
+	}
+
+	var fixtures spec.Fixtures
+	err = json.Unmarshal(data, &fixtures)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding spec: %v", err)
+	}
+
+	return &fixtures, nil
+}
+
+// LoadSpec loads OpenAPI spec from a JSON file
+//
+// If path is empty, the spec is loaded from internal embedded assets.
+func LoadSpec(specPath string) (*spec.Spec, error) {
+	var data []byte
+	var err error
+
+	if specPath == "" {
+		// Load the spec information from go-bindata
+		data, err = Asset("openapi/openapi/spec3.json")
+	} else {
+		if !isJSONFile(specPath) {
+			return nil, fmt.Errorf("spec should come from a JSON file")
+		}
+
+		data, err = ioutil.ReadFile(specPath)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error loading spec: %v", err)
+	}
+
+	var stripeSpec spec.Spec
+	err = json.Unmarshal(data, &stripeSpec)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding spec: %v", err)
+	}
+
+	return &stripeSpec, nil
+}
+
 // StubServer handles incoming HTTP requests and responds to them appropriately
 // based off the set of OpenAPI routes that it's been configured with.
 type StubServer struct {
 	fixtures           *spec.Fixtures
+	routes             map[spec.HTTPVerb][]stubServerRoute
 	spec               *spec.Spec
 	strictVersionCheck bool
-
-	routes map[spec.HTTPVerb][]stubServerRoute
 }
 
-//NewStubServer creates a new StubServer from the given spec values.
+// NewStubServer creates a new instance of StubServer
 func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck bool) (*StubServer, error) {
-	stub := StubServer{
+	s := StubServer{
 		fixtures:           fixtures,
 		spec:               spec,
 		strictVersionCheck: strictVersionCheck,
 	}
-
-	if err := stub.initializeRouter(); err != nil {
+	err := s.initializeRouter()
+	if err != nil {
 		return nil, err
 	}
-
-	return &stub, nil
+	return &s, nil
 }
 
 // HandleRequest handes an HTTP request directed at the API stub.
@@ -857,4 +918,11 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 		fmt.Printf("Error writing to client: %v\n", err)
 	}
 	fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
+}
+
+// isJSONFile judges based on a file's extension whether it's a JSON file. It's
+// used to return a better error message if the user points to an unsupported
+// file.
+func isJSONFile(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".json"
 }

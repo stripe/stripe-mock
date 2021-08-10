@@ -1,5 +1,5 @@
-//go:generate go-bindata -o spec/bindata.go -pkg spec -mode 444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
 //go:generate go-bindata -mode 444 -modtime 1 cert/cert.pem cert/key.pem
+//go:generate go-bindata -o server/bindata.go -pkg server -mode 444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
 
 package main
 
@@ -13,7 +13,6 @@ import (
 	"strconv"
 
 	"github.com/stripe/stripe-mock/server"
-	"github.com/stripe/stripe-mock/spec"
 )
 
 const defaultPortHTTP = 12111
@@ -73,20 +72,20 @@ func main() {
 		abort(fmt.Sprintf("Invalid options: %v", err))
 	}
 
+	server.Version = version
+
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := spec.LoadSpec(options.specPath)
+	stripeSpec, err := server.LoadSpec(options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := spec.LoadFixtures(options.fixturesPath)
+	fixtures, err := server.LoadFixtures(options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
-
-	server.Version = version
 
 	stub, err := server.NewStubServer(fixtures, stripeSpec, options.strictVersionCheck)
 	if err != nil {
