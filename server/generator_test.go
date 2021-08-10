@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -14,6 +14,7 @@ import (
 
 var listSchema *spec.Schema
 var searchResultSchema *spec.Schema
+var verbose bool
 
 func init() {
 	listSchema = &spec.Schema{
@@ -74,7 +75,7 @@ func TestConcurrentAccess(t *testing.T) {
 
 	// We use the real spec here because when there was a concurrency problem,
 	// it wasn't revealed due to the test spec being oversimplistic.
-	generator = DataGenerator{realSpec.Components.Schemas, &realFixtures}
+	generator = DataGenerator{realSpec.Components.Schemas, &realFixtures, verbose}
 
 	var wg sync.WaitGroup
 
@@ -95,7 +96,7 @@ func TestConcurrentAccess(t *testing.T) {
 func TestGenerateResponseData(t *testing.T) {
 	// basic reference
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			Schema: &spec.Schema{Ref: "#/components/schemas/charge"},
 		})
@@ -112,7 +113,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// expansion
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			Expansions: &ExpansionLevel{
 				expansions: map[string]*ExpansionLevel{"customer": {
@@ -130,7 +131,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// bad expansion
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		_, err := generator.Generate(&GenerateParams{
 			Expansions: &ExpansionLevel{
 				expansions: map[string]*ExpansionLevel{"id": {
@@ -145,7 +146,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// bad nested expansion
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		_, err := generator.Generate(&GenerateParams{
 			Expansions: &ExpansionLevel{
 				expansions: map[string]*ExpansionLevel{"customer.id": {
@@ -159,7 +160,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// wildcard expansion
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			Expansions: &ExpansionLevel{wildcard: true},
 			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
@@ -172,7 +173,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// list
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestPath: "/v1/charges",
 			Schema:      listSchema,
@@ -199,6 +200,7 @@ func TestGenerateResponseData(t *testing.T) {
 					},
 				},
 			},
+			verbose,
 		}
 		data, err := generator.Generate(&GenerateParams{
 			Schema: &spec.Schema{
@@ -220,7 +222,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// search result
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestPath: "/v1/search/charges",
 			Schema:      searchResultSchema,
@@ -241,7 +243,7 @@ func TestGenerateResponseData(t *testing.T) {
 					"id": "ch_123",
 				},
 			},
-		}}
+		}, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			PathParams: &PathParamsMap{},
 			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
@@ -266,7 +268,7 @@ func TestGenerateResponseData(t *testing.T) {
 					"id": "ch_123",
 				},
 			},
-		}}
+		}, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			PathParams: nil,
 			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
@@ -297,7 +299,7 @@ func TestGenerateResponseData(t *testing.T) {
 					"id": "ch_123",
 				},
 			},
-		}}
+		}, verbose}
 		newID := "ch_123_InjectedFromURL"
 		data, err := generator.Generate(&GenerateParams{
 			PathParams: &PathParamsMap{PrimaryID: &newID},
@@ -324,7 +326,7 @@ func TestGenerateResponseData(t *testing.T) {
 					"object": "customer",
 				},
 			},
-		}}
+		}, verbose}
 		newCustomerID := "cus_123_InjectedFromURL"
 		data, err := generator.Generate(&GenerateParams{
 			Expansions: &ExpansionLevel{
@@ -357,7 +359,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// data replacement on `POST`
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestData: map[string]interface{}{
 				"customer": "cus_9999",
@@ -373,7 +375,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// *no* data replacement on non-`POST`
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestData: map[string]interface{}{
 				"customer": "cus_9999",
@@ -389,7 +391,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// synthetic schema
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			Schema: &spec.Schema{
 				Properties: map[string]*spec.Schema{
@@ -413,7 +415,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// pick non-deleted anyOf branch
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			// Just needs to be any HTTP method that's not DELETE
 			RequestMethod: http.MethodPost,
@@ -433,7 +435,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// pick deleted anyOf branch
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestMethod: http.MethodDelete,
 			Schema: &spec.Schema{AnyOf: []*spec.Schema{
@@ -452,7 +454,7 @@ func TestGenerateResponseData(t *testing.T) {
 
 	// binary schema
 	{
-		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures}
+		generator := DataGenerator{testSpec.Components.Schemas, &testFixtures, verbose}
 		data, err := generator.Generate(&GenerateParams{
 			RequestMethod: http.MethodGet,
 			Schema: &spec.Schema{
@@ -700,7 +702,7 @@ func TestFindAnyOfBranch(t *testing.T) {
 		},
 	}
 
-	generator := DataGenerator{nil, nil}
+	generator := DataGenerator{nil, nil, verbose}
 
 	// Finds a deleted schema branch
 	{
@@ -879,7 +881,7 @@ func TestReplaceIDs(t *testing.T) {
 	}
 
 	// This function modifies structure in place.
-	pathParams = recordAndReplaceIDs(pathParams, data)
+	pathParams = recordAndReplaceIDs(pathParams, data, verbose)
 
 	assert.Equal(t, oldID, *pathParams.replacedPrimaryID)
 

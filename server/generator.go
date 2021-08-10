@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -90,6 +90,7 @@ type GenerateParams struct {
 type DataGenerator struct {
 	definitions map[string]*spec.Schema
 	fixtures    *spec.Fixtures
+	verbose     bool
 }
 
 // Generate generates a fixture response.
@@ -135,7 +136,7 @@ func (g *DataGenerator) Generate(params *GenerateParams) (interface{}, error) {
 		//
 		// Note that the path params are mutated by the function, but we return
 		// them anyway to make the control flow here more clear.
-		pathParams := recordAndReplaceIDs(pathParams, data)
+		pathParams := recordAndReplaceIDs(pathParams, data, g.verbose)
 
 		// Passes through the generated data again to replace the values of any old
 		// IDs that we replaced. This is a separate step because IDs could have
@@ -319,7 +320,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
 
-		if verbose {
+		if g.verbose {
 			// We list properties here because the schema might not have a
 			// better name to identify it with.
 			fmt.Printf("Generated synthetic fixture with properties: %s\n",
@@ -847,7 +848,7 @@ func isRequiredProperty(schema *spec.Schema, name string) bool {
 
 // logReplacedID is just a logging shortcut for replaceIDsInternal so that we
 // can keep its function body more succinct.
-func logReplacedID(prevID, newID string) {
+func logReplacedID(prevID, newID string, verbose bool) {
 	if !verbose {
 		return
 	}
@@ -983,8 +984,8 @@ func randomIDTimePart() string {
 // Returns the same PathParamsMap given to it as a parameter, after some
 // mutation. It's returned to add clarity as to what's happening to its
 // invocation sites.
-func recordAndReplaceIDs(pathParams *PathParamsMap, data interface{}) *PathParamsMap {
-	recordAndReplaceIDsInternal(pathParams, data, nil, 0)
+func recordAndReplaceIDs(pathParams *PathParamsMap, data interface{}, verbose bool) *PathParamsMap {
+	recordAndReplaceIDsInternal(pathParams, data, nil, 0, verbose)
 	return pathParams
 }
 
@@ -992,12 +993,12 @@ func recordAndReplaceIDs(pathParams *PathParamsMap, data interface{}) *PathParam
 // internal interface that tracks a parent key and recursion level. Use
 // recordAndReplaceIDs instead.
 func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
-	parentKey *string, recurseLevel int) {
+	parentKey *string, recurseLevel int, verbose bool) {
 
 	dataSlice, ok := data.([]interface{})
 	if ok {
 		for _, val := range dataSlice {
-			recordAndReplaceIDsInternal(pathParams, val, nil, recurseLevel+1)
+			recordAndReplaceIDsInternal(pathParams, val, nil, recurseLevel+1, verbose)
 		}
 		return
 	}
@@ -1016,7 +1017,7 @@ func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
 				if pathParams.PrimaryID != nil {
 					pathParams.replacedPrimaryID = &strVal
 					dataMap["id"] = *pathParams.PrimaryID
-					logReplacedID(strVal, *pathParams.PrimaryID)
+					logReplacedID(strVal, *pathParams.PrimaryID, verbose)
 				}
 			} else {
 				// After the object's top level, we'll replace an object's ID
@@ -1034,7 +1035,7 @@ func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
 						if objectVal == secondaryID.Name {
 							secondaryID.appendReplacedID(strVal)
 							dataMap["id"] = secondaryID.ID
-							logReplacedID(strVal, secondaryID.ID)
+							logReplacedID(strVal, secondaryID.ID, verbose)
 							break
 						}
 					}
@@ -1044,7 +1045,7 @@ func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
 					if parentKey != nil && *parentKey == secondaryID.Name {
 						secondaryID.appendReplacedID(strVal)
 						dataMap["id"] = secondaryID.ID
-						logReplacedID(strVal, secondaryID.ID)
+						logReplacedID(strVal, secondaryID.ID, verbose)
 						break
 					}
 				}
@@ -1062,12 +1063,12 @@ func recordAndReplaceIDsInternal(pathParams *PathParamsMap, data interface{},
 					if key == secondaryID.Name {
 						secondaryID.appendReplacedID(strVal)
 						dataMap[key] = secondaryID.ID
-						logReplacedID(strVal, secondaryID.ID)
+						logReplacedID(strVal, secondaryID.ID, verbose)
 						break
 					}
 				}
 			} else {
-				recordAndReplaceIDsInternal(pathParams, val, &key, recurseLevel+1)
+				recordAndReplaceIDsInternal(pathParams, val, &key, recurseLevel+1, verbose)
 			}
 		}
 	}
