@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -14,6 +14,32 @@ import (
 
 var listSchema *spec.Schema
 var searchResultSchema *spec.Schema
+
+var testSpec, testFixtures = spec.Test()
+
+// Try to avoid using the real spec as much as possible because it's more
+// complicated and slower. A test spec is provided below. If you do use it,
+// don't mutate it.
+var realSpec spec.Spec
+var realFixtures spec.Fixtures
+var realComponentsForValidation *spec.ComponentsForValidation
+
+func init() {
+	s, err := spec.LoadSpec("")
+	if err != nil {
+		panic(err)
+	}
+	realSpec = *s
+
+	realComponentsForValidation =
+		spec.GetComponentsForValidation(&realSpec.Components)
+
+	f, err := spec.LoadFixtures("")
+	if err != nil {
+		panic(err)
+	}
+	realFixtures = *f
+}
 
 func init() {
 	listSchema = &spec.Schema{

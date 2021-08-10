@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -319,7 +319,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
 
-		if verbose {
+		if Verbose {
 			// We list properties here because the schema might not have a
 			// better name to identify it with.
 			fmt.Printf("Generated synthetic fixture with properties: %s\n",
@@ -848,7 +848,7 @@ func isRequiredProperty(schema *spec.Schema, name string) bool {
 // logReplacedID is just a logging shortcut for replaceIDsInternal so that we
 // can keep its function body more succinct.
 func logReplacedID(prevID, newID string) {
-	if !verbose {
+	if !Verbose {
 		return
 	}
 

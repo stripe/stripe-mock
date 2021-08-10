@@ -1,28 +1,23 @@
-//go:generate go-bindata -mode 444 -modtime 1 cert/cert.pem cert/key.pem openapi/openapi/fixtures3.json openapi/openapi/spec3.json
+//go:generate go-bindata -o spec/bindata.go -pkg spec -mode 444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
+//go:generate go-bindata -mode 444 -modtime 1 cert/cert.pem cert/key.pem
 
 package main
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 
+	"github.com/stripe/stripe-mock/server"
 	"github.com/stripe/stripe-mock/spec"
 )
 
 const defaultPortHTTP = 12111
 const defaultPortHTTPS = 12112
-
-// verbose tracks whether the program is operating in verbose mode
-var verbose bool
 
 // This is set to the actual version by GoReleaser (using `-ldflags "-X ..."`)
 // as it's run. Versions built from source will always show master.
@@ -62,7 +57,7 @@ func main() {
 	flag.StringVar(&options.specPath, "spec", "", "Path to OpenAPI spec to use instead of bundled version (should be JSON)")
 	flag.BoolVar(&options.strictVersionCheck, "strict-version-check", false, "Errors if version sent in Stripe-Version doesn't match the one in OpenAPI")
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
-	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
+	flag.BoolVar(&server.Verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
 
 	flag.Parse()
@@ -81,22 +76,19 @@ func main() {
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := getSpec(options.specPath)
+	stripeSpec, err := spec.LoadSpec(options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := getFixtures(options.fixturesPath)
+	fixtures, err := spec.LoadFixtures(options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	stub := StubServer{
-		fixtures:           fixtures,
-		spec:               stripeSpec,
-		strictVersionCheck: options.strictVersionCheck,
-	}
-	err = stub.initializeRouter()
+	server.Version = version
+
+	stub, err := server.NewStubServer(fixtures, stripeSpec, options.strictVersionCheck)
 	if err != nil {
 		abort(fmt.Sprintf("Error initializing router: %v\n", err))
 	}
@@ -106,7 +98,7 @@ func main() {
 
 	// Deduplicates doubled slashes in paths. e.g. `//v1/charges` becomes
 	// `/v1/charges`.
-	handler := &DoubleSlashFixHandler{httpMux}
+	handler := &server.DoubleSlashFixHandler{Mux: httpMux}
 
 	httpListener, err := options.getHTTPListener()
 	if err != nil {
@@ -364,34 +356,6 @@ func getTLSCertificate() (tls.Certificate, error) {
 	return tls.X509KeyPair(cert, key)
 }
 
-func getFixtures(fixturesPath string) (*spec.Fixtures, error) {
-	var data []byte
-	var err error
-
-	if fixturesPath == "" {
-		// And do the same for fixtures
-		data, err = Asset("openapi/openapi/fixtures3.json")
-	} else {
-		if !isJSONFile(fixturesPath) {
-			return nil, fmt.Errorf("Fixtures should come from a JSON file")
-		}
-
-		data, err = ioutil.ReadFile(fixturesPath)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("error loading fixtures: %v", err)
-	}
-
-	var fixtures spec.Fixtures
-	err = json.Unmarshal(data, &fixtures)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding spec: %v", err)
-	}
-
-	return &fixtures, nil
-}
-
 func getPortListener(addr string, protocol string) (net.Listener, error) {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -417,33 +381,6 @@ func getPortListenerDefault(defaultPort int, protocol string) (net.Listener, err
 	return getPortListener(fmt.Sprintf(":%v", defaultPort), protocol)
 }
 
-func getSpec(specPath string) (*spec.Spec, error) {
-	var data []byte
-	var err error
-
-	if specPath == "" {
-		// Load the spec information from go-bindata
-		data, err = Asset("openapi/openapi/spec3.json")
-	} else {
-		if !isJSONFile(specPath) {
-			return nil, fmt.Errorf("spec should come from a JSON file")
-		}
-
-		data, err = ioutil.ReadFile(specPath)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error loading spec: %v", err)
-	}
-
-	var stripeSpec spec.Spec
-	err = json.Unmarshal(data, &stripeSpec)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding spec: %v", err)
-	}
-
-	return &stripeSpec, nil
-}
-
 func getUnixSocketListener(unixSocket, protocol string) (net.Listener, error) {
 	listener, err := net.Listen("unix", unixSocket)
 	if err != nil {
@@ -452,11 +389,4 @@ func getUnixSocketListener(unixSocket, protocol string) (net.Listener, error) {
 
 	fmt.Printf("Listening for %s on Unix socket: %s\n", protocol, unixSocket)
 	return listener, nil
-}
-
-// isJSONFile judges based on a file's extension whether it's a JSON file. It's
-// used to return a better error message if the user points to an unsupported
-// file.
-func isJSONFile(path string) bool {
-	return strings.ToLower(filepath.Ext(path)) == ".json"
 }
