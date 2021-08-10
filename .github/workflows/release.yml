@@ -12,7 +12,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-      -
         name: Docker Login
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
