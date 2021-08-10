@@ -2,6 +2,8 @@ project_name: stripe-mock
 
 before:
   hooks:
+    - go install golang.org/x/lint/golint@latest
+    - go install github.com/go-bindata/go-bindata/...@latest
     - go generate
 
 builds:
@@ -77,5 +79,5 @@ dockers:
   - binaries:
     - stripe-mock
     image_templates:
-    - "stripemock/stripe-mock:latest"
-    - "stripemock/stripe-mock:{{ .Tag }}"
+    - "stripe/stripe-mock:latest"
+    - "stripe/stripe-mock:{{ .Tag }}"
