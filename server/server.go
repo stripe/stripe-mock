@@ -165,7 +165,7 @@ func LoadFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	var fixtures spec.Fixtures
 	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding spec: %v", err)
+		return nil, fmt.Errorf("error decoding fixtures: %v", err)
 	}
 
 	return &fixtures, nil
