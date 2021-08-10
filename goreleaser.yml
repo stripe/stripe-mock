@@ -65,3 +65,19 @@ brews:
           <string>#{var}/log/stripe-mock.log</string>
         </dict>
       </plist>
+
+nfpms:
+  - vendor: Stripe
+    homepage:  https://stripe.com
+    maintainer: Stripe <support@stripe.com>
+    license: MIT
+    formats:
+    - deb
+    - rpm
+
+dockers:
+  - binaries:
+    - stripe-mock
+    image_templates:
+    - "stripe/stripe-mock:latest"
+    - "stripe/stripe-mock:{{ .Tag }}"
