@@ -2,8 +2,8 @@ project_name: richardm-stripe-mock
 
 before:
   hooks:
-    - go get -u golang.org/x/lint/golint
-    - go get -u github.com/go-bindata/go-bindata/...
+    - go install golang.org/x/lint/golint@latest
+    - go install github.com/go-bindata/go-bindata@latest
     - go generate
 
 builds:
