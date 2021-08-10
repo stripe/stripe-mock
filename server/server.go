@@ -148,7 +148,6 @@ func LoadFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	var err error
 
 	if fixturesPath == "" {
-		// And do the same for fixtures
 		data, err = Asset("openapi/openapi/fixtures3.json")
 	} else {
 		if !isJSONFile(fixturesPath) {
