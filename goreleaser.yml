@@ -1,4 +1,4 @@
-project_name: richardm-stripe-mock
+project_name: stripe-mock
 
 before:
   hooks:
@@ -27,9 +27,9 @@ archives:
 
 brews:
   - tap:
-      owner: richardm-stripe
+      owner: stripe
       name: homebrew-stripe-mock
-    homepage: "https://github.com/richardm-stripe/stripe-mock"
+    homepage: "https://github.com/stripe/stripe-mock"
     description: "stripe-mock is a mock HTTP server that responds like the real Stripe API. It can be used instead of Stripe's testmode to make test suites integrating with Stripe faster and less brittle."
     commit_author:
       name: stripe-ci
