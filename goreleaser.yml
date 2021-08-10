@@ -4,7 +4,7 @@ before:
   hooks:
     - go get -u golang.org/x/lint/golint
     - go get -u github.com/go-bindata/go-bindata/...
-    - go generate
+    - go generate -mod=readonly
 
 builds:
   - binary: stripe-mock
