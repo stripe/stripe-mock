@@ -5,6 +5,7 @@ before:
     - go get -u honnef.co/go/tools/cmd/staticcheck@latest
     - go install github.com/go-bindata/go-bindata/...@latest
     - go generate -mod=readonly
+    - go mod vendor
 
 builds:
   - binary: stripe-mock
