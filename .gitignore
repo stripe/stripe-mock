@@ -3,3 +3,7 @@
 /TODO.md
 /stripe-mock
 /dist/
+
+# IDE files
+.vscode
+.idea
