@@ -77,6 +77,6 @@ nfpms:
     - rpm
 
 dockers:
-  image_templates:
-  - "stripe/stripe-mock:latest"
-  - "stripe/stripe-mock:{{ .Tag }}"
+  - image_templates:
+    - "stripe/stripe-mock:latest"
+    - "stripe/stripe-mock:{{ .Tag }}"
