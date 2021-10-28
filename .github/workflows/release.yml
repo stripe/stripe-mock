@@ -25,7 +25,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v0.173.2 # Latest version as of 2021-07-16
+          version: v0.183.0 # Latest version as of 2021-10-28
           args: release -f goreleaser.yml --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
