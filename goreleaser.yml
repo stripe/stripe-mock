@@ -17,6 +17,7 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm64
 
 snapshot:
   name_template: "{{ .Tag }}-next"
