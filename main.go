@@ -90,12 +90,12 @@ func main() {
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := server.LoadSpec(EmbeddedOpenApiSpec, options.specPath)
+	stripeSpec, err := server.LoadSpec(EmbeddedOpenAPISpec, options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := server.LoadFixtures(EmbeddedOpenApiFixtures, options.fixturesPath)
+	fixtures, err := server.LoadFixtures(EmbeddedOpenAPIFixtures, options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
