@@ -20,10 +20,10 @@ var EmbeddedCertKey []byte
 var EmbeddedCertCert []byte
 
 //go:embed openapi/openapi/fixtures3.json
-var EmbeddedOpenApiFixtures []byte
+var EmbeddedOpenAPIFixtures []byte
 
 //go:embed openapi/openapi/spec3.json
-var EmbeddedOpenApiSpec []byte
+var EmbeddedOpenAPISpec []byte
 
 const defaultPortHTTP = 12111
 const defaultPortHTTPS = 12112
