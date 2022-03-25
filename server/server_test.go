@@ -49,7 +49,7 @@ func initRealSpec() {
 	specFile := path.Join(path.Dir(testFile), "../openapi/openapi/spec3.json")
 	fixtureFile := path.Join(path.Dir(testFile), "../openapi/openapi/fixtures3.json")
 
-	// Load the spec information from go-bindata
+	// Load the spec information
 	data, err := ioutil.ReadFile(specFile)
 	if err != nil {
 		panic(err)

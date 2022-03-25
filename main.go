@@ -143,7 +143,7 @@ func main() {
 	// arguments, but it won't start if HTTP is explicitly requested and HTTPS
 	// is not).
 	if httpsListener != nil {
-		// Our self-signed certificate is bundled up using go-bindata so that
+		// Our self-signed certificate is bundled up using go:embed so that
 		// it stays easy to distribute stripe-mock as a standalone binary with
 		// no other dependencies.
 		certificate, err := getTLSCertificate()

@@ -178,7 +178,7 @@ func LoadSpec(embeddedSpec []byte, specPath string) (*spec.Spec, error) {
 	var err error
 
 	if specPath == "" {
-		// Load the spec information from go-bindata
+		// Use the embedded spec
 		data = embeddedSpec
 	} else {
 		if !isJSONFile(specPath) {
