@@ -1,6 +1,5 @@
 .env
 .envrc
-.idea
 /TODO.md
 /stripe-mock
 /dist/
