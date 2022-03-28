@@ -137,12 +137,10 @@ go test ./...
 
 ### Updating OpenAPI
 
-Update the `openapi/` submodule to update the bundled OpenAPI specification.
+Update the OpenAPI spec by running `make update-openapi-spec` in the root of the repo.
 
 ``` sh
-# Drop into the openapi/ Git submodule and update it (you may have to commit a
-# change).
-pushd openapi/ && git pull origin master && popd
+make update-openapi-spec
 ```
 
 ## Dependencies
