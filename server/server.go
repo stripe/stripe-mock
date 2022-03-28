@@ -143,12 +143,12 @@ type ResponseError struct {
 // LoadFixtures load fixtures from a JSON file
 //
 // If path is empty, fixtures are loaded from internal embedded assets.
-func LoadFixtures(embeddedFixtures []byte, fixturesPath string) (*spec.Fixtures, error) {
+func LoadFixtures(fixturesPath string) (*spec.Fixtures, error) {
 	var data []byte
 	var err error
 
 	if fixturesPath == "" {
-		data = embeddedFixtures
+		data, err = Asset("openapi/openapi/fixtures3.json")
 	} else {
 		if !isJSONFile(fixturesPath) {
 			return nil, fmt.Errorf("Fixtures should come from a JSON file")
@@ -173,13 +173,13 @@ func LoadFixtures(embeddedFixtures []byte, fixturesPath string) (*spec.Fixtures,
 // LoadSpec loads OpenAPI spec from a JSON file
 //
 // If path is empty, the spec is loaded from internal embedded assets.
-func LoadSpec(embeddedSpec []byte, specPath string) (*spec.Spec, error) {
+func LoadSpec(specPath string) (*spec.Spec, error) {
 	var data []byte
 	var err error
 
 	if specPath == "" {
-		// Use the embedded spec
-		data = embeddedSpec
+		// Load the spec information from go-bindata
+		data, err = Asset("openapi/openapi/spec3.json")
 	} else {
 		if !isJSONFile(specPath) {
 			return nil, fmt.Errorf("spec should come from a JSON file")
