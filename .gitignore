@@ -1,6 +1,7 @@
 .env
 .envrc
 .idea
+.DS_Store
 /TODO.md
 /stripe-mock
 /dist/

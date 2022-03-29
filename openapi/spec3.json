@@ -24189,7 +24189,7 @@
             "type": "object"
           },
           "name": {
-            "description": "The product's name, meant to be displayable to the customer. Whenever this product is sold via a subscription, name will show up on associated invoice line item descriptions.",
+            "description": "The product's name, meant to be displayable to the customer.",
             "maxLength": 5000,
             "type": "string"
           },
@@ -31652,6 +31652,15 @@
       "terminal.reader": {
         "description": "A Reader represents a physical device for accepting payment details.\n\nRelated guide: [Connecting to a Reader](https://stripe.com/docs/terminal/payments/connect-reader).",
         "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/terminal_reader_reader_resource_reader_action"
+              }
+            ],
+            "description": "The most recent action performed by the reader.",
+            "nullable": true
+          },
           "device_sw_version": {
             "description": "The current software version of the reader.",
             "maxLength": 5000,
@@ -31748,9 +31757,225 @@
         "title": "TerminalReaderReader",
         "type": "object",
         "x-expandableFields": [
+          "action",
           "location"
         ],
         "x-resourceId": "terminal.reader"
+      },
+      "terminal_reader_reader_resource_cart": {
+        "description": "Represents a cart to be displayed on the reader",
+        "properties": {
+          "currency": {
+            "description": "Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).",
+            "type": "string"
+          },
+          "line_items": {
+            "description": "List of line items in the cart.",
+            "items": {
+              "$ref": "#/components/schemas/terminal_reader_reader_resource_line_item"
+            },
+            "type": "array"
+          },
+          "tax": {
+            "description": "Tax amount for the entire cart. A positive integer in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).",
+            "nullable": true,
+            "type": "integer"
+          },
+          "total": {
+            "description": "Total amount for the entire cart, including tax. A positive integer in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currency",
+          "line_items",
+          "total"
+        ],
+        "title": "TerminalReaderReaderResourceCart",
+        "type": "object",
+        "x-expandableFields": [
+          "line_items"
+        ]
+      },
+      "terminal_reader_reader_resource_line_item": {
+        "description": "Represents a line item to be displayed on the reader",
+        "properties": {
+          "amount": {
+            "description": "The amount of the line item. A positive integer in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).",
+            "type": "integer"
+          },
+          "description": {
+            "description": "Description of the line item.",
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "quantity": {
+            "description": "The quantity of the line item.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "description",
+          "quantity"
+        ],
+        "title": "TerminalReaderReaderResourceLineItem",
+        "type": "object",
+        "x-expandableFields": [
+
+        ]
+      },
+      "terminal_reader_reader_resource_process_payment_intent_action": {
+        "description": "Represents a reader action to process a payment intent",
+        "properties": {
+          "payment_intent": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/payment_intent"
+              }
+            ],
+            "description": "Most recent PaymentIntent processed by the reader.",
+            "x-expansionResources": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/payment_intent"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "payment_intent"
+        ],
+        "title": "TerminalReaderReaderResourceProcessPaymentIntentAction",
+        "type": "object",
+        "x-expandableFields": [
+          "payment_intent"
+        ]
+      },
+      "terminal_reader_reader_resource_process_setup_intent_action": {
+        "description": "Represents a reader action to process a setup intent",
+        "properties": {
+          "generated_card": {
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "setup_intent": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/setup_intent"
+              }
+            ],
+            "description": "Most recent SetupIntent processed by the reader.",
+            "x-expansionResources": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/setup_intent"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "setup_intent"
+        ],
+        "title": "TerminalReaderReaderResourceProcessSetupIntentAction",
+        "type": "object",
+        "x-expandableFields": [
+          "setup_intent"
+        ]
+      },
+      "terminal_reader_reader_resource_reader_action": {
+        "description": "Represents an action performed by the reader",
+        "properties": {
+          "failure_code": {
+            "description": "Failure code, only set if status is `failed`.",
+            "maxLength": 5000,
+            "nullable": true,
+            "type": "string"
+          },
+          "failure_message": {
+            "description": "Detailed failure message, only set if status is `failed`.",
+            "maxLength": 5000,
+            "nullable": true,
+            "type": "string"
+          },
+          "process_payment_intent": {
+            "$ref": "#/components/schemas/terminal_reader_reader_resource_process_payment_intent_action"
+          },
+          "process_setup_intent": {
+            "$ref": "#/components/schemas/terminal_reader_reader_resource_process_setup_intent_action"
+          },
+          "set_reader_display": {
+            "$ref": "#/components/schemas/terminal_reader_reader_resource_set_reader_display_action"
+          },
+          "status": {
+            "description": "Status of the action performed by the reader.",
+            "enum": [
+              "failed",
+              "in_progress",
+              "succeeded"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of action performed by the reader.",
+            "enum": [
+              "process_payment_intent",
+              "process_setup_intent",
+              "set_reader_display"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "type"
+        ],
+        "title": "TerminalReaderReaderResourceReaderAction",
+        "type": "object",
+        "x-expandableFields": [
+          "process_payment_intent",
+          "process_setup_intent",
+          "set_reader_display"
+        ]
+      },
+      "terminal_reader_reader_resource_set_reader_display_action": {
+        "description": "Represents a reader action to set the reader display",
+        "properties": {
+          "cart": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/terminal_reader_reader_resource_cart"
+              }
+            ],
+            "description": "Cart object to be displayed by the reader.",
+            "nullable": true
+          },
+          "type": {
+            "description": "Type of information to be displayed by the reader.",
+            "enum": [
+              "cart"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "TerminalReaderReaderResourceSetReaderDisplayAction",
+        "type": "object",
+        "x-expandableFields": [
+          "cart"
+        ]
       },
       "test_helpers.test_clock": {
         "description": "A test clock enables deterministic control over objects in testmode. With a test clock, you can create\nobjects at a frozen time in the past or future, and advance to a specific future time to observe webhooks and state changes. After the clock advances,\nyou can either validate the current state of your scenario (and test your assumptions), change the current state of your scenario (and test more complex scenarios), or keep advancing forward in time.",
@@ -48580,7 +48805,7 @@
     },
     "/v1/charges/search": {
       "get": {
-        "description": "<p>Search for charges you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for charges you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetChargesSearch",
         "parameters": [
           {
@@ -54131,7 +54356,7 @@
     },
     "/v1/customers/search": {
       "get": {
-        "description": "<p>Search for customers you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for customers you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetCustomersSearch",
         "parameters": [
           {
@@ -64707,7 +64932,7 @@
     },
     "/v1/invoices/search": {
       "get": {
-        "description": "<p>Search for invoices you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for invoices you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetInvoicesSearch",
         "parameters": [
           {
@@ -78723,7 +78948,7 @@
     },
     "/v1/payment_intents/search": {
       "get": {
-        "description": "<p>Search for PaymentIntents you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for PaymentIntents you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetPaymentIntentsSearch",
         "parameters": [
           {
@@ -86982,7 +87207,7 @@
     },
     "/v1/prices/search": {
       "get": {
-        "description": "<p>Search for prices you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for prices you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetPricesSearch",
         "parameters": [
           {
@@ -87567,7 +87792,7 @@
                     "type": "object"
                   },
                   "name": {
-                    "description": "The product's name, meant to be displayable to the customer. Whenever this product is sold via a subscription, name will show up on associated invoice line item descriptions.",
+                    "description": "The product's name, meant to be displayable to the customer.",
                     "maxLength": 5000,
                     "type": "string"
                   },
@@ -87655,7 +87880,7 @@
     },
     "/v1/products/search": {
       "get": {
-        "description": "<p>Search for products you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for products you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetProductsSearch",
         "parameters": [
           {
@@ -88007,7 +88232,7 @@
                     "description": "Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`."
                   },
                   "name": {
-                    "description": "The product's name, meant to be displayable to the customer. Whenever this product is sold via a subscription, name will show up on associated invoice line item descriptions.",
+                    "description": "The product's name, meant to be displayable to the customer.",
                     "maxLength": 5000,
                     "type": "string"
                   },
@@ -101597,7 +101822,7 @@
     },
     "/v1/subscriptions/search": {
       "get": {
-        "description": "<p>Search for subscriptions you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a></p>",
+        "description": "<p>Search for subscriptions you’ve previously created using Stripe’s <a href=\"/docs/search#search-query-language\">Search Query Language</a>.\nDon’t use search in read-after-write flows where strict consistency is necessary. Under normal operating\nconditions, data is searchable in less than a minute. Occasionally, propagation of new or updated data can be up\nto an hour behind during outages. Search functionality is not available to merchants in India.</p>",
         "operationId": "GetSubscriptionsSearch",
         "parameters": [
           {
@@ -104451,6 +104676,462 @@
                       "$ref": "#/components/schemas/deleted_terminal.reader"
                     }
                   ]
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/terminal/readers/{reader}/cancel_action": {
+      "post": {
+        "description": "<p>Cancels the current reader action</p>",
+        "operationId": "PostTerminalReadersReaderCancelAction",
+        "parameters": [
+          {
+            "description": "Reader ID",
+            "in": "path",
+            "name": "reader",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/terminal.reader"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/terminal/readers/{reader}/process_payment_intent": {
+      "post": {
+        "description": "<p>Initiates a payment flow on a Reader</p>",
+        "operationId": "PostTerminalReadersReaderProcessPaymentIntent",
+        "parameters": [
+          {
+            "description": "Reader ID",
+            "in": "path",
+            "name": "reader",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "process_config": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "payment_intent": {
+                    "description": "PaymentIntent ID",
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  "process_config": {
+                    "description": "Configuration overrides",
+                    "properties": {
+                      "skip_tipping": {
+                        "type": "boolean"
+                      }
+                    },
+                    "title": "process_config",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "payment_intent"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/terminal.reader"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/terminal/readers/{reader}/process_setup_intent": {
+      "post": {
+        "description": "<p>Initiates a setup intent flow on a Reader</p>",
+        "operationId": "PostTerminalReadersReaderProcessSetupIntent",
+        "parameters": [
+          {
+            "description": "Reader ID",
+            "in": "path",
+            "name": "reader",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "customer_consent_collected": {
+                    "description": "Customer Consent Collected",
+                    "type": "boolean"
+                  },
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "setup_intent": {
+                    "description": "SetupIntent ID",
+                    "maxLength": 5000,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "customer_consent_collected",
+                  "setup_intent"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/terminal.reader"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/terminal/readers/{reader}/set_reader_display": {
+      "post": {
+        "description": "<p>Sets reader display</p>",
+        "operationId": "PostTerminalReadersReaderSetReaderDisplay",
+        "parameters": [
+          {
+            "description": "Reader ID",
+            "in": "path",
+            "name": "reader",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "cart": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cart": {
+                    "description": "Cart",
+                    "properties": {
+                      "currency": {
+                        "type": "string"
+                      },
+                      "line_items": {
+                        "items": {
+                          "properties": {
+                            "amount": {
+                              "type": "integer"
+                            },
+                            "description": {
+                              "maxLength": 5000,
+                              "type": "string"
+                            },
+                            "quantity": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "amount",
+                            "description",
+                            "quantity"
+                          ],
+                          "title": "line_item",
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "tax": {
+                        "type": "integer"
+                      },
+                      "total": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "currency",
+                      "line_items",
+                      "total"
+                    ],
+                    "title": "cart",
+                    "type": "object"
+                  },
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "description": "Type",
+                    "enum": [
+                      "cart"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/terminal.reader"
+                }
+              }
+            },
+            "description": "Successful response."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            },
+            "description": "Error response."
+          }
+        }
+      }
+    },
+    "/v1/test_helpers/terminal/readers/{reader}/present_payment_method": {
+      "post": {
+        "description": "<p>Presents a payment method on a simulated reader. Can be used to simulate accepting a payment, saving a card or refunding a transaction</p>",
+        "operationId": "PostTestHelpersTerminalReadersReaderPresentPaymentMethod",
+        "parameters": [
+          {
+            "description": "Reader ID",
+            "in": "path",
+            "name": "reader",
+            "required": true,
+            "schema": {
+              "maxLength": 5000,
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {
+                "card_present": {
+                  "explode": true,
+                  "style": "deepObject"
+                },
+                "expand": {
+                  "explode": true,
+                  "style": "deepObject"
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "card_present": {
+                    "description": "Simulated card present data",
+                    "properties": {
+                      "number": {
+                        "maxLength": 5000,
+                        "type": "string"
+                      }
+                    },
+                    "title": "card_present",
+                    "type": "object"
+                  },
+                  "expand": {
+                    "description": "Specifies which fields in the response should be expanded.",
+                    "items": {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "description": "Simulated payment type",
+                    "enum": [
+                      "card_present"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/terminal.reader"
                 }
               }
             },
