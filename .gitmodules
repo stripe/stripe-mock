@@ -1,3 +1,0 @@
-[submodule "openapi"]
-	path = openapi
-	url = https://github.com/stripe/openapi

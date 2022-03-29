@@ -135,23 +135,12 @@ Run the test suite:
 go test ./...
 ```
 
-### Binary data & updating OpenAPI
+### Updating OpenAPI
 
-The project uses [go-bindata] to bundle OpenAPI and fixture data into
-`bindata.go` so that it's automatically included with built executables.
-Rebuild it with:
+Update the OpenAPI spec by running `make update-openapi-spec` in the root of the repo.
 
 ``` sh
-# Make sure you have the go-bindata executable (it's not vendored into this
-# repository).
-go get -u github.com/go-bindata/go-bindata/...
-
-# Drop into the openapi/ Git submodule and update it (you may have to commit a
-# change).
-pushd openapi/ && git pull origin master && popd
-
-# Generates `bindata.go`.
-go generate
+make update-openapi-spec
 ```
 
 ## Dependencies

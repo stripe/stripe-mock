@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path"
+	"runtime"
 	"testing"
 
 	assert "github.com/stretchr/testify/require"
@@ -42,8 +44,13 @@ func init() {
 }
 
 func initRealSpec() {
-	// Load the spec information from go-bindata
-	data, err := Asset("openapi/openapi/spec3.json")
+	// Determine test file name and paths to openapi specs
+	_, testFile, _, _ := runtime.Caller(0)
+	specFile := path.Join(path.Dir(testFile), "../openapi/spec3.json")
+	fixtureFile := path.Join(path.Dir(testFile), "../openapi/fixtures3.json")
+
+	// Load the spec information
+	data, err := ioutil.ReadFile(specFile)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +64,7 @@ func initRealSpec() {
 		spec.GetComponentsForValidation(&realSpec.Components)
 
 	// And do the same for fixtures
-	data, err = Asset("openapi/openapi/fixtures3.json")
+	data, err = ioutil.ReadFile(fixtureFile)
 	if err != nil {
 		panic(err)
 	}

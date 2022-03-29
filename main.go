@@ -1,10 +1,8 @@
-//go:generate go-bindata -mode 0444 -modtime 1 cert/cert.pem cert/key.pem
-//go:generate go-bindata -o server/bindata.go -pkg server -mode 0444 -modtime 1 openapi/openapi/fixtures3.json openapi/openapi/spec3.json
-
 package main
 
 import (
 	"crypto/tls"
+	_ "embed"
 	"flag"
 	"fmt"
 	"net"
@@ -14,6 +12,18 @@ import (
 
 	"github.com/stripe/stripe-mock/server"
 )
+
+//go:embed cert/key.pem
+var EmbeddedCertKey []byte
+
+//go:embed cert/cert.pem
+var EmbeddedCertCert []byte
+
+//go:embed openapi/fixtures3.json
+var EmbeddedOpenAPIFixtures []byte
+
+//go:embed openapi/spec3.json
+var EmbeddedOpenAPISpec []byte
 
 const defaultPortHTTP = 12111
 const defaultPortHTTPS = 12112
@@ -80,12 +90,12 @@ func main() {
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := server.LoadSpec(options.specPath)
+	stripeSpec, err := server.LoadSpec(EmbeddedOpenAPISpec, options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := server.LoadFixtures(options.fixturesPath)
+	fixtures, err := server.LoadFixtures(EmbeddedOpenAPIFixtures, options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
@@ -133,7 +143,7 @@ func main() {
 	// arguments, but it won't start if HTTP is explicitly requested and HTTPS
 	// is not).
 	if httpsListener != nil {
-		// Our self-signed certificate is bundled up using go-bindata so that
+		// Our self-signed certificate is bundled up using go:embed so that
 		// it stays easy to distribute stripe-mock as a standalone binary with
 		// no other dependencies.
 		certificate, err := getTLSCertificate()
@@ -342,20 +352,9 @@ func abort(message string) {
 	os.Exit(1)
 }
 
-// getTLSCertificate reads a certificate and key from the assets built by
-// go-bindata.
+// getTLSCertificate reads a certificate and key embedded into the binary
 func getTLSCertificate() (tls.Certificate, error) {
-	cert, err := Asset("cert/cert.pem")
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-
-	key, err := Asset("cert/key.pem")
-	if err != nil {
-		return tls.Certificate{}, err
-	}
-
-	return tls.X509KeyPair(cert, key)
+	return tls.X509KeyPair(EmbeddedCertCert, EmbeddedCertKey)
 }
 
 func getPortListener(addr string, protocol string) (net.Listener, error) {
