@@ -13,7 +13,8 @@ lint:
 	staticcheck
 
 test:
-	go test ./...
+	# -count=1 disables the cache
+	go test ./... -count=1
 
 vet:
 	go vet ./...
