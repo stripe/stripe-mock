@@ -1,6 +1,7 @@
 module github.com/stripe/stripe-mock
 
-go 1.16
+// +heroku goVersion go1.17
+go 1.17
 
 require (
 	github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2 // indirect
