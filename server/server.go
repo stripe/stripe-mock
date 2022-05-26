@@ -301,8 +301,10 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	var responseContent spec.MediaType
 
 	if jsonResponseContent, ok := response.Content["application/json"]; ok && jsonResponseContent.Schema != nil {
+		w.Header().Set("Content-Type", "application/json")
 		responseContent = jsonResponseContent
 	} else if pdfResponseContent, ok := response.Content["application/pdf"]; ok && pdfResponseContent.Schema != nil {
+		w.Header().Set("Content-Type", "application/pdf")
 		responseContent = pdfResponseContent
 	} else {
 		fmt.Printf("Couldn't find application/json or application/pdf in response\n")
@@ -894,6 +896,11 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 
 	var encodedData []byte
 	var err error
+
+	// If no special Content-Type has been set, then we default to JSON.
+	if w.Header().Get("Content-Type") == "" {
+		w.Header().Set("Content-Type", "application/json")
+	}
 
 	if dataString, ok := data.(string); ok {
 		encodedData = []byte(dataString)
