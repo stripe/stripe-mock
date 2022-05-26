@@ -470,12 +470,14 @@ func TestStubServer_SetsSpecialHeaders(t *testing.T) {
 	resp, _ := sendRequest(t, "POST", "/", "", nil, nil)
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, Version, resp.Header.Get("Stripe-Mock-Version"))
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 	_, ok := resp.Header["Request-Id"]
 	assert.False(t, ok)
 
 	resp, _ = sendRequest(t, "POST", "/", "", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 	assert.Equal(t, Version, resp.Header.Get("Stripe-Mock-Version"))
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 	assert.Equal(t, "req_123", resp.Header.Get("Request-Id"))
 }
 
@@ -655,10 +657,18 @@ func TestStubServer_RoutesRequest(t *testing.T) {
 	}
 }
 
+func TestStubServer_JSONResponse(t *testing.T) {
+	resp, _ := sendRequest(t, "GET", "/v1/charges",
+		"", getDefaultHeaders(), nil)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+}
+
 func TestStubServer_BinaryResponse(t *testing.T) {
 	resp, body := sendRequest(t, "GET", "/v1/quotes/qt_123/pdf",
 		"", getDefaultHeaders(), nil)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "application/pdf", resp.Header.Get("Content-Type"))
 	assert.Equal(t, "Stripe binary response", string(body[:]))
 }
 
