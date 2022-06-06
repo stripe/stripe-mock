@@ -1,4 +1,4 @@
-name: Create Tag
+name: Create Tag and trigger release
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +21,7 @@ jobs:
         id: tag
         run: |
           last_tag="$(git describe --tags --abbrev=0)"
-          new_tag="$(echo "$last_tag" | perl -pe 's/^(v\d+\.)(\d+)(\.\d+)$/$1.($2+1).($3)/e')"
+          new_tag="$(echo "$last_tag" | perl -pe 's/^(v\d+\.)(\d+)(\.\d+)$/$1.($2+1).".0"/e')"
           echo "::set-output name=newTag::$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)"
         env:
           TAG: ${{ github.event.inputs.tag }}
