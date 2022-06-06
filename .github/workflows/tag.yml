@@ -21,7 +21,7 @@ jobs:
         id: tag
         run: |
           last_tag="$(git describe --tags --abbrev=0)"
-          # Parse the version into parts, increment the minor version and reset the path to 0
+          # Parse the version into parts, increment the minor version and reset the patch to 0
           # Example:
           # v1.2.3 is parsed into $1 = "v1.", $2 = "2", $3 = ".3"
           # and concatenated back into v1.3.0
