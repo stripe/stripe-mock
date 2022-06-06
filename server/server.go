@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+  "math/rand"
 
 	"github.com/lestrrat-go/jsval"
 	"github.com/stripe/stripe-mock/param"
@@ -229,6 +230,13 @@ func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck,
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
+
+  //random delay to emulate stripe production behaviour
+  min := 0.5
+  max := 1.5
+  random_float := min + rand.Float64() * (max - min)
+  time.Sleep(time.Duration(random_float * float64(time.Second)))
+
 
 	//
 	// Validate headers
