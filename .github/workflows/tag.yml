@@ -2,6 +2,9 @@ name: Create Tag
 on:
   workflow_dispatch:
     inputs:
+      tag:
+        description: "Tag name, defaults to minor increment."
+        required: false
       sha:
         description: "Commit SHA to tag. Defaults to latest."
         required: false
@@ -19,9 +22,9 @@ jobs:
         run: |
           last_tag="$(git describe --tags --abbrev=0)"
           new_tag="$(echo "$last_tag" | perl -pe 's/^(v\d+\.)(\d+)(\.\d+)$/$1.($2+1).($3)/e')"
-          echo "::set-output name=newTag::$new_tag"
+          echo "::set-output name=newTag::$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)"
         env:
-          SHA: ${{ github.event.inputs.sha }}
+          TAG: ${{ github.event.inputs.tag }}
       - name: Create tag
         uses: actions/github-script@v5
         with:
