@@ -33,9 +33,15 @@ jobs:
           echo "::set-output name=newTag::$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)"
         env:
           TAG: ${{ github.event.inputs.tag }}
+      - uses: tibdex/github-app-token@v1.5.2
+        id: gh-api-token
+        with:
+          app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
+          private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
       - name: Create tag
         uses: actions/github-script@v5
         with:
+          token: ${{ steps.gh-api-token.outputs.token }}
           script: |
             github.rest.git.createRef({
               owner: context.repo.owner,
