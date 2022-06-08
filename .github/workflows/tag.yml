@@ -41,7 +41,7 @@ jobs:
       - name: Create tag
         uses: actions/github-script@v5
         with:
-          token: ${{ steps.gh-api-token.outputs.token }}
+          github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |
             github.rest.git.createRef({
               owner: context.repo.owner,
