@@ -132,6 +132,27 @@ func coerceNonObjectSchema(val interface{}, schema *spec.Schema) (interface{}, b
 		return val, ok, nil
 	}
 
+	if schema.AdditionalProperties != nil {
+		valMap, ok := val.(map[string]interface{})
+		if ok {
+			allOk := true
+			for itemKey, itemVal := range valMap {
+				itemValCoerced, itemOk, err := coerceSubSchema(itemVal, schema.AdditionalProperties)
+				if err != nil {
+					return nil, false, err
+				}
+				if itemOk {
+					valMap[itemKey] = itemValCoerced
+				}
+				skipNilItem := itemVal == nil
+				allOk = allOk && (itemOk || skipNilItem)
+			}
+			if allOk {
+				return valMap, true, nil
+			}
+		}
+	}
+
 	if schema.AnyOf != nil {
 		for _, subSchema := range schema.AnyOf {
 			val, ok, err := coerceSubSchema(val, subSchema)

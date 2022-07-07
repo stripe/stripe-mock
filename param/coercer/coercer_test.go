@@ -50,6 +50,34 @@ func TestCoerceParams_AnyOfCoercion(t *testing.T) {
 		assert.Equal(t, 123, data["object_or_int_key"].(map[string]interface{})["intkey"])
 	}
 
+	// `anyOf` with object type in additional properties
+	{
+		schema := &spec.Schema{Properties: map[string]*spec.Schema{
+			"map": {
+				AnyOf: []*spec.Schema{
+					{AdditionalProperties: &spec.Schema{
+						Properties: map[string]*spec.Schema{
+							"intkey": {Type: integerType},
+						},
+					}},
+					{Type: objectType},
+				},
+			},
+		}}
+		data := map[string]interface{}{
+			"map": map[string]interface{}{
+				"item": map[string]interface{}{
+					"intkey": "123",
+				},
+			},
+		}
+
+		err := CoerceParams(schema, data)
+		assert.NoError(t, err)
+		item := data["map"].(map[string]interface{})["item"]
+		assert.Equal(t, 123, item.(map[string]interface{})["intkey"])
+	}
+
 	// `anyOf` with array of mixed types
 	{
 		schema := &spec.Schema{Properties: map[string]*spec.Schema{
