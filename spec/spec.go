@@ -133,6 +133,8 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	additionalPropertiesValue := rawFields["additionalProperties"]
+
 	for _, supportedField := range supportedSchemaFields {
 		delete(rawFields, supportedField)
 	}
@@ -153,7 +155,6 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	}
 	*s = Schema(inner)
 
-	additionalPropertiesValue := rawFields["additional_properties"]
 	additionalPropertiesBool, ok := additionalPropertiesValue.(bool)
 
 	// AdditionalProperties can be a `false` or `Schema` object for convenience turn
