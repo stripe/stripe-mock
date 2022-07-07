@@ -94,18 +94,18 @@ type Schema struct {
 	// AdditionalProperties is either a nil to indicate that no additional
 	// properties in the object are allowed (beyond what's in Properties), or a
 	// JSON schema that describes the expected format of any additional properties.
-	AdditionalProperties *Schema `json:"-"`
-
-	AnyOf      []*Schema          `json:"anyOf,omitempty"`
-	Enum       []interface{}      `json:"enum,omitempty"`
-	Format     string             `json:"format,omitempty"`
-	Items      *Schema            `json:"items,omitempty"`
-	MaxLength  int                `json:"maxLength,omitempty"`
-	Nullable   bool               `json:"nullable,omitempty"`
-	Pattern    string             `json:"pattern,omitempty"`
-	Properties map[string]*Schema `json:"properties,omitempty"`
-	Required   []string           `json:"required,omitempty"`
-	Type       string             `json:"type,omitempty"`
+	AdditionalProperties        *Schema `json:"-"`
+	AdditionalPropertiesAllowed bool
+	AnyOf                       []*Schema          `json:"anyOf,omitempty"`
+	Enum                        []interface{}      `json:"enum,omitempty"`
+	Format                      string             `json:"format,omitempty"`
+	Items                       *Schema            `json:"items,omitempty"`
+	MaxLength                   int                `json:"maxLength,omitempty"`
+	Nullable                    bool               `json:"nullable,omitempty"`
+	Pattern                     string             `json:"pattern,omitempty"`
+	Properties                  map[string]*Schema `json:"properties,omitempty"`
+	Required                    []string           `json:"required,omitempty"`
+	Type                        string             `json:"type,omitempty"`
 
 	// Ref is populated if this JSON Schema is actually a JSON reference, and
 	// it defines the location of the actual schema definition.
@@ -153,9 +153,19 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 	}
 	*s = Schema(inner)
 
+	additionalPropertiesValue := rawFields["additional_properties"]
+	additionalPropertiesBool, ok := additionalPropertiesValue.(bool)
+
 	// AdditionalProperties can be a `false` or `Schema` object for convenience turn
-	// false into nil on the real `Schema`
-	if rawFields["additional_properties"] != nil {
+	// load bool and schema into different fields
+	if ok {
+		s.AdditionalPropertiesAllowed = additionalPropertiesBool
+		return nil
+	} else {
+		s.AdditionalPropertiesAllowed = true
+	}
+
+	if additionalPropertiesValue != nil {
 		type additionalProperties struct {
 			AdditionalProperties *Schema `json:"additionalProperties,omitempty"`
 		}

@@ -64,12 +64,14 @@ func GetComponentsForValidation(components *Components) *ComponentsForValidation
 // type, and it must be updated when new options are supported.
 func getJSONSchemaForOpenAPI3Schema(oai *Schema) map[string]interface{} {
 	jss := make(map[string]interface{})
-	if oai.AdditionalProperties != nil {
-		// We currently don't decode `AdditionalProperties` into a custom
-		// struct, so it's a pretty direct JSON representation. Just set it
-		// directly.
-		jss["additionalProperties"] = oai.AdditionalProperties
+	if !oai.AdditionalPropertiesAllowed {
+		jss["additionalProperties"] = false
+	} else {
+		if oai.AdditionalProperties != nil {
+			jss["additionalProperties"] = getJSONSchemaForOpenAPI3Schema(oai.AdditionalProperties)
+		}
 	}
+
 	if len(oai.AnyOf) != 0 {
 		var jssAnyOf = make([]interface{}, len(oai.AnyOf))
 		for index, oaiSubschema := range oai.AnyOf {

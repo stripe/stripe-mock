@@ -109,7 +109,8 @@ func initTestSpec() {
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": {
 					Schema: &spec.Schema{
-						AdditionalProperties: false,
+						AdditionalProperties:        nil,
+						AdditionalPropertiesAllowed: false,
 						Properties: map[string]*spec.Schema{
 							"amount": {
 								Type: spec.TypeInteger,
@@ -139,8 +140,9 @@ func initTestSpec() {
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": {
 					Schema: &spec.Schema{
-						AdditionalProperties: false,
-						Type:                 spec.TypeObject,
+						AdditionalProperties:        nil,
+						AdditionalPropertiesAllowed: false,
+						Type:                        spec.TypeObject,
 					},
 				},
 			},
@@ -163,8 +165,9 @@ func initTestSpec() {
 			Content: map[string]spec.MediaType{
 				"application/x-www-form-urlencoded": {
 					Schema: &spec.Schema{
-						AdditionalProperties: false,
-						Type:                 spec.TypeObject,
+						AdditionalProperties:        nil,
+						AdditionalPropertiesAllowed: false,
+						Type:                        spec.TypeObject,
 					},
 				},
 			},
