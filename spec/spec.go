@@ -91,13 +91,10 @@ var supportedSchemaFields = []string{
 
 // Schema is a struct representing a JSON schema.
 type Schema struct {
-	// AdditionalProperties is either a `false` to indicate that no additional
+	// AdditionalProperties is either a nil to indicate that no additional
 	// properties in the object are allowed (beyond what's in Properties), or a
 	// JSON schema that describes the expected format of any additional properties.
-	//
-	// We currently just read it as an `interface{}` because we're not using it
-	// for anything right now.
-	AdditionalProperties interface{} `json:"additionalProperties,omitempty"`
+	AdditionalProperties *Schema `json:"-"`
 
 	AnyOf      []*Schema          `json:"anyOf,omitempty"`
 	Enum       []interface{}      `json:"enum,omitempty"`
@@ -155,6 +152,21 @@ func (s *Schema) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*s = Schema(inner)
+
+	// AdditionalProperties can be a `false` or `Schema` object for convenience turn
+	// false into nil on the real `Schema`
+	if rawFields["additional_properties"] != nil {
+		type additionalProperties struct {
+			AdditionalProperties *Schema `json:"additionalProperties,omitempty"`
+		}
+		var addProps additionalProperties
+		err = json.Unmarshal(data, &addProps)
+		if err != nil {
+			return err
+		}
+
+		s.AdditionalProperties = addProps.AdditionalProperties
+	}
 
 	return nil
 }
