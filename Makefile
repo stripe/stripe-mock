@@ -28,8 +28,8 @@ docker-run:
 .PHONY: docker-run
 
 update-openapi-spec:
-	rm -f ./openapi/spec3.json
-	rm -f ./openapi/fixtures3.json
-	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json -P ./openapi
-	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/fixtures3.json -P ./openapi
+	rm -f ./embedded/openapi/spec3.json
+	rm -f ./embedded/openapi/fixtures3.json
+	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json -P ./embedded/openapi
+	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/fixtures3.json -P ./embedded/openapi
 .PHONY: update-openapi-spec

@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"github.com/stripe/stripe-mock/embedded"
 	"net"
 	"net/http"
 	"os"
@@ -12,18 +13,6 @@ import (
 
 	"github.com/stripe/stripe-mock/server"
 )
-
-//go:embed cert/key.pem
-var EmbeddedCertKey []byte
-
-//go:embed cert/cert.pem
-var EmbeddedCertCert []byte
-
-//go:embed openapi/fixtures3.json
-var EmbeddedOpenAPIFixtures []byte
-
-//go:embed openapi/spec3.json
-var EmbeddedOpenAPISpec []byte
 
 const defaultPortHTTP = 12111
 const defaultPortHTTPS = 12112
@@ -90,12 +79,12 @@ func main() {
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := server.LoadSpec(EmbeddedOpenAPISpec, options.specPath)
+	stripeSpec, err := server.LoadSpec(embedded.OpenAPISpec, options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := server.LoadFixtures(EmbeddedOpenAPIFixtures, options.fixturesPath)
+	fixtures, err := server.LoadFixtures(embedded.OpenAPIFixtures, options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
@@ -354,7 +343,7 @@ func abort(message string) {
 
 // getTLSCertificate reads a certificate and key embedded into the binary
 func getTLSCertificate() (tls.Certificate, error) {
-	return tls.X509KeyPair(EmbeddedCertCert, EmbeddedCertKey)
+	return tls.X509KeyPair(embedded.CertCert, embedded.CertKey)
 }
 
 func getPortListener(addr string, protocol string) (net.Listener, error) {
