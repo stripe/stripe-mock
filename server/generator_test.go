@@ -260,6 +260,31 @@ func TestGenerateResponseData(t *testing.T) {
 			data.(map[string]interface{})["id"])
 	}
 
+	// generated primary ID (double prefix)
+	{
+		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
+			Resources: map[spec.ResourceID]interface{}{
+				spec.ResourceID("charge"): map[string]interface{}{
+					"id": "ch_sub_123",
+				},
+			},
+		}, verbose}
+		data, err := generator.Generate(&GenerateParams{
+			PathParams: &PathParamsMap{},
+			Schema:     &spec.Schema{Ref: "#/components/schemas/charge"},
+		})
+		assert.Nil(t, err)
+
+		// Should not be equal to our fixture's ID because it's generated.
+		assert.NotEqual(t, "ch_sub_123",
+			data.(map[string]interface{})["id"])
+
+		// However, the fixture's ID's prefix will have been used to generate
+		// the new ID, so it should share a prefix.
+		assert.Regexp(t, regexp.MustCompile("^ch_sub_"),
+			data.(map[string]interface{})["id"])
+	}
+
 	// generated primary ID (nil PathParamsMap)
 	{
 		generator := DataGenerator{testSpec.Components.Schemas, &spec.Fixtures{
