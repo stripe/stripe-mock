@@ -891,8 +891,13 @@ func maybeGeneratePrimaryID(pathParams *PathParamsMap, data interface{}) *PathPa
 		return pathParams
 	}
 
+	prefix := id
+
+	usInd := strings.LastIndex(id, "_")
 	// Like `sub_sched`.
-	prefix := id[:strings.LastIndex(id, "_")]
+	if usInd != -1 {
+		prefix = id[:usInd]
+	}
 
 	newID := randomID(prefix)
 
