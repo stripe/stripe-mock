@@ -4,8 +4,8 @@ stripe-mock is a mock HTTP server based on the real Stripe API. It accepts the
 same requests and parameters that the Stripe API accepts, and rejects requests
 whose parameters are not recognized or have incorrect types. Its responses
 resemble the responses of the real Stripe API in terms of data type; however,
-stripe-mock does not attempt to reproduce the _behavior_ of the real Stripe API
-at all. It cannot reject all invalid requests, and its responses are completely
+stripe-mock **does not attempt to reproduce the _behavior_ of the real Stripe API
+at all**. It cannot reject all invalid requests, and its responses are completely
 hardcoded. They will have a correct type, but they will not necessarily be
 realistic Stripe responses.
 
