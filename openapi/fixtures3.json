@@ -808,6 +808,7 @@
     },
     "credit_note": {
       "amount": 1690,
+      "amount_shipping": 0,
       "created": 1234567890,
       "currency": "usd",
       "customer": "cus_NGfDrONhLxEPND",
@@ -1494,6 +1495,7 @@
       "amount_due": 1000,
       "amount_paid": 0,
       "amount_remaining": 1000,
+      "amount_shipping": 0,
       "application": null,
       "application_fee_amount": null,
       "attempt_count": 0,
