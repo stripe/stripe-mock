@@ -891,11 +891,13 @@ func maybeGeneratePrimaryID(pathParams *PathParamsMap, data interface{}) *PathPa
 		return pathParams
 	}
 
-	// Splits something like `ch_123` into `["ch", "123"]`.
-	idParts := strings.Split(id, "_")
+	prefix := id
 
-	// Like `ch`.
-	prefix := idParts[0]
+	usInd := strings.LastIndex(id, "_")
+	// Like `sub_sched`.
+	if usInd != -1 {
+		prefix = id[:usInd]
+	}
 
 	newID := randomID(prefix)
 
@@ -928,7 +930,7 @@ func propertyNames(schema *spec.Schema) string {
 //
 // As with the real Stripe API, the general format looks like:
 //
-//     <prefix>_<time_part><random_part>
+//	<prefix>_<time_part><random_part>
 //
 // The prefix helps identify the type of object. For example, charges have a
 // `ch` prefix.
