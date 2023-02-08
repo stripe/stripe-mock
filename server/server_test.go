@@ -46,8 +46,8 @@ func init() {
 func initRealSpec() {
 	// Determine test file name and paths to openapi specs
 	_, testFile, _, _ := runtime.Caller(0)
-	specFile := path.Join(path.Dir(testFile), "../openapi/spec3.json")
-	fixtureFile := path.Join(path.Dir(testFile), "../openapi/fixtures3.json")
+	specFile := path.Join(path.Dir(testFile), "../embedded/openapi/spec3.json")
+	fixtureFile := path.Join(path.Dir(testFile), "../embedded/openapi/fixtures3.json")
 
 	// Load the spec information
 	data, err := ioutil.ReadFile(specFile)
