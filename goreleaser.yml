@@ -79,28 +79,5 @@ nfpms:
 
 dockers:
   - image_templates:
-      - "stripe/stripe-mock:{{ .Tag }}-amd64"
-      - "stripe/stripe-mock:latest-amd64"
-    use: buildx
-    goos: linux
-    goarch: amd64
-    build_flag_templates:
-      - "--platform=linux/amd64"
-  - image_templates:
-      - "stripe/stripe-mock:{{ .Tag }}-arm64"
-      - "stripe/stripe-mock:latest-arm64"
-    use: buildx
-    goos: linux
-    goarch: arm64
-    build_flag_templates:
-      - "--platform=linux/arm64"
-
-docker_manifests:
-  - name_template: "stripe/stripe-mock:{{ .Tag }}"
-    image_templates: &image_templates
-      - "stripe/stripe-mock:{{ .Tag }}-amd64"
-      - "stripe/stripe-mock:{{ .Tag }}-arm64"
-  - name_template: "stripe/stripe-mock:latest"
-    image_templates: &image_templates
-      - "stripe/stripe-mock:latest-amd64"
-      - "stripe/stripe-mock:latest-arm64"
+    - "stripe/stripe-mock:latest"
+    - "stripe/stripe-mock:{{ .Tag }}"
