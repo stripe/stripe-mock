@@ -15,3 +15,9 @@ var OpenAPIFixtures []byte
 
 //go:embed openapi/spec3.json
 var OpenAPISpec []byte
+
+//go:embed openapi/fixtures3.beta.json
+var BetaOpenAPIFixtures []byte
+
+//go:embed openapi/spec3.beta.sdk.json
+var BetaOpenAPISpec []byte

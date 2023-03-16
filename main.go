@@ -60,7 +60,7 @@ func main() {
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
-
+	flag.BoolVar(&options.beta, "http", false, "Run with HTTP")
 	flag.Parse()
 
 	fmt.Printf("stripe-mock %s\n", version)
@@ -79,12 +79,18 @@ func main() {
 	// For both spec and fixtures stripe-mock will by default load data from
 	// internal assets compiled into the binary, but either one can be
 	// overridden with a -spec or -fixtures argument and a path to a file.
-	stripeSpec, err := server.LoadSpec(embedded.OpenAPISpec, options.specPath)
+	specBytes := embedded.OpenAPISpec
+	fixtureBytes := embedded.OpenAPIFixtures
+	if options.beta {
+		specBytes = embedded.BetaOpenAPISpec
+		fixtureBytes = embedded.BetaOpenAPIFixtures
+	}
+	stripeSpec, err := server.LoadSpec(specBytes, options.specPath)
 	if err != nil {
 		abort(err.Error())
 	}
 
-	fixtures, err := server.LoadFixtures(embedded.OpenAPIFixtures, options.fixturesPath)
+	fixtures, err := server.LoadFixtures(fixtureBytes, options.fixturesPath)
 	if err != nil {
 		abort(err.Error())
 	}
@@ -195,6 +201,7 @@ type options struct {
 	specPath           string
 	strictVersionCheck bool
 	unixSocket         string
+	beta               bool
 }
 
 func (o *options) checkConflictingOptions() error {
