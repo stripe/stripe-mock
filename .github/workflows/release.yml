@@ -15,9 +15,9 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Docker Login
-        # env:
-        #   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        #   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - name: Set up Docker Buildx
@@ -36,9 +36,9 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: v1.16.1 # Latest version as of 2023-03-17
-          args: release -f goreleaser.yml --rm-dist
-        # env:
-        #   GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
+          args: release -f goreleaser.yml --rm-dist --skip-validate --skip-publish
+        env:
+          GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
       - uses: stripe/openapi/actions/notify-release@master
         if: always()
         with:
