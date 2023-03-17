@@ -60,7 +60,7 @@ func main() {
 	flag.StringVar(&options.unixSocket, "unix", "", "Unix socket to listen on")
 	flag.BoolVar(&verbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&options.showVersion, "version", false, "Show version and exit")
-	flag.BoolVar(&options.beta, "http", false, "Run with HTTP")
+	flag.BoolVar(&options.beta, "beta", false, "Run with beta OpenAPI spec and fixtures")
 	flag.Parse()
 
 	fmt.Printf("stripe-mock %s\n", version)
