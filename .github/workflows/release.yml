@@ -35,8 +35,8 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: v1.16.1 # Latest version as of 2023-03-17
-          args: release -f goreleaser.yml --rm-dist --skip-validate --skip-publish
+          version: v1.7 # Latest version as of 2023-03-17
+          args: release -f goreleaser.yml --clean --skip-validate --skip-publish
         env:
           GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
       - uses: stripe/openapi/actions/notify-release@master
