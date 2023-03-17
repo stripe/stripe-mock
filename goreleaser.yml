@@ -36,19 +36,18 @@ brews:
     commit_author:
       name: stripe-ci
       email: support@stripe.com
-
-      service: |
-        keep_alive successful_exit: false
-        run [
-          opt_bin/"stripe-mock",
-          "-http-port", 
-          "12111",
-          "-https-port",
-          "12112"
-        ]
-        working_dir var
-        log_path var/"log/stripe-mock.log"
-        error_log_path var/"log/stripe-mock.log"
+    service: |
+      keep_alive successful_exit: false
+      run [
+        opt_bin/"stripe-mock",
+        "-http-port",
+        "12111",
+        "-https-port",
+        "12112"
+      ]
+      working_dir var
+      log_path var/"log/stripe-mock.log"
+      error_log_path var/"log/stripe-mock.log"
 
 nfpms:
   - vendor: Stripe
