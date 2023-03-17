@@ -39,3 +39,7 @@ jobs:
           args: release -f goreleaser.yml --rm-dist
         # env:
         #   GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
+      - uses: stripe/openapi/actions/notify-release@master
+        if: always()
+        with:
+          bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
