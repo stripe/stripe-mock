@@ -3268,6 +3268,7 @@
       "amount": 1000,
       "amount_tax": 230,
       "id": "tax_li_NZwPhKjAJdTj5K",
+      "livemode": false,
       "object": "tax.calculation_line_item",
       "product": null,
       "quantity": 1,
