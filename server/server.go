@@ -228,7 +228,9 @@ func NewStubServer(fixtures *spec.Fixtures, spec *spec.Spec, strictVersionCheck,
 // HandleRequest handes an HTTP request directed at the API stub.
 func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
+	if s.verbose {
+		fmt.Printf("Request: %v %v\n", r.Method, r.URL.Path)
+	}
 
 	//
 	// Validate headers
@@ -238,7 +240,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	if !validateAuth(auth) {
 		message := fmt.Sprintf(invalidAuthorization, auth)
 		stripeError := createStripeError(typeInvalidRequestError, message)
-		writeResponse(w, r, start, http.StatusUnauthorized, stripeError)
+		writeResponse(w, r, start, s.verbose, http.StatusUnauthorized, stripeError)
 		return
 	}
 
@@ -251,7 +253,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		if stripeVersion != "" && stripeVersion != s.spec.Info.Version {
 			message := fmt.Sprintf(invalidStripeVersion, stripeVersion, s.spec.Info.Version)
 			stripeError := createStripeError(typeInvalidRequestError, message)
-			writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+			writeResponse(w, r, start, s.verbose, http.StatusBadRequest, stripeError)
 			return
 		}
 	}
@@ -279,21 +281,21 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf("Couldn't parse path parameters: %v", err)
 		fmt.Printf(message + "\n")
 		stripeError := createStripeError(typeInvalidRequestError, message)
-		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+		writeResponse(w, r, start, s.verbose, http.StatusBadRequest, stripeError)
 		return
 	}
 
 	if route == nil {
 		message := fmt.Sprintf(invalidRoute, r.Method, r.URL.Path)
 		stripeError := createStripeError(typeInvalidRequestError, message)
-		writeResponse(w, r, start, http.StatusNotFound, stripeError)
+		writeResponse(w, r, start, s.verbose, http.StatusNotFound, stripeError)
 		return
 	}
 
 	response, ok := route.operation.Responses["200"]
 	if !ok {
 		fmt.Printf("Couldn't find 200 response in spec\n")
-		writeResponse(w, r, start, http.StatusInternalServerError,
+		writeResponse(w, r, start, s.verbose, http.StatusInternalServerError,
 			createInternalServerError())
 		return
 	}
@@ -308,7 +310,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		responseContent = pdfResponseContent
 	} else {
 		fmt.Printf("Couldn't find application/json or application/pdf in response\n")
-		writeResponse(w, r, start, http.StatusInternalServerError,
+		writeResponse(w, r, start, s.verbose, http.StatusInternalServerError,
 			createInternalServerError())
 		return
 	}
@@ -323,7 +325,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf("Couldn't parse query/body: %v", err)
 		fmt.Printf(message + "\n")
 		stripeError := createStripeError(typeInvalidRequestError, message)
-		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+		writeResponse(w, r, start, s.verbose, http.StatusBadRequest, stripeError)
 		return
 	}
 
@@ -340,7 +342,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	// it.
 	requestData, stripeError := validateAndCoerceRequest(r, route, requestData)
 	if stripeError != nil {
-		writeResponse(w, r, start, http.StatusBadRequest, stripeError)
+		writeResponse(w, r, start, s.verbose, http.StatusBadRequest, stripeError)
 		return
 	}
 
@@ -360,7 +362,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		fmt.Printf("Couldn't generate response: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError,
+		writeResponse(w, r, start, s.verbose, http.StatusInternalServerError,
 			createInternalServerError())
 		return
 	}
@@ -371,7 +373,7 @@ func (s *StubServer) HandleRequest(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Response data: %s\n", responseDataJSON)
 	}
-	writeResponse(w, r, start, http.StatusOK, responseData)
+	writeResponse(w, r, start, s.verbose, http.StatusOK, responseData)
 }
 
 func (s *StubServer) initializeRouter() error {
@@ -889,7 +891,7 @@ func validateAuth(auth string) bool {
 	return true
 }
 
-func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, status int, data interface{}) {
+func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, verbose bool, status int, data interface{}) {
 	if data == nil {
 		data = http.StatusText(status)
 	}
@@ -913,7 +915,7 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 
 	if err != nil {
 		fmt.Printf("Error serializing response: %v\n", err)
-		writeResponse(w, r, start, http.StatusInternalServerError, nil)
+		writeResponse(w, r, start, verbose, http.StatusInternalServerError, nil)
 		return
 	}
 
@@ -924,7 +926,9 @@ func writeResponse(w http.ResponseWriter, r *http.Request, start time.Time, stat
 	if err != nil {
 		fmt.Printf("Error writing to client: %v\n", err)
 	}
-	fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
+	if verbose {
+		fmt.Printf("Response: elapsed=%v status=%v\n", time.Now().Sub(start), status)
+	}
 }
 
 // isJSONFile judges based on a file's extension whether it's a JSON file. It's
