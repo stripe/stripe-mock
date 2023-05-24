@@ -1176,7 +1176,8 @@
       "expires": 1234567890,
       "id": "ephkey_1N6Eh1ArWMVfByDX9Sxa4XVW",
       "livemode": false,
-      "object": "ephemeral_key"
+      "object": "ephemeral_key",
+      "secret": "ek_test_YWNjdF8xSVRpNkhLWWZVOFpQNnJhLGNYbEpnTEJXUUN4aWhsUHFwMXR1S2NsSDdnc3JTdWY_00GReOJAVP"
     },
     "event": {
       "api_version": null,
