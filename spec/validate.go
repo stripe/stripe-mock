@@ -1,7 +1,9 @@
 package spec
 
 import (
-	"github.com/lestrrat-go/jsschema"
+	"strings"
+
+	schema "github.com/lestrrat-go/jsschema"
 	"github.com/lestrrat-go/jsval"
 	"github.com/lestrrat-go/jsval/builder"
 )
@@ -102,7 +104,9 @@ func getJSONSchemaForOpenAPI3Schema(oai *Schema) map[string]interface{} {
 		jss["maxLength"] = oai.MaxLength
 	}
 	if oai.Pattern != "" {
-		jss["pattern"] = oai.Pattern
+		// Some patterns on listable resources contains ":id", which is not a valid regex, so we
+		// replace :id with a regex that matches any string up to the next slash.
+		jss["pattern"] = strings.Replace(oai.Pattern, ":id", "[^/]+", 1)
 	}
 	if len(oai.Properties) != 0 {
 		var jssProperties = make(map[string]interface{})
