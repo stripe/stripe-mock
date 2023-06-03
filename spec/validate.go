@@ -3,7 +3,7 @@ package spec
 import (
 	"strings"
 
-	schema "github.com/lestrrat-go/jsschema"
+	"github.com/lestrrat-go/jsschema"
 	"github.com/lestrrat-go/jsval"
 	"github.com/lestrrat-go/jsval/builder"
 )
