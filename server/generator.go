@@ -454,10 +454,14 @@ func (g *DataGenerator) maybeDereference(schema *spec.Schema, context string) (*
 
 func (g *DataGenerator) generateURLForListableResource(schema *spec.Schema, params *GenerateParams) string {
 	var val string
+	const regexPlaceholder = "[^/]+"
 	if strings.HasPrefix(schema.Pattern, "^") {
-		// Many listable resources have a URL pattern of the form "^/v1/whatevers";
-		// we cut off the "^" to leave the URL.
+		// Many listable resources have a URL pattern of the form "^/v1/tax/calculations/[^/]+/line_items";
+		// we cut off the "^" to leave the URL and replace placeholders with ids.
 		val = schema.Pattern[1:]
+		if strings.Index(val, regexPlaceholder) != -1 {
+			val = strings.Replace(val, regexPlaceholder, "id_123", 1)
+		}
 	} else if params.example != nil {
 		// If an example was provided, we can assume it has the correct format
 		example := params.example.value.(map[string]interface{})

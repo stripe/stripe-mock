@@ -13,6 +13,7 @@ import (
 )
 
 var listSchema *spec.Schema
+var listSchemaWithPlaceholder *spec.Schema
 var searchResultSchema *spec.Schema
 var verbose bool
 
@@ -37,6 +38,30 @@ func init() {
 			"url": {
 				Type:    "string",
 				Pattern: "^/v1/charges",
+			},
+		},
+	}
+
+	listSchemaWithPlaceholder = &spec.Schema{
+		Type: "object",
+		Properties: map[string]*spec.Schema{
+			"data": {
+				Items: &spec.Schema{
+					Ref: "#/components/schemas/charge",
+				},
+			},
+			"has_more": {
+				Type: "boolean",
+			},
+			"object": {
+				Enum: []interface{}{"list"},
+			},
+			"total_count": {
+				Type: "integer",
+			},
+			"url": {
+				Type:    "string",
+				Pattern: "^/v1/charges/[^/]+/nested_list",
 			},
 		},
 	}
@@ -337,6 +362,40 @@ func TestGenerateResponseData(t *testing.T) {
 		assert.Equal(t,
 			newID,
 			data.(map[string]interface{})["customer"])
+	}
+
+	// injected ID in list url
+	{
+		generator := DataGenerator{
+			testSpec.Components.Schemas,
+			&spec.Fixtures{
+				Resources: map[spec.ResourceID]interface{}{
+					spec.ResourceID("charge"): map[string]interface{}{"id": "ch_123"},
+					spec.ResourceID("with_charges_list"): map[string]interface{}{
+						"charges_list": map[string]interface{}{
+							"url": "/v1/charges",
+						},
+					},
+				},
+			},
+			verbose,
+		}
+		data, err := generator.Generate(&GenerateParams{
+			Schema: &spec.Schema{
+				Type: "object",
+				Properties: map[string]*spec.Schema{
+					"charges_list": listSchemaWithPlaceholder,
+				},
+				XResourceID: "with_charges_list",
+			},
+		})
+		assert.Nil(t, err)
+		chargesList := data.(map[string]interface{})["charges_list"]
+		assert.Equal(t, "list", chargesList.(map[string]interface{})["object"])
+		assert.Equal(t, "/v1/charges/id_123/nested_list", chargesList.(map[string]interface{})["url"])
+		assert.Equal(t,
+			testFixtures.Resources["charge"].(map[string]interface{})["id"],
+			chargesList.(map[string]interface{})["data"].([]interface{})[0].(map[string]interface{})["id"])
 	}
 
 	// injected secondary ID
