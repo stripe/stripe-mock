@@ -2003,15 +2003,12 @@
       "last_payment_error": null,
       "latest_charge": null,
       "livemode": false,
-      "metadata": {
-        "order_id": "pay_oKIb82AehukmsQcs5YoZ",
-        "txn_id": "merchant_x_pay_oKIb82AehukmsQcs5YoZ",
-        "txn_uuid": "merchant_x_pay_oKIb82AehukmsQcs5YoZ"
-      },
+      "metadata": {},
       "next_action": null,
       "object": "payment_intent",
       "on_behalf_of": null,
       "payment_method": null,
+      "payment_method_options": {},
       "payment_method_types": [
         "card"
       ],
