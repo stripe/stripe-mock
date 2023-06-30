@@ -59,6 +59,7 @@ nfpms:
     - rpm
 
 dockers:
+  - dockerfile: goreleaser.dockerfile
   - image_templates:
       - "stripe/stripe-mock:{{ .Tag }}-amd64"
       - "stripe/stripe-mock:latest-amd64"
