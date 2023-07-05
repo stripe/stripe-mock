@@ -59,7 +59,6 @@ nfpms:
     - rpm
 
 dockers:
-  - dockerfile: goreleaser.dockerfile
   - image_templates:
       - "stripe/stripe-mock:{{ .Tag }}-amd64"
       - "stripe/stripe-mock:latest-amd64"
@@ -68,6 +67,7 @@ dockers:
     goarch: amd64
     build_flag_templates:
       - "--platform=linux/amd64"
+    dockerfile: goreleaser.dockerfile
   - image_templates:
       - "stripe/stripe-mock:{{ .Tag }}-arm64"
       - "stripe/stripe-mock:latest-arm64"
@@ -76,6 +76,7 @@ dockers:
     goarch: arm64
     build_flag_templates:
       - "--platform=linux/arm64"
+    dockerfile: goreleaser.dockerfile
 
 docker_manifests:
   - name_template: "stripe/stripe-mock:{{ .Tag }}"
