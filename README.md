@@ -77,7 +77,7 @@ API does, and might differ in nuanced (and potentially dangerous) ways.
 If you have Go installed, you can install the basic binary with:
 
 ```sh
-go get -u github.com/stripe/stripe-mock
+go install github.com/stripe/stripe-mock@latest
 ```
 
 With no arguments, stripe-mock will listen with HTTP on its default port of
