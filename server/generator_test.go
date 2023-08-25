@@ -812,23 +812,23 @@ func TestFindAnyOfBranch(t *testing.T) {
 
 func TestGenerateSyntheticFixture(t *testing.T) {
 	// Scalars (and an array, which is easy)
-	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, ""))
-	assert.Equal(t, true, generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, ""))
-	assert.Equal(t, 0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, ""))
-	assert.Equal(t, 0.0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeNumber}, ""))
-	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{Type: spec.TypeString}, ""))
+	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, "", nil))
+	assert.Equal(t, true, generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, "", nil))
+	assert.Equal(t, 0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, "", nil))
+	assert.Equal(t, 0.0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeNumber}, "", nil))
+	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{Type: spec.TypeString}, "", nil))
 
 	// Nullable property
 	assert.Equal(t, nil, generateSyntheticFixture(&spec.Schema{
 		Nullable: true,
 		Type:     spec.TypeString,
-	}, ""))
+	}, "", nil))
 
 	// Property with enum
 	assert.Equal(t, "list", generateSyntheticFixture(&spec.Schema{
 		Enum: []interface{}{"list"},
 		Type: spec.TypeString,
-	}, ""))
+	}, "", nil))
 
 	// Takes the first non-reference branch of an anyOf
 	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{
@@ -836,7 +836,7 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 			{Ref: "#/components/schemas/radar_rule"},
 			{Type: spec.TypeString},
 		},
-	}, ""))
+	}, "", nil))
 
 	// Object
 	assert.Equal(t,
@@ -866,8 +866,54 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 				"object",
 				"url",
 			},
-		}, ""),
+		}, "", nil),
 	)
+
+	// Nullable object property with expansion
+	assert.Equal(t,
+		map[string]interface{}{
+			"foo": "",
+		},
+		generateSyntheticFixture(&spec.Schema{
+			Type:     "object",
+			Nullable: true,
+			Properties: map[string]*spec.Schema{
+				"foo": {
+					Type: "string",
+				},
+			},
+			Required: []string{
+				"foo",
+			},
+		}, "", &ExpansionLevel{
+			expansions: map[string]*ExpansionLevel{"foo": {
+				expansions: map[string]*ExpansionLevel{}},
+			},
+		}),
+	)
+}
+
+func TestGenerateForNullableExpansion(t *testing.T) {
+	generator := DataGenerator{
+		definitions: realSpec.Components.Schemas,
+		fixtures:    &realFixtures,
+		verbose:     verbose,
+	}
+
+	var example interface{}
+	var err error
+	assert.NotPanics(t, func() {
+		example, err = generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"account_tax_ids": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
+			},
+			Schema: &spec.Schema{Ref: "#/components/schemas/invoice"},
+		})
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, example)
 }
 
 func TestPropertyNames(t *testing.T) {
