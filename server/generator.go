@@ -739,7 +739,7 @@ func generateSyntheticFixture(schema *spec.Schema, context string, expansions *E
 
 	// Return the minimum viable object by returning nil/null for a nullable
 	// property, if that property does not need to be expanded.
-	if schema.Nullable && (expansions == nil) {
+	if schema.Nullable && expansions == nil {
 		return nil
 	}
 
