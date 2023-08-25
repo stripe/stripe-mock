@@ -315,7 +315,10 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	}
 
 	// Generate a synthethic schema as a last ditch effort
-	if example == nil && schema.XResourceID == "" {
+	if (example == nil || example.value == nil) && schema.XResourceID == "" {
+		if schema.Nullable && params.Expansions != nil {
+			schema.Nullable = false
+		}
 		example = &valueWrapper{value: generateSyntheticFixture(schema, context)}
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)

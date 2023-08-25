@@ -870,6 +870,29 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 	)
 }
 
+func TestGenerateForNullableExpansion(t *testing.T) {
+	generator := DataGenerator{
+		definitions: realSpec.Components.Schemas,
+		fixtures:    &realFixtures,
+		verbose:     verbose,
+	}
+
+	var example interface{}
+	var err error
+	assert.NotPanics(t, func() {
+		example, err = generator.Generate(&GenerateParams{
+			Expansions: &ExpansionLevel{
+				expansions: map[string]*ExpansionLevel{"account_tax_ids": {
+					expansions: map[string]*ExpansionLevel{}},
+				},
+			},
+			Schema: &spec.Schema{Ref: "#/components/schemas/invoice"},
+		})
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, example)
+}
+
 func TestPropertyNames(t *testing.T) {
 	assert.Equal(t, "bar, foo", propertyNames(&spec.Schema{
 		Properties: map[string]*spec.Schema{
