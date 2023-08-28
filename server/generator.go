@@ -315,8 +315,8 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	}
 
 	// Generate a synthethic schema as a last ditch effort
-	if (example == nil || example.value == nil) && schema.XResourceID == "" {
-		example = &valueWrapper{value: generateSyntheticFixture(schema, context, params.Expansions)}
+	if example == nil && schema.XResourceID == "" {
+		example = &valueWrapper{value: generateSyntheticFixture(schema, context)}
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
 
@@ -734,12 +734,12 @@ func distributeReplacedIDsInValue(pathParams *PathParamsMap, value interface{}) 
 // This function calls itself recursively by initially iterating through every
 // property in an object schema, then recursing and returning values for
 // embedded objects and scalars.
-func generateSyntheticFixture(schema *spec.Schema, context string, expansions *ExpansionLevel) interface{} {
+func generateSyntheticFixture(schema *spec.Schema, context string) interface{} {
 	context = fmt.Sprintf("%sGenerating synthetic fixture: %+v\n", context, schema)
 
 	// Return the minimum viable object by returning nil/null for a nullable
-	// property, if that property does not need to be expanded.
-	if schema.Nullable && expansions == nil {
+	// property.
+	if schema.Nullable {
 		return nil
 	}
 
@@ -755,8 +755,7 @@ func generateSyntheticFixture(schema *spec.Schema, context string, expansions *E
 			if subSchema.Ref != "" {
 				continue
 			}
-
-			return generateSyntheticFixture(subSchema, context, expansions)
+			return generateSyntheticFixture(subSchema, context)
 		}
 		panic(fmt.Sprintf("%sCouldn't find an anyOf branch to take", context))
 	}
@@ -783,12 +782,7 @@ func generateSyntheticFixture(schema *spec.Schema, context string, expansions *E
 				continue
 			}
 
-			var propertyExpansions *ExpansionLevel
-			if expansions != nil && expansions.expansions[property] != nil {
-				propertyExpansions = expansions.expansions[property]
-			}
-
-			fixture[property] = generateSyntheticFixture(subSchema, context, propertyExpansions)
+			fixture[property] = generateSyntheticFixture(subSchema, context)
 		}
 		return fixture
 
