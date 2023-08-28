@@ -315,7 +315,10 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	}
 
 	// Generate a synthethic schema as a last ditch effort
-	if (example == nil || example.value == nil) && schema.XResourceID == "" {
+	// Note that if example.value is nil, we only want to generate
+	// a synthetic fixture if the user has requested expansions.
+	// Otherwise, we'll cause bugs like https://github.com/stripe/stripe-mock/issues/447
+	if example == nil || (params.Expansions != nil && example.value == nil) && schema.XResourceID == "" {
 		example = &valueWrapper{value: generateSyntheticFixture(schema, context, params.Expansions)}
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
