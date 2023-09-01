@@ -812,7 +812,7 @@ func TestFindAnyOfBranch(t *testing.T) {
 
 func TestGenerateSyntheticFixture(t *testing.T) {
 	// Scalars (and an array, which is easy)
-    g := DataGenerator{nil, nil, verbose}
+	g := DataGenerator{nil, nil, verbose}
 	assert.Equal(t, []string{}, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, "", nil))
 	assert.Equal(t, true, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, "", nil))
 	assert.Equal(t, 0, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, "", nil))
