@@ -812,26 +812,27 @@ func TestFindAnyOfBranch(t *testing.T) {
 
 func TestGenerateSyntheticFixture(t *testing.T) {
 	// Scalars (and an array, which is easy)
-	assert.Equal(t, []string{}, generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, "", nil))
-	assert.Equal(t, true, generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, "", nil))
-	assert.Equal(t, 0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, "", nil))
-	assert.Equal(t, 0.0, generateSyntheticFixture(&spec.Schema{Type: spec.TypeNumber}, "", nil))
-	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{Type: spec.TypeString}, "", nil))
+	g := DataGenerator{nil, nil, verbose}
+	assert.Equal(t, []string{}, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeArray}, "", nil))
+	assert.Equal(t, true, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeBoolean}, "", nil))
+	assert.Equal(t, 0, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeInteger}, "", nil))
+	assert.Equal(t, 0.0, g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeNumber}, "", nil))
+	assert.Equal(t, "", g.generateSyntheticFixture(&spec.Schema{Type: spec.TypeString}, "", nil))
 
 	// Nullable property
-	assert.Equal(t, nil, generateSyntheticFixture(&spec.Schema{
+	assert.Equal(t, nil, g.generateSyntheticFixture(&spec.Schema{
 		Nullable: true,
 		Type:     spec.TypeString,
 	}, "", nil))
 
 	// Property with enum
-	assert.Equal(t, "list", generateSyntheticFixture(&spec.Schema{
+	assert.Equal(t, "list", g.generateSyntheticFixture(&spec.Schema{
 		Enum: []interface{}{"list"},
 		Type: spec.TypeString,
 	}, "", nil))
 
 	// Takes the first non-reference branch of an anyOf
-	assert.Equal(t, "", generateSyntheticFixture(&spec.Schema{
+	assert.Equal(t, "", g.generateSyntheticFixture(&spec.Schema{
 		AnyOf: []*spec.Schema{
 			{Ref: "#/components/schemas/radar_rule"},
 			{Type: spec.TypeString},
@@ -845,7 +846,7 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 			"object":   "list",
 			"url":      "",
 		},
-		generateSyntheticFixture(&spec.Schema{
+		g.generateSyntheticFixture(&spec.Schema{
 			Type: "object",
 			Properties: map[string]*spec.Schema{
 				"has_more": {
@@ -874,7 +875,7 @@ func TestGenerateSyntheticFixture(t *testing.T) {
 		map[string]interface{}{
 			"foo": "",
 		},
-		generateSyntheticFixture(&spec.Schema{
+		g.generateSyntheticFixture(&spec.Schema{
 			Type:     "object",
 			Nullable: true,
 			Properties: map[string]*spec.Schema{
