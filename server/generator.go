@@ -762,7 +762,7 @@ func (g *DataGenerator) generateSyntheticFixture(schema *spec.Schema, context st
 			return g.generateSyntheticFixture(subSchema, context, expansions)
 		}
 
-		// If no viable non-references, do the references
+		// If no viable non-references, attempt to dereference the references
 		for _, subSchema := range schema.AnyOf {
 			if subSchema.Ref == "" {
 				continue
