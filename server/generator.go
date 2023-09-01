@@ -319,7 +319,7 @@ func (g *DataGenerator) generateInternal(params *GenerateParams) (interface{}, e
 	// a synthetic fixture if the user has requested expansions.
 	// Otherwise, we'll cause bugs like https://github.com/stripe/stripe-mock/issues/447
 	if example == nil || (params.Expansions != nil && example.value == nil) && schema.XResourceID == "" {
-		example = &valueWrapper{value: generateSyntheticFixture(schema, context, params.Expansions)}
+		example = &valueWrapper{value: g.generateSyntheticFixture(schema, context, params.Expansions)}
 
 		context = fmt.Sprintf("%sGenerated synthetic fixture: %+v\n", context, schema)
 
@@ -737,7 +737,7 @@ func distributeReplacedIDsInValue(pathParams *PathParamsMap, value interface{}) 
 // This function calls itself recursively by initially iterating through every
 // property in an object schema, then recursing and returning values for
 // embedded objects and scalars.
-func generateSyntheticFixture(schema *spec.Schema, context string, expansions *ExpansionLevel) interface{} {
+func (g *DataGenerator) generateSyntheticFixture(schema *spec.Schema, context string, expansions *ExpansionLevel) interface{} {
 	context = fmt.Sprintf("%sGenerating synthetic fixture: %+v\n", context, schema)
 
 	// Return the minimum viable object by returning nil/null for a nullable
@@ -753,15 +753,28 @@ func generateSyntheticFixture(schema *spec.Schema, context string, expansions *E
 	}
 
 	if len(schema.AnyOf) > 0 {
+		// Try the non-references first.
 		for _, subSchema := range schema.AnyOf {
-			// We don't handle dereferencing here right now, but it's plausible
 			if subSchema.Ref != "" {
 				continue
 			}
 
-			return generateSyntheticFixture(subSchema, context, expansions)
+			return g.generateSyntheticFixture(subSchema, context, expansions)
 		}
-		panic(fmt.Sprintf("%sCouldn't find an anyOf branch to take", context))
+
+		// If no viable non-references, do the references
+		for _, subSchema := range schema.AnyOf {
+			if subSchema.Ref == "" {
+				continue
+			}
+
+			dereferencedSchema, context, err := g.maybeDereference(subSchema, context)
+			if err != nil {
+				panic(err)
+			}
+			return g.generateSyntheticFixture(dereferencedSchema, context, expansions)
+		}
+		panic("Unexpected: anyOf with length > 0 should have contained a ref or non ref")
 	}
 
 	switch schema.Type {
@@ -791,7 +804,7 @@ func generateSyntheticFixture(schema *spec.Schema, context string, expansions *E
 				propertyExpansions = expansions.expansions[property]
 			}
 
-			fixture[property] = generateSyntheticFixture(subSchema, context, propertyExpansions)
+			fixture[property] = g.generateSyntheticFixture(subSchema, context, propertyExpansions)
 		}
 		return fixture
 
