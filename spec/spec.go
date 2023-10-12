@@ -84,6 +84,7 @@ var supportedSchemaFields = []string{
 	"x-stripeResource",
 	"x-stripeOperations",
 	"x-stripeParam",
+	"x-stripeEvent",
 
 	// This is currently a hint for the server-side so I haven't included it in
 	// Schema yet. If we do start validating responses that come out of

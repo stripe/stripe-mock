@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/stripe/stripe-mock/embedded"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -276,6 +277,13 @@ func initTestSpec() {
 //
 // Tests
 //
+
+func TestCanLoadEmbeddedSpecs(t *testing.T) {
+	_, err := LoadSpec(embedded.OpenAPISpec, "")
+	assert.NoError(t, err)
+	_, err = LoadSpec(embedded.BetaOpenAPISpec, "")
+	assert.NoError(t, err)
+}
 
 func TestDoubleSlashFixHandler(t *testing.T) {
 	var lastPath string
