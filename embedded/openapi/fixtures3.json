@@ -379,7 +379,7 @@
       "id": "card_1OPoudJN5vQBdWExoijT3YAB",
       "last4": "4242",
       "metadata": {},
-      "name": null,
+      "name": "Jenny Rosen",
       "object": "card",
       "tokenization_method": null
     },
@@ -413,7 +413,7 @@
           "state": null
         },
         "email": null,
-        "name": null,
+        "name": "Jenny Rosen",
         "phone": null
       },
       "calculated_statement_descriptor": null,
@@ -658,6 +658,23 @@
           "name": "Heirloom",
           "object": "climate.supplier",
           "removal_pathway": "direct_air_capture"
+        },
+        {
+          "id": "climsup_lithos",
+          "info_url": "https://frontierclimate.com/portfolio/lithos",
+          "livemode": false,
+          "locations": [
+            {
+              "city": "San Francisco",
+              "country": "US",
+              "latitude": 37.7749,
+              "longitude": -122.4194,
+              "region": "CA"
+            }
+          ],
+          "name": "Lithos",
+          "object": "climate.supplier",
+          "removal_pathway": "enhanced_weathering"
         }
       ]
     },
@@ -1406,7 +1423,52 @@
       "filename": "file_1OPouvJN5vQBdWExSL8Knl9d",
       "id": "file_1OPouvJN5vQBdWExSL8Knl9d",
       "links": {
-        "data": [],
+        "data": [
+          {
+            "created": 1704317636,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUc4WCvqdCcBJstqK9xR0jd",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfT1I4MWJUZUpJRGhra2pocFliQVMzUFBN00yC1khHda"
+          },
+          {
+            "created": 1704317635,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUc4VCvqdCcBJstSiPWoOrm",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfUXJQZjBMNVhVT2l1NWFoSDE2V2tJN0dZ00maU6RA8s"
+          },
+          {
+            "created": 1704317268,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUbyaCvqdCcBJst24owQXtB",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfOTNlSU0wd0gwdE9MNERNY2VxaDZ1RGNU00rA23eftk"
+          },
+          {
+            "created": 1704317267,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUbyZCvqdCcBJstiMH2ccV7",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfMzlSSjB3QTE2bDc1djNhVkdTWjRSdE1P00wpLiNEEN"
+          }
+        ],
         "has_more": false,
         "object": "list",
         "url": "/v1/file_links?file=file_1OPouvJN5vQBdWExSL8Knl9d"
@@ -3431,7 +3493,9 @@
         "collection_method": "charge_automatically",
         "default_payment_method": null,
         "description": null,
-        "invoice_settings": null,
+        "invoice_settings": {
+          "days_until_due": null
+        },
         "on_behalf_of": null,
         "transfer_data": null
       },
