@@ -149,6 +149,30 @@
         "account_onboarding": {
           "enabled": false,
           "features": {}
+        },
+        "payment_details": {
+          "enabled": false,
+          "features": {
+            "capture_payments": true,
+            "dispute_management": true,
+            "refund_management": true
+          }
+        },
+        "payments": {
+          "enabled": false,
+          "features": {
+            "capture_payments": true,
+            "dispute_management": true,
+            "refund_management": true
+          }
+        },
+        "payouts": {
+          "enabled": false,
+          "features": {
+            "edit_payout_schedule": false,
+            "instant_payouts": false,
+            "standard_payouts": false
+          }
         }
       },
       "expires_at": 1234567890,
@@ -619,6 +643,9 @@
       "amount_fees": 0,
       "amount_subtotal": 0,
       "amount_total": 0,
+      "beneficiary": {
+        "public_name": "Frontier Climate"
+      },
       "canceled_at": 1234567890,
       "cancellation_reason": null,
       "certificate": null,
@@ -704,6 +731,23 @@
           "name": "Heirloom",
           "object": "climate.supplier",
           "removal_pathway": "direct_air_capture"
+        },
+        {
+          "id": "climsup_lithos",
+          "info_url": "https://frontierclimate.com/portfolio/lithos",
+          "livemode": false,
+          "locations": [
+            {
+              "city": "San Francisco",
+              "country": "US",
+              "latitude": 37.7749,
+              "longitude": -122.4194,
+              "region": "CA"
+            }
+          ],
+          "name": "Lithos",
+          "object": "climate.supplier",
+          "removal_pathway": "enhanced_weathering"
         }
       ]
     },
@@ -1516,6 +1560,39 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://rwashburne-g8ezbf--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT01lM3JDTERMcEhtRTZ1fGZsX3Rlc3RfU1BWbWdMcFVLVTFIUHZpM0lpTFFDRmtm00yC4jtB6H"
+          },
+          {
+            "created": 1704317635,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUc4VCvqdCcBJstSiPWoOrm",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfUXJQZjBMNVhVT2l1NWFoSDE2V2tJN0dZ00maU6RA8s"
+          },
+          {
+            "created": 1704317268,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUbyaCvqdCcBJst24owQXtB",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfOTNlSU0wd0gwdE9MNERNY2VxaDZ1RGNU00rA23eftk"
+          },
+          {
+            "created": 1704317267,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
+            "id": "link_1OUbyZCvqdCcBJstiMH2ccV7",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfMzlSSjB3QTE2bDc1djNhVkdTWjRSdE1P00wpLiNEEN"
           }
         ],
         "has_more": false,
@@ -3394,7 +3471,13 @@
         "collection_method": null,
         "default_payment_method": null,
         "description": null,
-        "invoice_settings": null,
+        "invoice_settings": {
+          "days_until_due": null,
+          "issuer": {
+            "account": "",
+            "type": "account"
+          }
+        },
         "on_behalf_of": null,
         "transfer_data": null
       },
@@ -3451,6 +3534,12 @@
       "charge": "ch_1OMe4CCLDLpHmE6u7IyT3Jwn",
       "created": 1234567890,
       "currency": "usd",
+      "destination_details": {
+        "card": {
+          "type": "reversal"
+        },
+        "type": "card"
+      },
       "id": "re_1OMeeKCLDLpHmE6uz77haXBS",
       "metadata": {},
       "object": "refund",
@@ -3857,7 +3946,9 @@
         "collection_method": "charge_automatically",
         "default_payment_method": null,
         "description": null,
-        "invoice_settings": null,
+        "invoice_settings": {
+          "days_until_due": null
+        },
         "on_behalf_of": null,
         "transfer_data": null
       },
