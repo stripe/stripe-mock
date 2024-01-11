@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
       - name: Set the commit SHA
         id: sha
-        run: echo "::set-output name=commitSha::$(if [ -z "$SHA" ]; then echo $GITHUB_SHA; else echo $SHA; fi)"
+        run: echo "commitSha=$(if [ -z "$SHA" ]; then echo $GITHUB_SHA; else echo $SHA; fi)" >> "$GITHUB_OUTPUT"
         env:
           SHA: ${{ github.event.inputs.sha }}
       - name: Set the tag
@@ -30,7 +30,7 @@ jobs:
           # v1.2.3 is parsed into $1 = "v1.", $2 = "2", $3 = ".3"
           # and concatenated back into v1.3.0
           new_tag="$(echo "$last_tag" | perl -pe 's/^(v\d+\.)(\d+)(\.\d+)$/$1.($2+1).".0"/e')"
-          echo "::set-output name=newTag::$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)"
+          echo "newTag=$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)" >> "$GITHUB_OUTPUT"
         env:
           TAG: ${{ github.event.inputs.tag }}
       - uses: tibdex/github-app-token@v1.5.2
