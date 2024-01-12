@@ -811,6 +811,7 @@
         }
       },
       "return_url": "https://example.com/return",
+      "setup_future_usage": "off_session",
       "setup_intent": null,
       "shipping": {
         "address": {
@@ -1262,6 +1263,7 @@
     },
     "customer_session": {
       "client_secret": "_PB0fJ3hjtNwv8q9uBE2WCHja97ziIdXj38YAVkF7DYVuqqj",
+      "components": {},
       "created": 1234567890,
       "customer": "cus_PB04OtV7Mglte4",
       "expires_at": 1234567890,
@@ -1560,39 +1562,6 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://rwashburne-g8ezbf--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT01lM3JDTERMcEhtRTZ1fGZsX3Rlc3RfU1BWbWdMcFVLVTFIUHZpM0lpTFFDRmtm00yC4jtB6H"
-          },
-          {
-            "created": 1704317635,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUc4VCvqdCcBJstSiPWoOrm",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfUXJQZjBMNVhVT2l1NWFoSDE2V2tJN0dZ00maU6RA8s"
-          },
-          {
-            "created": 1704317268,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUbyaCvqdCcBJst24owQXtB",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfOTNlSU0wd0gwdE9MNERNY2VxaDZ1RGNU00rA23eftk"
-          },
-          {
-            "created": 1704317267,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUbyZCvqdCcBJstiMH2ccV7",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfMzlSSjB3QTE2bDc1djNhVkdTWjRSdE1P00wpLiNEEN"
           }
         ],
         "has_more": false,

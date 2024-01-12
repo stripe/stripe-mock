@@ -1130,6 +1130,15 @@
       "object": "customer_cash_balance_transaction",
       "type": "funded"
     },
+    "customer_session": {
+      "client_secret": "_PMG9cUABRpWoToRKwjVQsfVNtZ0oe5m5LuRYsgOe68eoLHh",
+      "components": {},
+      "created": 1234567890,
+      "customer": "cus_PMG9sZduVeoHej",
+      "expires_at": 1234567890,
+      "livemode": false,
+      "object": "customer_session"
+    },
     "deleted_account": {
       "deleted": true,
       "id": "acct_1OPouMJN5vQBdWEx",
@@ -1425,48 +1434,15 @@
       "links": {
         "data": [
           {
-            "created": 1704317636,
+            "created": 1705015539,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUc4WCvqdCcBJstqK9xR0jd",
+            "file": "file_1OXXd1D2qP7QtJeGUtVg07y2",
+            "id": "link_1OXXd1D2qP7QtJeG4PxdkQAI",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfT1I4MWJUZUpJRGhra2pocFliQVMzUFBN00yC1khHda"
-          },
-          {
-            "created": 1704317635,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUc4VCvqdCcBJstSiPWoOrm",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfUXJQZjBMNVhVT2l1NWFoSDE2V2tJN0dZ00maU6RA8s"
-          },
-          {
-            "created": 1704317268,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUbyaCvqdCcBJst24owQXtB",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfOTNlSU0wd0gwdE9MNERNY2VxaDZ1RGNU00rA23eftk"
-          },
-          {
-            "created": 1704317267,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OUbyZCvqdCcBJstQnA2CM0M",
-            "id": "link_1OUbyZCvqdCcBJstiMH2ccV7",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1VieHdDdnFkQ2NCSnN0fGZsX3Rlc3RfMzlSSjB3QTE2bDc1djNhVkdTWjRSdE1P00wpLiNEEN"
+            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           }
         ],
         "has_more": false,
