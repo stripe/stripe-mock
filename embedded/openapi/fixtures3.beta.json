@@ -813,18 +813,7 @@
       "return_url": "https://example.com/return",
       "setup_future_usage": "off_session",
       "setup_intent": null,
-      "shipping": {
-        "address": {
-          "city": "San Francisco",
-          "country": "US",
-          "line1": "1234 Fake Street",
-          "line2": null,
-          "postal_code": "94102",
-          "state": "CA"
-        },
-        "name": "Jenny Rosen",
-        "phone": null
-      }
+      "shipping": null
     },
     "country_spec": {
       "default_currency": "usd",
@@ -1562,6 +1551,17 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://rwashburne-g8ezbf--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT01lM3JDTERMcEhtRTZ1fGZsX3Rlc3RfU1BWbWdMcFVLVTFIUHZpM0lpTFFDRmtm00yC4jtB6H"
+          },
+          {
+            "created": 1705517612,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
+            "id": "link_1OZeEyBdtFoQDc8hkuUWhWwb",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfNUZpaDd5YU4yS01sVVVFalBLNDRmb01I00dvOQbCJw"
           }
         ],
         "has_more": false,
@@ -1801,6 +1801,7 @@
       "auto_advance": false,
       "automatic_tax": {
         "enabled": false,
+        "liability": null,
         "status": null
       },
       "billing_reason": "manual",
@@ -1831,6 +1832,9 @@
       "hosted_invoice_url": null,
       "id": "in_1OMeeJCLDLpHmE6uKpDfxFT6",
       "invoice_pdf": null,
+      "issuer": {
+        "type": "self"
+      },
       "last_finalization_error": null,
       "latest_revision": null,
       "lines": {
@@ -3363,6 +3367,10 @@
       "footer": null,
       "from_invoice": null,
       "id": "",
+      "issuer": {
+        "account": "",
+        "type": "account"
+      },
       "last_finalization_error": null,
       "latest_revision": null,
       "lines": {
@@ -3746,6 +3754,7 @@
         "enabled": false
       },
       "billing_cycle_anchor": 1234567890,
+      "billing_cycle_anchor_config": null,
       "billing_thresholds": null,
       "cancel_at": 1234567890,
       "cancel_at_period_end": false,
@@ -4317,39 +4326,7 @@
         "order_id": "12345678"
       },
       "object": "topup",
-      "source": {
-        "ach_debit": {
-          "bank_name": "STRIPE TEST BANK",
-          "country": "US",
-          "fingerprint": "5Wh4KBcfDrz5IOnx",
-          "last4": "6789",
-          "routing_number": "110000000",
-          "type": "individual"
-        },
-        "amount": null,
-        "client_secret": "src_client_secret_UB0hY2iC2k4UkRLMtN9LC5JA",
-        "created": 1702420927,
-        "currency": "usd",
-        "flow": "code_verification",
-        "id": "src_1OMeeRCLDLpHmE6u5OMuCEB5",
-        "livemode": false,
-        "metadata": {},
-        "object": "source",
-        "owner": {
-          "address": null,
-          "email": "jenny.rosen@example.com",
-          "name": "Jenny Rosen",
-          "phone": null,
-          "verified_address": null,
-          "verified_email": null,
-          "verified_name": null,
-          "verified_phone": null
-        },
-        "statement_descriptor": null,
-        "status": "pending",
-        "type": "ach_debit",
-        "usage": "reusable"
-      },
+      "source": null,
       "statement_descriptor": null,
       "status": "pending",
       "transfer_group": null
