@@ -379,7 +379,7 @@
       "id": "card_1OPoudJN5vQBdWExoijT3YAB",
       "last4": "4242",
       "metadata": {},
-      "name": "Jenny Rosen",
+      "name": null,
       "object": "card",
       "tokenization_method": null
     },
@@ -413,7 +413,7 @@
           "state": null
         },
         "email": null,
-        "name": "Jenny Rosen",
+        "name": null,
         "phone": null
       },
       "calculated_statement_descriptor": null,
@@ -1132,7 +1132,14 @@
     },
     "customer_session": {
       "client_secret": "_PMG9cUABRpWoToRKwjVQsfVNtZ0oe5m5LuRYsgOe68eoLHh",
-      "components": {},
+      "components": {
+        "buy_button": {
+          "enabled": false
+        },
+        "pricing_table": {
+          "enabled": true
+        }
+      },
       "created": 1234567890,
       "customer": "cus_PMG9sZduVeoHej",
       "expires_at": 1234567890,
@@ -1443,6 +1450,28 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
+          },
+          {
+            "created": 1705517612,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
+            "id": "link_1OZeEyBdtFoQDc8hkuUWhWwb",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfNUZpaDd5YU4yS01sVVVFalBLNDRmb01I00dvOQbCJw"
+          },
+          {
+            "created": 1705518728,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
+            "id": "link_1OZeWyBdtFoQDc8hnxJ5gmNE",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfaTd5TldodW94MWM0M3pJSld1eDNRbkpL00x9dR5ays"
           },
           {
             "created": 1705517612,
@@ -2505,6 +2534,14 @@
           "value": "off"
         }
       },
+      "customer_balance": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
       "eps": {
         "available": false,
         "display_preference": {
@@ -3334,7 +3371,8 @@
       "application": null,
       "application_fee_percent": null,
       "automatic_tax": {
-        "enabled": false
+        "enabled": false,
+        "liability": null
       },
       "billing_cycle_anchor": 1234567890,
       "billing_cycle_anchor_config": null,

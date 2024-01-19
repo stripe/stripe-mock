@@ -451,7 +451,7 @@
       "id": "card_1OMe4BCLDLpHmE6uOaydeTvZ",
       "last4": "4242",
       "metadata": {},
-      "name": "Jenny Rosen",
+      "name": null,
       "object": "card",
       "tokenization_method": null
     },
@@ -485,7 +485,7 @@
           "state": null
         },
         "email": null,
-        "name": "Jenny Rosen",
+        "name": null,
         "phone": null
       },
       "calculated_statement_descriptor": null,
@@ -813,7 +813,18 @@
       "return_url": "https://example.com/return",
       "setup_future_usage": "off_session",
       "setup_intent": null,
-      "shipping": null
+      "shipping": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "1234 Fake Street",
+          "line2": null,
+          "postal_code": "94102",
+          "state": "CA"
+        },
+        "name": "Jenny Rosen",
+        "phone": null
+      }
     },
     "country_spec": {
       "default_currency": "usd",
@@ -1252,7 +1263,14 @@
     },
     "customer_session": {
       "client_secret": "_PB0fJ3hjtNwv8q9uBE2WCHja97ziIdXj38YAVkF7DYVuqqj",
-      "components": {},
+      "components": {
+        "buy_button": {
+          "enabled": false
+        },
+        "pricing_table": {
+          "enabled": true
+        }
+      },
       "created": 1234567890,
       "customer": "cus_PB04OtV7Mglte4",
       "expires_at": 1234567890,
@@ -1551,6 +1569,28 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://rwashburne-g8ezbf--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT01lM3JDTERMcEhtRTZ1fGZsX3Rlc3RfU1BWbWdMcFVLVTFIUHZpM0lpTFFDRmtm00yC4jtB6H"
+          },
+          {
+            "created": 1705517612,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
+            "id": "link_1OZeEyBdtFoQDc8hkuUWhWwb",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfNUZpaDd5YU4yS01sVVVFalBLNDRmb01I00dvOQbCJw"
+          },
+          {
+            "created": 1705518728,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
+            "id": "link_1OZeWyBdtFoQDc8hnxJ5gmNE",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfaTd5TldodW94MWM0M3pJSld1eDNRbkpL00x9dR5ays"
           },
           {
             "created": 1705517612,
@@ -2766,6 +2806,14 @@
           "value": "off"
         }
       },
+      "customer_balance": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
       "eps": {
         "available": false,
         "display_preference": {
@@ -3751,7 +3799,8 @@
       "application": null,
       "application_fee_percent": null,
       "automatic_tax": {
-        "enabled": false
+        "enabled": false,
+        "liability": null
       },
       "billing_cycle_anchor": 1234567890,
       "billing_cycle_anchor_config": null,
@@ -4564,19 +4613,13 @@
       "created": 1234567890,
       "currency": "usd",
       "customer": null,
-      "description": "OutboundPayment to a 3rd party",
+      "description": null,
       "destination_payment_method": null,
-      "destination_payment_method_details": {
-        "destination": "ba_1OMe4dCLDLpHmE6uQd8de7sr",
-        "type": "us_bank_account"
-      },
-      "end_user_details": {
-        "ip_address": null,
-        "present": false
-      },
+      "destination_payment_method_details": null,
+      "end_user_details": null,
       "expected_arrival_date": 1234567890,
       "financial_account": "fa_1OMeeYCLDLpHmE6unDhjFTR3",
-      "hosted_regulatory_receipt_url": "https://rwashburne-g8ezbf--agrippa-mydev.dev.stripe.me/regulatory-receipt/CBQaFwoVYWNjdF8xT01lM3JDTERMcEhtRTZ1KMzD46sGMgbaXba3e5M6Nf3PjkWntrC4v07pbPdxpCdzgPRcMbTlpJHG-5eXkaD7K7UTpW_etqtlajtXtLyND-bpc2Yo",
+      "hosted_regulatory_receipt_url": null,
       "id": "obp_1OMeeeCLDLpHmE6uj7LV979T",
       "livemode": false,
       "metadata": {},
