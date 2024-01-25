@@ -2,6 +2,8 @@
   "resources": {
     "account": {
       "business_profile": {
+        "annual_revenue": null,
+        "estimated_worker_count": null,
         "mcc": null,
         "name": null,
         "product_description": null,
@@ -379,7 +381,7 @@
       "id": "card_1OPoudJN5vQBdWExoijT3YAB",
       "last4": "4242",
       "metadata": {},
-      "name": null,
+      "name": "Jenny Rosen",
       "object": "card",
       "tokenization_method": null
     },
@@ -413,7 +415,7 @@
           "state": null
         },
         "email": null,
-        "name": null,
+        "name": "Jenny Rosen",
         "phone": null
       },
       "calculated_statement_descriptor": null,
@@ -502,6 +504,7 @@
       "amount_total": null,
       "automatic_tax": {
         "enabled": false,
+        "liability": null,
         "status": null
       },
       "billing_address_collection": null,
@@ -984,6 +987,7 @@
                 "id": "txr_1OPouvJN5vQBdWExvkEZYzsQ",
                 "inclusive": false,
                 "jurisdiction": "DE",
+                "jurisdiction_level": null,
                 "livemode": false,
                 "metadata": {},
                 "object": "tax_rate",
@@ -1452,37 +1456,26 @@
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           },
           {
-            "created": 1705517612,
+            "created": 1706199800,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
-            "id": "link_1OZeEyBdtFoQDc8hkuUWhWwb",
+            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
+            "id": "link_1OcVi0Dy8zbvZdAPelDMzIr9",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfNUZpaDd5YU4yS01sVVVFalBLNDRmb01I00dvOQbCJw"
+            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfSzFXUUhwdTVnTzJNcWFBMTVOYWl4ZE8500ozp8ilyy"
           },
           {
-            "created": 1705518728,
+            "created": 1706199799,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
-            "id": "link_1OZeWyBdtFoQDc8hnxJ5gmNE",
+            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
+            "id": "link_1OcVhzDy8zbvZdAPamJnikfg",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfaTd5TldodW94MWM0M3pJSld1eDNRbkpL00x9dR5ays"
-          },
-          {
-            "created": 1705517612,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OZeEyBdtFoQDc8hiLctksU9",
-            "id": "link_1OZeEyBdtFoQDc8hkuUWhWwb",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://anniel-ob52sw--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1plRVhCZHRGb1FEYzhofGZsX3Rlc3RfNUZpaDd5YU4yS01sVVVFalBLNDRmb01I00dvOQbCJw"
+            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfRjJLSVNGMTBoR1FmVldGN2JhV0FaeXVz009hUvBCR4"
           }
         ],
         "has_more": false,
@@ -2365,7 +2358,8 @@
       "application_fee_amount": null,
       "application_fee_percent": null,
       "automatic_tax": {
-        "enabled": false
+        "enabled": false,
+        "liability": null
       },
       "billing_address_collection": "auto",
       "consent_collection": null,
@@ -2659,6 +2653,8 @@
     },
     "payment_source": {
       "business_profile": {
+        "annual_revenue": null,
+        "estimated_worker_count": null,
         "mcc": null,
         "name": null,
         "product_description": null,
@@ -2978,6 +2974,7 @@
       "application_fee_percent": null,
       "automatic_tax": {
         "enabled": false,
+        "liability": null,
         "status": null
       },
       "collection_method": "charge_automatically",
@@ -3006,7 +3003,10 @@
       "id": "qt_1OPoumJN5vQBdWExJFNWX8UZ",
       "invoice": null,
       "invoice_settings": {
-        "days_until_due": null
+        "days_until_due": null,
+        "issuer": {
+          "type": "self"
+        }
       },
       "livemode": false,
       "metadata": {},
@@ -3516,7 +3516,8 @@
       "default_settings": {
         "application_fee_percent": null,
         "automatic_tax": {
-          "enabled": false
+          "enabled": false,
+          "liability": null
         },
         "billing_cycle_anchor": "automatic",
         "billing_thresholds": null,
@@ -3524,7 +3525,10 @@
         "default_payment_method": null,
         "description": null,
         "invoice_settings": {
-          "days_until_due": null
+          "days_until_due": null,
+          "issuer": {
+            "type": "self"
+          }
         },
         "on_behalf_of": null,
         "transfer_data": null
