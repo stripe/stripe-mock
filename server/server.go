@@ -144,30 +144,42 @@ type ResponseError struct {
 //
 // If path is empty, fixtures are loaded from internal embedded assets.
 func LoadFixtures(embeddedFixtures []byte, fixturesPath string) (*spec.Fixtures, error) {
-	var data []byte
 	var err error
+	var rawCustomFixture []byte
 
-	if fixturesPath == "" {
-		data = embeddedFixtures
-	} else {
+	var marshalledCustomFixtures *spec.Fixtures
+	var marshalledEmbeddedFixture spec.Fixtures
+
+	if fixturesPath != "" {
 		if !isJSONFile(fixturesPath) {
 			return nil, fmt.Errorf("Fixtures should come from a JSON file")
 		}
 
-		data, err = ioutil.ReadFile(fixturesPath)
+		rawCustomFixture, err = ioutil.ReadFile(fixturesPath)
+		if err != nil {
+			return nil, fmt.Errorf("error loading fixtures: %v", err)
+		}
+
+		err = json.Unmarshal(rawCustomFixture, &marshalledCustomFixtures)
+
+		if err != nil {
+			return nil, fmt.Errorf("error decoding fixtures: %v", err)
+		}
 	}
 
-	if err != nil {
-		return nil, fmt.Errorf("error loading fixtures: %v", err)
-	}
+	err = json.Unmarshal(embeddedFixtures, &marshalledEmbeddedFixture)
 
-	var fixtures spec.Fixtures
-	err = json.Unmarshal(data, &fixtures)
 	if err != nil {
 		return nil, fmt.Errorf("error decoding fixtures: %v", err)
 	}
 
-	return &fixtures, nil
+	if marshalledCustomFixtures != nil {
+		for resourceFixtureName, resourceFixture := range marshalledCustomFixtures.Resources {
+			marshalledEmbeddedFixture.Resources[resourceFixtureName] = resourceFixture
+		}
+	}
+
+	return &marshalledEmbeddedFixture, nil
 }
 
 // LoadSpec loads OpenAPI spec from a JSON file
