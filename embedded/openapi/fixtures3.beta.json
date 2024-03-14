@@ -101,6 +101,9 @@
           "display_name": null,
           "timezone": "Etc/UTC"
         },
+        "invoices": {
+          "default_account_tax_ids": null
+        },
         "payments": {
           "statement_descriptor": null,
           "statement_descriptor_kana": null,
@@ -149,6 +152,10 @@
       "client_secret": "_PB0f0kzm1qMYTiMqFkdbmH2O6pCzgvYf0SJip3dWFkgjK4V",
       "components": {
         "account_onboarding": {
+          "enabled": false,
+          "features": {}
+        },
+        "documents": {
           "enabled": false,
           "features": {}
         },
@@ -777,10 +784,10 @@
       "expires_at": 1234567890,
       "id": "ctoken_1OMeefCLDLpHmE6uSe3hKEuC",
       "livemode": true,
-      "mandate_data": null,
       "object": "confirmation_token",
       "payment_intent": null,
       "payment_method": null,
+      "payment_method_options": null,
       "payment_method_preview": {
         "billing_details": {
           "address": {
@@ -806,8 +813,7 @@
           "networks": {
             "preferred": "ach",
             "supported": [
-              "ach",
-              "us_domestic_wire"
+              "ach"
             ]
           },
           "routing_number": "110000000",
@@ -1255,6 +1261,24 @@
       "object": "customer_cash_balance_transaction",
       "type": "funded"
     },
+    "customer_entitlement": {
+      "feature": "",
+      "id": "",
+      "livemode": false,
+      "lookup_key": "",
+      "object": "customer_entitlement"
+    },
+    "customer_entitlement_summary": {
+      "customer": "",
+      "entitlements": {
+        "data": [],
+        "has_more": false,
+        "object": "list",
+        "url": ""
+      },
+      "livemode": false,
+      "object": "customer_entitlement_summary"
+    },
     "customer_session": {
       "client_secret": "_PB0fJ3hjtNwv8q9uBE2WCHja97ziIdXj38YAVkF7DYVuqqj",
       "components": {
@@ -1461,6 +1485,13 @@
       "reason": "general",
       "status": "warning_needs_response"
     },
+    "entitlements.feature": {
+      "id": "",
+      "livemode": false,
+      "lookup_key": "",
+      "name": "",
+      "object": "entitlements.feature"
+    },
     "ephemeral_key": {
       "created": 1234567890,
       "expires": 1234567890,
@@ -1563,28 +1594,6 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfMkpENmxlajRVSkN6UWcyN2tDbXJzb1hz00ZUdPIHXo"
-          },
-          {
-            "created": 1706199800,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
-            "id": "link_1OcVi0Dy8zbvZdAPelDMzIr9",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfSzFXUUhwdTVnTzJNcWFBMTVOYWl4ZE8500ozp8ilyy"
-          },
-          {
-            "created": 1706199799,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
-            "id": "link_1OcVhzDy8zbvZdAPamJnikfg",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfRjJLSVNGMTBoR1FmVldGN2JhV0FaeXVz009hUvBCR4"
           }
         ],
         "has_more": false,
@@ -1749,6 +1758,7 @@
       "transfer_group": null
     },
     "identity.verification_report": {
+      "client_reference_id": null,
       "created": 1234567890,
       "document": {
         "address": {
@@ -1790,6 +1800,7 @@
       "verification_session": "vs_1OMeedCLDLpHmE6uGoNSD6v1"
     },
     "identity.verification_session": {
+      "client_reference_id": null,
       "client_secret": null,
       "created": 1234567890,
       "id": "vs_1OMeedCLDLpHmE6uAU4rb408",
@@ -1871,6 +1882,7 @@
             "discountable": true,
             "discounts": [],
             "id": "il_1OMeeHCLDLpHmE6udYEvcwPA",
+            "invoice": "in_1Ou2SSI2S8mDw66kojRfbf62",
             "invoice_item": "ii_1OMeeHCLDLpHmE6ucdSnRU4H",
             "livemode": false,
             "metadata": {},
@@ -2327,6 +2339,7 @@
       "carrier_text": null,
       "created": 1234567890,
       "id": "ipcd_PB0fy8lQDpQxPv",
+      "livemode": false,
       "lookup_key": "my_card_design_lookup_key",
       "metadata": {},
       "name": "My Card Design V1",
@@ -2445,6 +2458,7 @@
       "discountable": true,
       "discounts": [],
       "id": "il_tmp_1OMeeNCLDLpHmE6uJh2YqyAP",
+      "invoice": "in_1Ou2SSI2S8mDw66kojRfbf62",
       "invoice_item": "ii_1OMeeNCLDLpHmE6uJh2YqyAP",
       "livemode": false,
       "metadata": {},
@@ -2680,6 +2694,7 @@
           "cvc_check": "pass"
         },
         "country": "US",
+        "display_brand": "visa",
         "exp_month": 8,
         "exp_year": 2024,
         "fingerprint": "8IkI3fmGr5cYzsIJ",
@@ -3013,6 +3028,9 @@
         "dashboard": {
           "display_name": null,
           "timezone": "Etc/UTC"
+        },
+        "invoices": {
+          "default_account_tax_ids": null
         },
         "payments": {
           "statement_descriptor": null,
@@ -3487,6 +3505,7 @@
         "default_payment_method": null,
         "description": null,
         "invoice_settings": {
+          "account_tax_ids": null,
           "days_until_due": null,
           "issuer": {
             "account": "",
@@ -3965,6 +3984,7 @@
         "default_payment_method": null,
         "description": null,
         "invoice_settings": {
+          "account_tax_ids": null,
           "days_until_due": null,
           "issuer": {
             "type": "self"
@@ -4243,6 +4263,10 @@
       "id": "txi_1OMeebCLDLpHmE6uz9EPoFn2",
       "livemode": false,
       "object": "tax_id",
+      "owner": {
+        "customer": "cus_PjUutxjlduca42",
+        "type": "customer"
+      },
       "type": "eu_vat",
       "value": "DE123456789",
       "verification": {
@@ -4261,6 +4285,7 @@
       "id": "txr_1OMeeNCLDLpHmE6ubJ8HgTtn",
       "inclusive": false,
       "jurisdiction": "DE",
+      "jurisdiction_level": null,
       "livemode": false,
       "metadata": {},
       "object": "tax_rate",
@@ -4342,6 +4367,9 @@
         "last4": "4242",
         "metadata": {},
         "name": null,
+        "networks": {
+          "preferred": null
+        },
         "object": "card",
         "tokenization_method": null,
         "wallet": null
@@ -4369,7 +4397,39 @@
         "order_id": "12345678"
       },
       "object": "topup",
-      "source": null,
+      "source": {
+        "ach_debit": {
+          "bank_name": "STRIPE TEST BANK",
+          "country": "US",
+          "fingerprint": "5Wh4KBcfDrz5IOnx",
+          "last4": "6789",
+          "routing_number": "110000000",
+          "type": "individual"
+        },
+        "amount": null,
+        "client_secret": "src_client_secret_tiFXuOyFmQ1mAQuL6jlkN8yW",
+        "created": 1710377282,
+        "currency": "usd",
+        "flow": "code_verification",
+        "id": "src_1Ou2SkI2S8mDw66kB2bF7dJW",
+        "livemode": false,
+        "metadata": {},
+        "object": "source",
+        "owner": {
+          "address": null,
+          "email": "jenny.rosen@example.com",
+          "name": "Jenny Rosen",
+          "phone": null,
+          "verified_address": null,
+          "verified_email": null,
+          "verified_name": null,
+          "verified_phone": null
+        },
+        "statement_descriptor": null,
+        "status": "pending",
+        "type": "ach_debit",
+        "usage": "reusable"
+      },
       "statement_descriptor": null,
       "status": "pending",
       "transfer_group": null

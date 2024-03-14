@@ -101,6 +101,9 @@
           "display_name": null,
           "timezone": "Etc/UTC"
         },
+        "invoices": {
+          "default_account_tax_ids": null
+        },
         "payments": {
           "statement_descriptor": null,
           "statement_descriptor_kana": null,
@@ -134,6 +137,10 @@
       "client_secret": "_PEHTFHffpUcokiSVrrc6TERNdA8300TQ5tgKincvQQYRY0v",
       "components": {
         "account_onboarding": {
+          "enabled": false,
+          "features": {}
+        },
+        "documents": {
           "enabled": false,
           "features": {}
         },
@@ -1456,26 +1463,26 @@
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           },
           {
-            "created": 1706199800,
+            "created": 1710377273,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
-            "id": "link_1OcVi0Dy8zbvZdAPelDMzIr9",
+            "file": "file_1Ou1vJI2S8mDw66kosKVHNgE",
+            "id": "link_1Ou2SbI2S8mDw66kHCBsAV2F",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfSzFXUUhwdTVnTzJNcWFBMTVOYWl4ZE8500ozp8ilyy"
+            "url": "https://richardm-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3UxdWVJMlM4bUR3NjZrfGZsX3Rlc3RfMlZab2dhQ2NsbUF4c05ic3ZVN3ZxdnRW00ktEJ4Je3"
           },
           {
-            "created": 1706199799,
+            "created": 1710375209,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OcVhzDy8zbvZdAPbMdtICx2",
-            "id": "link_1OcVhzDy8zbvZdAPamJnikfg",
+            "file": "file_1Ou1vJI2S8mDw66kosKVHNgE",
+            "id": "link_1Ou1vJI2S8mDw66kYK5WS9xz",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT2NWaGNEeTh6YnZaZEFQfGZsX3Rlc3RfRjJLSVNGMTBoR1FmVldGN2JhV0FaeXVz009hUvBCR4"
+            "url": "https://richardm-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3UxdWVJMlM4bUR3NjZrfGZsX3Rlc3RfUFJXdnpreUc3UjZ4VVZPRGpVeDdoS1B000KffERoes"
           }
         ],
         "has_more": false,
@@ -1599,6 +1606,7 @@
       "object": "funding_instructions"
     },
     "identity.verification_report": {
+      "client_reference_id": null,
       "created": 1234567890,
       "document": {
         "address": {
@@ -1640,6 +1648,7 @@
       "verification_session": "vs_1OPouwJN5vQBdWExbazjv0rx"
     },
     "identity.verification_session": {
+      "client_reference_id": null,
       "client_secret": null,
       "created": 1234567890,
       "id": "vs_1OPouwJN5vQBdWExwnxAiDeP",
@@ -1720,6 +1729,7 @@
             "discountable": true,
             "discounts": [],
             "id": "il_1OPougJN5vQBdWExuj8Ico7Q",
+            "invoice": "in_1Ou1v0I2S8mDw66kzOu5UVSR",
             "invoice_item": "ii_1OPougJN5vQBdWExCVUz1PP9",
             "livemode": false,
             "metadata": {},
@@ -2119,6 +2129,35 @@
       "status": "unsubmitted",
       "transaction": "ipi_1OPouuJN5vQBdWExyOINiqR1"
     },
+    "issuing.personalization_design": {
+      "card_logo": null,
+      "carrier_text": null,
+      "created": 1234567890,
+      "id": "ipcd_PjUvzGEbcbtY8U",
+      "livemode": false,
+      "lookup_key": "my_card_design_lookup_key",
+      "metadata": {},
+      "name": "My Card Design V1",
+      "object": "issuing.personalization_design",
+      "physical_bundle": "ics_Fiiwz3T83opOUd",
+      "preferences": {
+        "is_default": false,
+        "is_platform_default": null
+      },
+      "rejection_reasons": {
+        "card_logo": [],
+        "carrier_text": []
+      },
+      "status": "review"
+    },
+    "issuing.physical_bundle": {
+      "id": "ics_PjUv222Xszs9R1",
+      "livemode": false,
+      "name": "My Card Bundle V1",
+      "object": "issuing.physical_bundle",
+      "status": "active",
+      "type": "custom"
+    },
     "issuing.settlement": {
       "bin": "424242",
       "clearing_date": 1703175372,
@@ -2231,6 +2270,7 @@
       "discountable": true,
       "discounts": [],
       "id": "il_tmp_1OPoulJN5vQBdWExKaAxodMb",
+      "invoice": "in_1Ou1v0I2S8mDw66kzOu5UVSR",
       "invoice_item": "ii_1OPoulJN5vQBdWExKaAxodMb",
       "livemode": false,
       "metadata": {},
@@ -2418,6 +2458,7 @@
           "cvc_check": "pass"
         },
         "country": "US",
+        "display_brand": "visa",
         "exp_month": 8,
         "exp_year": 2024,
         "fingerprint": "r40d4vOgg3VecDJF",
@@ -2751,6 +2792,9 @@
         "dashboard": {
           "display_name": null,
           "timezone": "Etc/UTC"
+        },
+        "invoices": {
+          "default_account_tax_ids": null
         },
         "payments": {
           "statement_descriptor": null,
@@ -3525,6 +3569,7 @@
         "default_payment_method": null,
         "description": null,
         "invoice_settings": {
+          "account_tax_ids": null,
           "days_until_due": null,
           "issuer": {
             "type": "self"
@@ -3766,6 +3811,10 @@
       "id": "txi_1OPouvJN5vQBdWExlr1piCRz",
       "livemode": false,
       "object": "tax_id",
+      "owner": {
+        "customer": "cus_PjUutxjlduca42",
+        "type": "customer"
+      },
       "type": "eu_vat",
       "value": "DE123456789",
       "verification": {
@@ -3784,6 +3833,7 @@
       "id": "txr_1OPoulJN5vQBdWExFxem94NU",
       "inclusive": false,
       "jurisdiction": "DE",
+      "jurisdiction_level": null,
       "livemode": false,
       "metadata": {},
       "object": "tax_rate",
@@ -3865,6 +3915,9 @@
         "last4": "4242",
         "metadata": {},
         "name": null,
+        "networks": {
+          "preferred": null
+        },
         "object": "card",
         "tokenization_method": null,
         "wallet": null
@@ -3892,7 +3945,39 @@
         "order_id": "12345678"
       },
       "object": "topup",
-      "source": null,
+      "source": {
+        "ach_debit": {
+          "bank_name": "STRIPE TEST BANK",
+          "country": "US",
+          "fingerprint": "5Wh4KBcfDrz5IOnx",
+          "last4": "6789",
+          "routing_number": "110000000",
+          "type": "individual"
+        },
+        "amount": null,
+        "client_secret": "src_client_secret_zJrY2MSz4b4vCQlw9TZcZLEg",
+        "created": 1710375218,
+        "currency": "usd",
+        "flow": "code_verification",
+        "id": "src_1Ou1vSI2S8mDw66k17wJMt0I",
+        "livemode": false,
+        "metadata": {},
+        "object": "source",
+        "owner": {
+          "address": null,
+          "email": "jenny.rosen@example.com",
+          "name": "Jenny Rosen",
+          "phone": null,
+          "verified_address": null,
+          "verified_email": null,
+          "verified_name": null,
+          "verified_phone": null
+        },
+        "statement_descriptor": null,
+        "status": "pending",
+        "type": "ach_debit",
+        "usage": "reusable"
+      },
       "statement_descriptor": null,
       "status": "pending",
       "transfer_group": null
