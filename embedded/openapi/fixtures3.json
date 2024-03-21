@@ -705,6 +705,52 @@
       "object": "climate.supplier",
       "removal_pathway": "biomass_carbon_removal_and_storage"
     },
+    "confirmation_token": {
+      "created": 1234567890,
+      "expires_at": 1234567890,
+      "id": "ctoken_1OwqXTC7jqlCbEWAnSWvE8pX",
+      "livemode": true,
+      "mandate_data": null,
+      "object": "confirmation_token",
+      "payment_intent": null,
+      "payment_method_preview": {
+        "billing_details": {
+          "address": {
+            "city": "San Francisco",
+            "country": "US",
+            "line1": "1234 Fake Street",
+            "line2": null,
+            "postal_code": "94102",
+            "state": "CA"
+          },
+          "email": null,
+          "name": "Jane Austen",
+          "phone": null
+        },
+        "type": "card",
+        "us_bank_account": {
+          "account_holder_type": "company",
+          "account_type": "checking",
+          "bank_name": "STRIPE TEST BANK",
+          "financial_connections_account": null,
+          "fingerprint": "6wfQAEPlPmv9GKyV",
+          "last4": "6789",
+          "networks": {
+            "preferred": "ach",
+            "supported": [
+              "ach"
+            ]
+          },
+          "routing_number": "110000000",
+          "status_details": {}
+        }
+      },
+      "return_url": "https://example.com/return",
+      "setup_future_usage": "off_session",
+      "setup_intent": null,
+      "shipping": null,
+      "use_stripe_sdk": true
+    },
     "country_spec": {
       "default_currency": "usd",
       "id": "US",
@@ -1463,26 +1509,15 @@
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           },
           {
-            "created": 1710377273,
+            "created": 1711046434,
             "expired": false,
             "expires_at": null,
-            "file": "file_1Ou1vJI2S8mDw66kosKVHNgE",
-            "id": "link_1Ou2SbI2S8mDw66kHCBsAV2F",
+            "file": "file_1OwqXWC7jqlCbEWA04W1XgtL",
+            "id": "link_1OwqXWC7jqlCbEWA5oixve1n",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://richardm-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3UxdWVJMlM4bUR3NjZrfGZsX3Rlc3RfMlZab2dhQ2NsbUF4c05ic3ZVN3ZxdnRW00ktEJ4Je3"
-          },
-          {
-            "created": 1710375209,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1Ou1vJI2S8mDw66kosKVHNgE",
-            "id": "link_1Ou1vJI2S8mDw66kYK5WS9xz",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://richardm-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3UxdWVJMlM4bUR3NjZrfGZsX3Rlc3RfUFJXdnpreUc3UjZ4VVZPRGpVeDdoS1B000KffERoes"
+            "url": "https://ramya-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3dxVFFDN2pxbENiRVdBfGZsX3Rlc3Rfd2hFeUJKWHFKYk5adVJ1Nmd1RVZRZVpW00TOfdfMgl"
           }
         ],
         "has_more": false,
@@ -1580,6 +1615,44 @@
       "transacted_at": 1234567890,
       "transaction_refresh": "fctxnref_PEHT703aotlKawfHY2I61XWP",
       "updated": 1234567890
+    },
+    "forwarding.request": {
+      "config": "fwdcfg_123",
+      "created": 1234567890,
+      "id": "fwdreq_123",
+      "livemode": false,
+      "object": "forwarding.request",
+      "payment_method": "pm_456",
+      "replacements": [],
+      "request_context": {
+        "destination_duration": 234,
+        "destination_ip_address": ""
+      },
+      "request_details": {
+        "body": "'{\"amount\":{\"value\":1000,\"currency\":\"usd\"},\"paymentMethod\":{\"cvc\": \"***\",\"expiryMonth\": \"03\",\"expiryYear\": \"2030\",\"holderName\": \"First Last\",\"number\": \"************4242\",\"type\": \"scheme\",},\"merchantAccount\":\"{{MERCHANT_ID}}\",\"reference\":\"{{REFERENCE_ID}}\"}'",
+        "headers": [
+          {
+            "name": "Idempotency-Key",
+            "value": "{{UPSTREAM_IDEMPOTENCY_KEY}}"
+          }
+        ],
+        "http_method": "POST"
+      },
+      "response_details": {
+        "body": "'{\"transactionId\":\"example1234\"}'",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json;charset=UTF-8"
+          },
+          {
+            "name": "Idempotency-Key",
+            "value": "{{UPSTREAM_IDEMPOTENCY_KEY}}"
+          }
+        ],
+        "status": 200
+      },
+      "url": "https://endpoint-url/v1/payments"
     },
     "funding_instructions": {
       "bank_transfer": {
@@ -1926,6 +1999,7 @@
         "livemode": false,
         "metadata": {},
         "object": "issuing.card",
+        "personalization_design": null,
         "replaced_by": null,
         "replacement_for": null,
         "replacement_reason": null,
@@ -2050,6 +2124,7 @@
       "livemode": false,
       "metadata": {},
       "object": "issuing.card",
+      "personalization_design": null,
       "replaced_by": null,
       "replacement_for": null,
       "replacement_reason": null,
@@ -2151,6 +2226,11 @@
       "status": "review"
     },
     "issuing.physical_bundle": {
+      "features": {
+        "card_logo": "unsupported",
+        "carrier_text": "unsupported",
+        "second_line": "unsupported"
+      },
       "id": "ics_PjUv222Xszs9R1",
       "livemode": false,
       "name": "My Card Bundle V1",
@@ -3848,6 +3928,7 @@
       "id": "tmc_ElVUAjF8xXG3hj",
       "is_account_default": false,
       "livemode": false,
+      "name": null,
       "object": "terminal.configuration"
     },
     "terminal.connection_token": {
@@ -4371,7 +4452,8 @@
         "debit_reversal": null,
         "inbound_transfer": null,
         "issuing_authorization": null,
-        "issuing_transaction": null
+        "issuing_transaction": null,
+        "payout": null
       },
       "livemode": false,
       "network": "ach",
