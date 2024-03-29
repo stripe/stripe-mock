@@ -273,6 +273,56 @@
       "routing_number": "110000000",
       "status": "new"
     },
+    "billing.meter": {
+      "created": 1234567890,
+      "customer_mapping": {
+        "event_payload_key": "customer",
+        "type": "by_id"
+      },
+      "default_aggregation": {
+        "formula": "sum"
+      },
+      "display_name": "test-meter",
+      "event_name": "test-meter-event-name",
+      "event_time_window": null,
+      "id": "meter_123",
+      "livemode": true,
+      "object": "billing.meter",
+      "status": "active",
+      "status_transitions": {
+        "deactivated_at": null
+      },
+      "updated": 1234567890,
+      "value_settings": {
+        "event_payload_key": "value"
+      }
+    },
+    "billing.meter_event": {
+      "created": 1234567890,
+      "event_name": "api_request",
+      "identifier": "1234-1234",
+      "livemode": false,
+      "object": "billing.meter_event",
+      "payload": {
+        "stripe_customer_id": "cus_123",
+        "value": "25"
+      },
+      "timestamp": 1234567890
+    },
+    "billing.meter_event_adjustment": {
+      "livemode": false,
+      "object": "billing.meter_event_adjustment",
+      "status": "complete"
+    },
+    "billing.meter_event_summary": {
+      "aggregated_value": 25,
+      "end_time": 1234567890,
+      "id": "mtrusg_123",
+      "livemode": false,
+      "meter": "mtr_123",
+      "object": "billing.meter_event_summary",
+      "start_time": 1234567890
+    },
     "billing_portal.configuration": {
       "active": true,
       "application": null,
@@ -1518,6 +1568,17 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://ramya-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3dxVFFDN2pxbENiRVdBfGZsX3Rlc3Rfd2hFeUJKWHFKYk5adVJ1Nmd1RVZRZVpW00TOfdfMgl"
+          },
+          {
+            "created": 1711575698,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1Oz4E2JDlh28ZWA1jiewbKBO",
+            "id": "link_1Oz4E2JDlh28ZWA1AhZkv28r",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://crystal-npwcda--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3o0RExKRGxoMjhaV0ExfGZsX3Rlc3RfQmdheWFvYXR3M3JWemZkUzFaZG9YMTR000x2cmFxaR"
           }
         ],
         "has_more": false,
@@ -1659,14 +1720,9 @@
         "country": "DE",
         "financial_addresses": [
           {
-            "iban": {
-              "account_holder_name": "Stripe Technology Europe Limited",
-              "bic": "SXPYDEHH",
-              "country": "DE",
-              "iban": "DE00000000000000000001"
-            },
             "supported_networks": [
-              "sepa"
+              "sepa",
+              "domestic_wire_us"
             ],
             "type": "iban"
           }
@@ -1999,7 +2055,6 @@
         "livemode": false,
         "metadata": {},
         "object": "issuing.card",
-        "personalization_design": null,
         "replaced_by": null,
         "replacement_for": null,
         "replacement_reason": null,
@@ -2124,7 +2179,6 @@
       "livemode": false,
       "metadata": {},
       "object": "issuing.card",
-      "personalization_design": null,
       "replaced_by": null,
       "replacement_for": null,
       "replacement_reason": null,
@@ -2226,11 +2280,6 @@
       "status": "review"
     },
     "issuing.physical_bundle": {
-      "features": {
-        "card_logo": "unsupported",
-        "carrier_text": "unsupported",
-        "second_line": "unsupported"
-      },
       "id": "ics_PjUv222Xszs9R1",
       "livemode": false,
       "name": "My Card Bundle V1",
