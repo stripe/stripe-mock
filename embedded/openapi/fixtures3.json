@@ -153,7 +153,8 @@
           "features": {
             "capture_payments": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "destination_on_behalf_of_charge_management": true
           }
         },
         "payments": {
@@ -161,7 +162,8 @@
           "features": {
             "capture_payments": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "destination_on_behalf_of_charge_management": true
           }
         },
         "payouts": {
@@ -183,6 +185,18 @@
           "features": {
             "external_account_collection": true
           }
+        },
+        "balances": {
+          "enabled": true,
+          "features": {
+            "edit_payout_schedule": true,
+            "instant_payouts": true,
+            "standard_payouts": true
+          }
+        },
+        "payouts_list": {
+          "enabled": true,
+          "features": {}
         }
       },
       "expires_at": 1234567890,
@@ -643,7 +657,8 @@
       "success_url": "https://example.com/success",
       "total_details": null,
       "ui_mode": "hosted",
-      "url": "https://checkout.stripe.com/pay/c/cs_test_a12et9VnHfV9NETJktvuOmVoyrOB40recOCQWiVNeDlBe4IqxEIRNi1Qdf"
+      "url": "https://checkout.stripe.com/pay/c/cs_test_a12et9VnHfV9NETJktvuOmVoyrOB40recOCQWiVNeDlBe4IqxEIRNi1Qdf",
+      "saved_payment_method_options": null
     },
     "climate.order": {
       "amount_fees": 300,
@@ -1705,7 +1720,6 @@
       "updated": 1234567890
     },
     "forwarding.request": {
-      "config": "fwdcfg_123",
       "created": 1234567890,
       "id": "fwdreq_123",
       "livemode": false,
@@ -4904,6 +4918,12 @@
       "id": "obj_123",
       "livemode": true,
       "object": "product_feature"
+    },
+    "entitlements.active_entitlement_summary": {
+      "customer": "customer",
+      "entitlements": null,
+      "livemode": true,
+      "object": "entitlements.active_entitlement_summary"
     }
   }
 }
