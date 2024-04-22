@@ -1839,7 +1839,8 @@
       "status": "verified",
       "type": "document",
       "url": null,
-      "verified_outputs": null
+      "verified_outputs": null,
+      "provided_details": null
     },
     "invoice": {
       "account_country": "US",
