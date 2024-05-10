@@ -4628,7 +4628,8 @@
         "posted_at": null,
         "returned_at": null
       },
-      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv"
+      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv",
+      "tracking_details": null
     },
     "treasury.outbound_transfer": {
       "amount": 10000,
@@ -4677,7 +4678,8 @@
         "posted_at": null,
         "returned_at": null
       },
-      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv"
+      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv",
+      "tracking_details": null
     },
     "treasury.received_credit": {
       "amount": 1234,
