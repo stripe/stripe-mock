@@ -229,7 +229,8 @@
         "has_more": false,
         "object": "list",
         "url": "/v1/application_fees/fee_1OPounJN5vQBdWExWgwi95uU/refunds"
-      }
+      },
+      "fee_source": null
     },
     "apps.secret": {
       "created": 1234567890,
@@ -3033,7 +3034,9 @@
       "source_type": "card",
       "statement_descriptor": null,
       "status": "in_transit",
-      "type": "bank_account"
+      "type": "bank_account",
+      "application_fee": null,
+      "application_fee_amount": null
     },
     "person": {
       "account": "acct_1OPouMJN5vQBdWEx",
