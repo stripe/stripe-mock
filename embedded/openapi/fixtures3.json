@@ -171,7 +171,8 @@
           "features": {
             "edit_payout_schedule": false,
             "instant_payouts": false,
-            "standard_payouts": false
+            "standard_payouts": false,
+            "external_account_collection": true
           }
         },
         "account_management": {
@@ -191,7 +192,8 @@
           "features": {
             "edit_payout_schedule": true,
             "instant_payouts": true,
-            "standard_payouts": true
+            "standard_payouts": true,
+            "external_account_collection": true
           }
         },
         "payouts_list": {
