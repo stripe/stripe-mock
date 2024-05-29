@@ -2132,7 +2132,8 @@
             "ineligible_reason": "missing_agreement"
           },
           "primary_account_identifier": null
-        }
+        },
+        "personalization_design": null
       },
       "cardholder": null,
       "created": 1234567890,
@@ -2260,7 +2261,8 @@
           "ineligible_reason": "missing_agreement"
         },
         "primary_account_identifier": null
-      }
+      },
+      "personalization_design": null
     },
     "issuing.cardholder": {
       "billing": {
@@ -2347,7 +2349,12 @@
       "name": "My Card Bundle V1",
       "object": "issuing.physical_bundle",
       "status": "active",
-      "type": "custom"
+      "type": "custom",
+      "features": {
+        "card_logo": "unsupported",
+        "carrier_text": "optional",
+        "second_line": "optional"
+      }
     },
     "issuing.settlement": {
       "bin": "424242",
