@@ -2674,7 +2674,8 @@
         "three_d_secure_usage": {
           "supported": true
         },
-        "wallet": null
+        "wallet": null,
+        "generated_from": null
       },
       "created": 1234567890,
       "customer": null,
