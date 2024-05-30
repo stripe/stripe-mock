@@ -818,6 +818,23 @@
           "name": "Lithos",
           "object": "climate.supplier",
           "removal_pathway": "enhanced_weathering"
+        },
+        {
+          "id": "climsup_vaulted",
+          "info_url": "https://frontierclimate.com/portfolio/vaulted",
+          "livemode": false,
+          "locations": [
+            {
+              "city": "Houston",
+              "country": "US",
+              "latitude": 29.7604,
+              "longitude": -95.3698,
+              "region": "TX"
+            }
+          ],
+          "name": "Vaulted",
+          "object": "climate.supplier",
+          "removal_pathway": "biomass_carbon_removal_and_storage"
         }
       ]
     },
