@@ -167,6 +167,7 @@
           "enabled": false,
           "features": {
             "edit_payout_schedule": false,
+            "external_account_collection": true,
             "instant_payouts": false,
             "standard_payouts": false
           }
@@ -203,6 +204,7 @@
           "enabled": false,
           "features": {
             "edit_payout_schedule": false,
+            "external_account_collection": true,
             "instant_payouts": false,
             "standard_payouts": false
           }
@@ -232,6 +234,10 @@
       "charge": "ch_1P74ZcL3SJdCuX0fW5zRF8nQ",
       "created": 1234567890,
       "currency": "usd",
+      "fee_source": {
+        "charge": "ch_1PMc54BM8hHlaKAc7GfMVcxS",
+        "type": "charge"
+      },
       "id": "fee_1P74ZdL3SJdCuX0fqZjO43Z4",
       "livemode": false,
       "object": "application_fee",
@@ -251,16 +257,37 @@
       "livemode": false,
       "name": "test-secret",
       "object": "apps.secret",
-      "payload": null,
       "scope": {
         "type": "account"
       }
     },
     "balance": {
-      "available": [],
+      "available": [
+        {
+          "amount": 0,
+          "currency": "usd",
+          "source_types": {
+            "card": 0
+          }
+        }
+      ],
+      "connect_reserved": [
+        {
+          "amount": 0,
+          "currency": "usd"
+        }
+      ],
       "livemode": false,
       "object": "balance",
-      "pending": []
+      "pending": [
+        {
+          "amount": 0,
+          "currency": "usd",
+          "source_types": {
+            "card": 0
+          }
+        }
+      ]
     },
     "balance_transaction": {
       "amount": 100,
@@ -519,7 +546,7 @@
       "id": "card_1P74ZUL3SJdCuX0fwOfZvu5G",
       "last4": "4242",
       "metadata": {},
-      "name": null,
+      "name": "Jenny Rosen",
       "object": "card",
       "tokenization_method": null
     },
@@ -553,7 +580,7 @@
           "state": null
         },
         "email": null,
-        "name": null,
+        "name": "Jenny Rosen",
         "phone": null
       },
       "calculated_statement_descriptor": null,
@@ -818,23 +845,6 @@
           "name": "Lithos",
           "object": "climate.supplier",
           "removal_pathway": "enhanced_weathering"
-        },
-        {
-          "id": "climsup_vaulted",
-          "info_url": "https://frontierclimate.com/portfolio/vaulted",
-          "livemode": false,
-          "locations": [
-            {
-              "city": "Houston",
-              "country": "US",
-              "latitude": 29.7604,
-              "longitude": -95.3698,
-              "region": "TX"
-            }
-          ],
-          "name": "Vaulted",
-          "object": "climate.supplier",
-          "removal_pathway": "biomass_carbon_removal_and_storage"
         }
       ]
     },
@@ -864,51 +874,53 @@
       "object": "confirmation_token",
       "payment_intent": null,
       "payment_method_preview": {
+        "allow_redisplay": "unspecified",
         "billing_details": {
           "address": {
-            "city": null,
-            "country": null,
-            "line1": null,
+            "city": "San Francisco",
+            "country": "US",
+            "line1": "1234 Fake Street",
             "line2": null,
-            "postal_code": null,
-            "state": null
+            "postal_code": "94102",
+            "state": "CA"
           },
           "email": null,
-          "name": null,
+          "name": "Jane Austen",
           "phone": null
         },
-        "card": {
-          "brand": "visa",
-          "checks": {
-            "address_line1_check": null,
-            "address_postal_code_check": null,
-            "cvc_check": "unchecked"
-          },
-          "country": "US",
-          "display_brand": "visa",
-          "exp_month": 8,
-          "exp_year": 2025,
-          "fingerprint": "bVZWKdLwfqphGT2h",
-          "funding": "credit",
-          "generated_from": null,
-          "last4": "4242",
+        "type": "card",
+        "us_bank_account": {
+          "account_holder_type": "company",
+          "account_type": "checking",
+          "bank_name": "STRIPE TEST BANK",
+          "financial_connections_account": null,
+          "fingerprint": "wNV5OVqdoHL0ZwzF",
+          "last4": "6789",
           "networks": {
-            "available": [
-              "visa"
-            ],
-            "preferred": null
+            "preferred": "ach",
+            "supported": [
+              "ach"
+            ]
           },
-          "three_d_secure_usage": {
-            "supported": true
-          },
-          "wallet": null
-        },
-        "type": "card"
+          "routing_number": "110000000",
+          "status_details": {}
+        }
       },
       "return_url": "https://example.com/return",
       "setup_future_usage": "off_session",
       "setup_intent": null,
-      "shipping": null,
+      "shipping": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "1234 Fake Street",
+          "line2": null,
+          "postal_code": "94102",
+          "state": "CA"
+        },
+        "name": "Jenny Rosen",
+        "phone": null
+      },
       "use_stripe_sdk": true
     },
     "country_spec": {
@@ -1127,13 +1139,7 @@
             "individual.first_name",
             "individual.id_number",
             "individual.last_name",
-            "individual.phone",
-            "individual.ssn_last_4",
-            "individual.verification.document",
-            "settings.card_payments.statement_descriptor_prefix",
-            "settings.payments.statement_descriptor",
-            "tos_acceptance.date",
-            "tos_acceptance.ip"
+            "individual.phone"
           ]
         }
       }
@@ -1599,6 +1605,7 @@
           "interval_count": 1,
           "livemode": false,
           "metadata": {},
+          "meter": null,
           "nickname": null,
           "object": "plan",
           "product": "prod_PwyW2nrVVg4zRr",
@@ -1677,6 +1684,94 @@
             "metadata": {},
             "object": "file_link",
             "url": "https://chaves-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUDB0dENMM1NKZEN1WDBmfGZsX3Rlc3RfTFlGMmhDdmd3MU9QdlN2RUkzYTlVcTdY00naUeo61A"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717188285,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMcJdBM8hHlaKAcxR5oR07M",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfRXVCeGRocW9SQTdHdXIxUU5ZcVBocEZy00ZzKsuY7F"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
           }
         ],
         "has_more": false,
@@ -1844,19 +1939,12 @@
       "active": false,
       "amount_available": 1000,
       "amount_held": 0,
-      "code": null,
       "created": 1234567890,
       "created_by": null,
       "currency": "usd",
       "id": "giftcard_6iYtciLUNYvS0sge",
       "metadata": null,
-      "object": "gift_cards.card",
-      "transactions": {
-        "data": [],
-        "has_more": false,
-        "object": "list",
-        "url": ""
-      }
+      "object": "gift_cards.card"
     },
     "gift_cards.transaction": {
       "amount": -1000,
@@ -1932,8 +2020,7 @@
       "redaction": null,
       "status": "verified",
       "type": "document",
-      "url": null,
-      "verified_outputs": null
+      "url": null
     },
     "invoice": {
       "account_country": "US",
@@ -2443,7 +2530,6 @@
     },
     "issuing.dispute": {
       "amount": 100,
-      "balance_transactions": null,
       "created": 1234567890,
       "currency": "usd",
       "evidence": {
@@ -2543,7 +2629,6 @@
         "transaction_id": null
       },
       "object": "issuing.transaction",
-      "purchase_details": null,
       "token": null,
       "type": "capture",
       "wallet": "apple_pay"
@@ -2671,6 +2756,7 @@
       "percent_off": 35,
       "updated": 1234567890
     },
+    "onboarding_policy_pubco_merchant_eligibility_for_pii_exempt_onboarding": {},
     "order": {
       "amount_subtotal": 0,
       "amount_total": 0,
@@ -2804,6 +2890,7 @@
       "url": "https://chaves-payment_links_ingress-mydev.dev.stripe.me/test_8wM6raarJ8CYgU07ss"
     },
     "payment_method": {
+      "allow_redisplay": "unspecified",
       "billing_details": {
         "address": {
           "city": "San Francisco",
@@ -3211,6 +3298,8 @@
     },
     "payout": {
       "amount": 1100,
+      "application_fee": null,
+      "application_fee_amount": null,
       "arrival_date": 1234567890,
       "automatic": true,
       "balance_transaction": "txn_1P74ZeL3SJdCuX0fEuGImsH8",
@@ -3312,6 +3401,7 @@
       "interval_count": 1,
       "livemode": false,
       "metadata": {},
+      "meter": null,
       "nickname": null,
       "object": "plan",
       "product": "prod_PwyW2nrVVg4zRr",
@@ -3337,6 +3427,7 @@
         "aggregate_usage": null,
         "interval": "month",
         "interval_count": 1,
+        "meter": null,
         "usage_type": "licensed"
       },
       "tax_behavior": "unspecified",
@@ -4034,6 +4125,7 @@
                 "aggregate_usage": null,
                 "interval": "month",
                 "interval_count": 1,
+                "meter": null,
                 "usage_type": "licensed"
               },
               "tax_behavior": "unspecified",
@@ -4127,6 +4219,7 @@
           "aggregate_usage": null,
           "interval": "month",
           "interval_count": 1,
+          "meter": null,
           "usage_type": "licensed"
         },
         "tax_behavior": "unspecified",
@@ -4232,9 +4325,18 @@
       },
       "expires_at": 1234567890,
       "id": "taxcalc_1P74ZyL3SJdCuX0fSgICOtod",
-      "line_items": null,
       "livemode": false,
       "object": "tax.calculation",
+      "ship_from_details": {
+        "address": {
+          "city": null,
+          "country": "US",
+          "line1": null,
+          "line2": null,
+          "postal_code": "75001",
+          "state": "TX"
+        }
+      },
       "shipping_cost": {
         "amount": 300,
         "amount_tax": 0,
@@ -4281,7 +4383,6 @@
       "quantity": 1,
       "reference": "Pepperoni Pizza",
       "tax_behavior": "exclusive",
-      "tax_breakdown": null,
       "tax_code": "txcd_40060003"
     },
     "tax.form": {
@@ -4403,6 +4504,16 @@
       "object": "tax.transaction",
       "reference": "myOrder_123",
       "reversal": null,
+      "ship_from_details": {
+        "address": {
+          "city": null,
+          "country": "US",
+          "line1": null,
+          "line2": null,
+          "postal_code": "75001",
+          "state": "TX"
+        }
+      },
       "shipping_cost": {
         "amount": 300,
         "amount_tax": 0,
@@ -4871,6 +4982,7 @@
         "posted_at": null,
         "returned_at": null
       },
+      "tracking_details": null,
       "transaction": "trxn_1P74ZwL3SJdCuX0fHduUoOhO"
     },
     "treasury.outbound_transfer": {
@@ -4920,6 +5032,7 @@
         "posted_at": null,
         "returned_at": null
       },
+      "tracking_details": null,
       "transaction": "trxn_1P74ZwL3SJdCuX0fHduUoOhO"
     },
     "treasury.received_credit": {
@@ -5024,10 +5137,8 @@
       "created": 1234567890,
       "currency": "usd",
       "description": "Jane Austen (6789) | Outbound transfer | transfer",
-      "entries": null,
       "financial_account": "fa_1P74ZwL3SJdCuX0fzn2ccKad",
       "flow": "obt_1P74ZxL3SJdCuX0f7cSUZVWp",
-      "flow_details": null,
       "flow_type": "outbound_transfer",
       "id": "trxn_1P74ZwL3SJdCuX0fHduUoOhO",
       "livemode": false,
@@ -5049,7 +5160,6 @@
       "effective_at": 1234567890,
       "financial_account": "fa_1P74ZwL3SJdCuX0fzn2ccKad",
       "flow": "obt_1P74ZxL3SJdCuX0f7cSUZVWp",
-      "flow_details": null,
       "flow_type": "outbound_transfer",
       "id": "trxne_1P74ZxL3SJdCuX0fCDJx40FF",
       "livemode": false,

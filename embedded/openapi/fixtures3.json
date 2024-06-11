@@ -138,51 +138,14 @@
       "account": "acct_1OPousKxBrsRi89x",
       "client_secret": "_PEHTFHffpUcokiSVrrc6TERNdA8300TQ5tgKincvQQYRY0v",
       "components": {
-        "account_onboarding": {
-          "enabled": false,
-          "features": {
-            "external_account_collection": true
-          }
-        },
-        "documents": {
-          "enabled": false,
-          "features": {}
-        },
-        "payment_details": {
-          "enabled": false,
-          "features": {
-            "capture_payments": true,
-            "dispute_management": true,
-            "refund_management": true,
-            "destination_on_behalf_of_charge_management": true
-          }
-        },
-        "payments": {
-          "enabled": false,
-          "features": {
-            "capture_payments": true,
-            "dispute_management": true,
-            "refund_management": true,
-            "destination_on_behalf_of_charge_management": true
-          }
-        },
-        "payouts": {
-          "enabled": false,
-          "features": {
-            "edit_payout_schedule": false,
-            "instant_payouts": false,
-            "standard_payouts": false,
-            "external_account_collection": true
-          }
-        },
         "account_management": {
           "enabled": true,
           "features": {
             "external_account_collection": true
           }
         },
-        "notification_banner": {
-          "enabled": true,
+        "account_onboarding": {
+          "enabled": false,
           "features": {
             "external_account_collection": true
           }
@@ -191,9 +154,46 @@
           "enabled": true,
           "features": {
             "edit_payout_schedule": true,
+            "external_account_collection": true,
             "instant_payouts": true,
-            "standard_payouts": true,
+            "standard_payouts": true
+          }
+        },
+        "documents": {
+          "enabled": false,
+          "features": {}
+        },
+        "notification_banner": {
+          "enabled": true,
+          "features": {
             "external_account_collection": true
+          }
+        },
+        "payment_details": {
+          "enabled": false,
+          "features": {
+            "capture_payments": true,
+            "destination_on_behalf_of_charge_management": true,
+            "dispute_management": true,
+            "refund_management": true
+          }
+        },
+        "payments": {
+          "enabled": false,
+          "features": {
+            "capture_payments": true,
+            "destination_on_behalf_of_charge_management": true,
+            "dispute_management": true,
+            "refund_management": true
+          }
+        },
+        "payouts": {
+          "enabled": false,
+          "features": {
+            "edit_payout_schedule": false,
+            "external_account_collection": true,
+            "instant_payouts": false,
+            "standard_payouts": false
           }
         },
         "payouts_list": {
@@ -221,6 +221,10 @@
       "charge": "ch_1OPoueJN5vQBdWEx5AWizjSY",
       "created": 1234567890,
       "currency": "usd",
+      "fee_source": {
+        "charge": "ch_1PMc55BM8hHlaKAcwKuWtC5P",
+        "type": "charge"
+      },
       "id": "fee_1OPounJN5vQBdWExWgwi95uU",
       "livemode": false,
       "object": "application_fee",
@@ -231,8 +235,7 @@
         "has_more": false,
         "object": "list",
         "url": "/v1/application_fees/fee_1OPounJN5vQBdWExWgwi95uU/refunds"
-      },
-      "fee_source": null
+      }
     },
     "apps.secret": {
       "created": 1234567890,
@@ -243,8 +246,7 @@
       "object": "apps.secret",
       "scope": {
         "type": "account"
-      },
-      "payload": null
+      }
     },
     "balance": {
       "available": [
@@ -344,11 +346,13 @@
       "timestamp": 1234567890
     },
     "billing.meter_event_adjustment": {
+      "cancel": {
+        "identifier": "1234-1234"
+      },
+      "event_name": "event_name",
       "livemode": false,
       "object": "billing.meter_event_adjustment",
       "status": "complete",
-      "cancel": null,
-      "event_name": "event_name",
       "type": "cancel"
     },
     "billing.meter_event_summary": {
@@ -396,8 +400,7 @@
         "subscription_update": {
           "default_allowed_updates": [],
           "enabled": false,
-          "proration_behavior": "none",
-          "products": null
+          "proration_behavior": "none"
         }
       },
       "id": "bpc_1OPouvJN5vQBdWEx6dSG6gsf",
@@ -649,6 +652,7 @@
         "enabled": false
       },
       "recovered_from": null,
+      "saved_payment_method_options": null,
       "setup_intent": null,
       "shipping_address_collection": null,
       "shipping_cost": null,
@@ -660,8 +664,7 @@
       "success_url": "https://example.com/success",
       "total_details": null,
       "ui_mode": "hosted",
-      "url": "https://checkout.stripe.com/pay/c/cs_test_a12et9VnHfV9NETJktvuOmVoyrOB40recOCQWiVNeDlBe4IqxEIRNi1Qdf",
-      "saved_payment_method_options": null
+      "url": "https://checkout.stripe.com/pay/c/cs_test_a12et9VnHfV9NETJktvuOmVoyrOB40recOCQWiVNeDlBe4IqxEIRNi1Qdf"
     },
     "climate.order": {
       "amount_fees": 300,
@@ -772,23 +775,6 @@
           "name": "Lithos",
           "object": "climate.supplier",
           "removal_pathway": "enhanced_weathering"
-        },
-        {
-          "id": "climsup_vaulted",
-          "info_url": "https://frontierclimate.com/portfolio/vaulted",
-          "livemode": false,
-          "locations": [
-            {
-              "city": "Houston",
-              "country": "US",
-              "latitude": 29.7604,
-              "longitude": -95.3698,
-              "region": "TX"
-            }
-          ],
-          "name": "Vaulted",
-          "object": "climate.supplier",
-          "removal_pathway": "biomass_carbon_removal_and_storage"
         }
       ]
     },
@@ -818,6 +804,7 @@
       "object": "confirmation_token",
       "payment_intent": null,
       "payment_method_preview": {
+        "allow_redisplay": "unspecified",
         "billing_details": {
           "address": {
             "city": "San Francisco",
@@ -837,7 +824,7 @@
           "account_type": "checking",
           "bank_name": "STRIPE TEST BANK",
           "financial_connections_account": null,
-          "fingerprint": "6wfQAEPlPmv9GKyV",
+          "fingerprint": "wNV5OVqdoHL0ZwzF",
           "last4": "6789",
           "networks": {
             "preferred": "ach",
@@ -852,7 +839,18 @@
       "return_url": "https://example.com/return",
       "setup_future_usage": "off_session",
       "setup_intent": null,
-      "shipping": null,
+      "shipping": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "1234 Fake Street",
+          "line2": null,
+          "postal_code": "94102",
+          "state": "CA"
+        },
+        "name": "Jenny Rosen",
+        "phone": null
+      },
       "use_stripe_sdk": true
     },
     "country_spec": {
@@ -1071,13 +1069,7 @@
             "individual.first_name",
             "individual.id_number",
             "individual.last_name",
-            "individual.phone",
-            "individual.ssn_last_4",
-            "individual.verification.document",
-            "settings.card_payments.statement_descriptor_prefix",
-            "settings.payments.statement_descriptor",
-            "tos_acceptance.date",
-            "tos_acceptance.ip"
+            "individual.phone"
           ]
         }
       }
@@ -1396,6 +1388,11 @@
       "id": "prod_PEHTfnvdJH6K0k",
       "object": "product"
     },
+    "deleted_product_feature": {
+      "deleted": true,
+      "id": "obj_123",
+      "object": "product_feature"
+    },
     "deleted_radar.value_list": {
       "deleted": true,
       "id": "rsl_1OPouuJN5vQBdWExWiMNdstK",
@@ -1528,6 +1525,22 @@
       "reason": "general",
       "status": "warning_needs_response"
     },
+    "entitlements.active_entitlement": {
+      "feature": "feature",
+      "id": "obj_123",
+      "livemode": true,
+      "lookup_key": "lookup_key",
+      "object": "entitlements.active_entitlement"
+    },
+    "entitlements.feature": {
+      "active": true,
+      "id": "obj_123",
+      "livemode": true,
+      "lookup_key": "lookup_key",
+      "metadata": {},
+      "name": "name",
+      "object": "entitlements.feature"
+    },
     "ephemeral_key": {
       "created": 1234567890,
       "expires": 1234567890,
@@ -1552,6 +1565,7 @@
           "interval_count": 1,
           "livemode": false,
           "metadata": {},
+          "meter": null,
           "nickname": null,
           "object": "plan",
           "product": "prod_PEHTfnvdJH6K0k",
@@ -1621,26 +1635,92 @@
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           },
           {
-            "created": 1711046434,
+            "created": 1717188285,
             "expired": false,
             "expires_at": null,
-            "file": "file_1OwqXWC7jqlCbEWA04W1XgtL",
-            "id": "link_1OwqXWC7jqlCbEWA5oixve1n",
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMcJdBM8hHlaKAcxR5oR07M",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://ramya-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3dxVFFDN2pxbENiRVdBfGZsX3Rlc3Rfd2hFeUJKWHFKYk5adVJ1Nmd1RVZRZVpW00TOfdfMgl"
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfRXVCeGRocW9SQTdHdXIxUU5ZcVBocEZy00ZzKsuY7F"
           },
           {
-            "created": 1711575698,
+            "created": 1717187391,
             "expired": false,
             "expires_at": null,
-            "file": "file_1Oz4E2JDlh28ZWA1jiewbKBO",
-            "id": "link_1Oz4E2JDlh28ZWA1AhZkv28r",
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://crystal-npwcda--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT3o0RExKRGxoMjhaV0ExfGZsX3Rlc3RfQmdheWFvYXR3M3JWemZkUzFaZG9YMTR000x2cmFxaR"
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+          },
+          {
+            "created": 1717187391,
+            "expired": false,
+            "expires_at": null,
+            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
+            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "livemode": false,
+            "metadata": {},
+            "object": "file_link",
+            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
           }
         ],
         "has_more": false,
@@ -1826,9 +1906,7 @@
         "issuing_country": "US",
         "last_name": "Rosen",
         "status": "verified",
-        "type": "driving_license",
-        "dob": null,
-        "number": null
+        "type": "driving_license"
       },
       "id": "vr_1OPouwJN5vQBdWExD3MD40Gc",
       "livemode": false,
@@ -1858,9 +1936,7 @@
       "redaction": null,
       "status": "verified",
       "type": "document",
-      "url": null,
-      "verified_outputs": null,
-      "provided_details": null
+      "url": null
     },
     "invoice": {
       "account_country": "US",
@@ -2107,11 +2183,11 @@
           },
           "spending_controls": {
             "allowed_categories": [],
+            "allowed_merchant_countries": [],
             "blocked_categories": [],
+            "blocked_merchant_countries": [],
             "spending_limits": [],
-            "spending_limits_currency": null,
-            "allowed_merchant_countries": null,
-            "blocked_merchant_countries": null
+            "spending_limits_currency": null
           },
           "status": "active",
           "type": "individual"
@@ -2125,17 +2201,18 @@
         "livemode": false,
         "metadata": {},
         "object": "issuing.card",
+        "personalization_design": null,
         "replaced_by": null,
         "replacement_for": null,
         "replacement_reason": null,
         "shipping": null,
         "spending_controls": {
           "allowed_categories": null,
-          "blocked_categories": null,
-          "spending_limits": [],
-          "spending_limits_currency": null,
           "allowed_merchant_countries": null,
-          "blocked_merchant_countries": null
+          "blocked_categories": null,
+          "blocked_merchant_countries": null,
+          "spending_limits": [],
+          "spending_limits_currency": null
         },
         "status": "active",
         "type": "physical",
@@ -2149,8 +2226,7 @@
             "ineligible_reason": "missing_agreement"
           },
           "primary_account_identifier": null
-        },
-        "personalization_design": null
+        }
       },
       "cardholder": null,
       "created": 1234567890,
@@ -2236,11 +2312,11 @@
         },
         "spending_controls": {
           "allowed_categories": [],
+          "allowed_merchant_countries": [],
           "blocked_categories": [],
+          "blocked_merchant_countries": [],
           "spending_limits": [],
-          "spending_limits_currency": null,
-          "allowed_merchant_countries": null,
-          "blocked_merchant_countries": null
+          "spending_limits_currency": null
         },
         "status": "active",
         "type": "individual"
@@ -2254,17 +2330,18 @@
       "livemode": false,
       "metadata": {},
       "object": "issuing.card",
+      "personalization_design": null,
       "replaced_by": null,
       "replacement_for": null,
       "replacement_reason": null,
       "shipping": null,
       "spending_controls": {
         "allowed_categories": null,
-        "blocked_categories": null,
-        "spending_limits": [],
-        "spending_limits_currency": null,
         "allowed_merchant_countries": null,
-        "blocked_merchant_countries": null
+        "blocked_categories": null,
+        "blocked_merchant_countries": null,
+        "spending_limits": [],
+        "spending_limits_currency": null
       },
       "status": "active",
       "type": "physical",
@@ -2278,8 +2355,7 @@
           "ineligible_reason": "missing_agreement"
         },
         "primary_account_identifier": null
-      },
-      "personalization_design": null
+      }
     },
     "issuing.cardholder": {
       "billing": {
@@ -2311,11 +2387,11 @@
       },
       "spending_controls": {
         "allowed_categories": [],
+        "allowed_merchant_countries": [],
         "blocked_categories": [],
+        "blocked_merchant_countries": [],
         "spending_limits": [],
-        "spending_limits_currency": null,
-        "allowed_merchant_countries": null,
-        "blocked_merchant_countries": null
+        "spending_limits_currency": null
       },
       "status": "active",
       "type": "individual"
@@ -2336,8 +2412,7 @@
       "metadata": {},
       "object": "issuing.dispute",
       "status": "unsubmitted",
-      "transaction": "ipi_1OPouuJN5vQBdWExyOINiqR1",
-      "balance_transactions": null
+      "transaction": "ipi_1OPouuJN5vQBdWExyOINiqR1"
     },
     "issuing.personalization_design": {
       "card_logo": null,
@@ -2361,17 +2436,17 @@
       "status": "review"
     },
     "issuing.physical_bundle": {
+      "features": {
+        "card_logo": "unsupported",
+        "carrier_text": "optional",
+        "second_line": "optional"
+      },
       "id": "ics_PjUv222Xszs9R1",
       "livemode": false,
       "name": "My Card Bundle V1",
       "object": "issuing.physical_bundle",
       "status": "active",
-      "type": "custom",
-      "features": {
-        "card_logo": "unsupported",
-        "carrier_text": "optional",
-        "second_line": "optional"
-      }
+      "type": "custom"
     },
     "issuing.settlement": {
       "bin": "424242",
@@ -2442,8 +2517,7 @@
       "object": "issuing.transaction",
       "token": null,
       "type": "capture",
-      "wallet": "apple_pay",
-      "purchase_details": null
+      "wallet": "apple_pay"
     },
     "item": {
       "amount_discount": 0,
@@ -2655,6 +2729,7 @@
       "url": "https://pakrym-payment_links_ingress-mydev.dev.stripe.me/test_4gw3eYbvN3ixabe6oo"
     },
     "payment_method": {
+      "allow_redisplay": "unspecified",
       "billing_details": {
         "address": {
           "city": "San Francisco",
@@ -2681,6 +2756,7 @@
         "exp_year": 2024,
         "fingerprint": "r40d4vOgg3VecDJF",
         "funding": "credit",
+        "generated_from": null,
         "last4": "4242",
         "networks": {
           "available": [
@@ -2691,8 +2767,7 @@
         "three_d_secure_usage": {
           "supported": true
         },
-        "wallet": null,
-        "generated_from": null
+        "wallet": null
       },
       "created": 1234567890,
       "customer": null,
@@ -2738,6 +2813,14 @@
           "value": "off"
         }
       },
+      "amazon_pay": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
       "apple_pay": {
         "available": true,
         "display_preference": {
@@ -2747,6 +2830,14 @@
         }
       },
       "application": null,
+      "bacs_debit": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
       "bancontact": {
         "available": false,
         "display_preference": {
@@ -2882,6 +2973,14 @@
         }
       },
       "wechat_pay": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
+      "zip": {
         "available": false,
         "display_preference": {
           "overridable": null,
@@ -3040,6 +3139,8 @@
     },
     "payout": {
       "amount": 1100,
+      "application_fee": null,
+      "application_fee_amount": null,
       "arrival_date": 1234567890,
       "automatic": true,
       "balance_transaction": "txn_1OPoueJN5vQBdWEx8dhHMVqh",
@@ -3061,9 +3162,7 @@
       "source_type": "card",
       "statement_descriptor": null,
       "status": "in_transit",
-      "type": "bank_account",
-      "application_fee": null,
-      "application_fee_amount": null
+      "type": "bank_account"
     },
     "person": {
       "account": "acct_1OPouMJN5vQBdWEx",
@@ -3143,6 +3242,7 @@
       "interval_count": 1,
       "livemode": false,
       "metadata": {},
+      "meter": null,
       "nickname": null,
       "object": "plan",
       "product": "prod_PEHTfnvdJH6K0k",
@@ -3168,6 +3268,7 @@
         "aggregate_usage": null,
         "interval": "month",
         "interval_count": 1,
+        "meter": null,
         "usage_type": "licensed",
         "trial_period_days": null
       },
@@ -3186,6 +3287,7 @@
       "id": "prod_PEHTfnvdJH6K0k",
       "images": [],
       "livemode": false,
+      "marketing_features": [],
       "metadata": {},
       "name": "T-shirt",
       "object": "product",
@@ -3196,10 +3298,21 @@
       "unit_label": null,
       "updated": 1234567890,
       "url": null,
-      "marketing_features": [
-        {}
-      ],
       "type": "good"
+    },
+    "product_feature": {
+      "entitlement_feature": {
+        "active": true,
+        "id": "obj_123",
+        "livemode": true,
+        "lookup_key": "lookup_key",
+        "metadata": {},
+        "name": "name",
+        "object": "entitlements.feature"
+      },
+      "id": "obj_123",
+      "livemode": true,
+      "object": "product_feature"
     },
     "promotion_code": {
       "active": false,
@@ -3667,6 +3780,7 @@
       "default_tax_rates": [],
       "description": null,
       "discount": null,
+      "discounts": [],
       "ended_at": 1234567890,
       "id": "sub_1OPouiJN5vQBdWExOgfg6t5C",
       "items": {
@@ -3674,6 +3788,7 @@
           {
             "billing_thresholds": null,
             "created": 1703175361,
+            "discounts": [],
             "id": "si_PEHTru8PmLRCo3",
             "metadata": {},
             "object": "subscription_item",
@@ -3694,6 +3809,7 @@
                 "aggregate_usage": null,
                 "interval": "month",
                 "interval_count": 1,
+                "meter": null,
                 "usage_type": "licensed",
                 "trial_period_days": null
               },
@@ -3707,38 +3823,6 @@
             "quantity": 1,
             "subscription": "sub_1OPouiJN5vQBdWExOgfg6t5C",
             "tax_rates": [],
-            "discounts": [
-              {
-                "checkout_session": null,
-                "coupon": {
-                  "amount_off": null,
-                  "created": 1028554472,
-                  "currency": null,
-                  "duration": "forever",
-                  "duration_in_months": null,
-                  "id": "obj_123",
-                  "livemode": true,
-                  "max_redemptions": null,
-                  "metadata": null,
-                  "name": null,
-                  "object": "coupon",
-                  "percent_off": null,
-                  "redeem_by": null,
-                  "times_redeemed": 990066668,
-                  "valid": true
-                },
-                "customer": null,
-                "end": null,
-                "id": "obj_123",
-                "invoice": null,
-                "invoice_item": null,
-                "object": "discount",
-                "promotion_code": null,
-                "start": 109757538,
-                "subscription": null,
-                "subscription_item": null
-              }
-            ],
             "plan": {
               "active": true,
               "aggregate_usage": null,
@@ -3793,38 +3877,6 @@
         }
       },
       "trial_start": 1234567890,
-      "discounts": [
-        {
-          "checkout_session": null,
-          "coupon": {
-            "amount_off": null,
-            "created": 1028554472,
-            "currency": null,
-            "duration": "forever",
-            "duration_in_months": null,
-            "id": "obj_123",
-            "livemode": true,
-            "max_redemptions": null,
-            "metadata": null,
-            "name": null,
-            "object": "coupon",
-            "percent_off": null,
-            "redeem_by": null,
-            "times_redeemed": 990066668,
-            "valid": true
-          },
-          "customer": null,
-          "end": null,
-          "id": "obj_123",
-          "invoice": null,
-          "invoice_item": null,
-          "object": "discount",
-          "promotion_code": null,
-          "start": 109757538,
-          "subscription": null,
-          "subscription_item": null
-        }
-      ],
       "invoice_settings": {
         "account_tax_ids": null,
         "issuer": {
@@ -3835,6 +3887,7 @@
     "subscription_item": {
       "billing_thresholds": null,
       "created": 1703175363,
+      "discounts": [],
       "id": "si_PEHTIbRiA7RW9V",
       "metadata": {},
       "object": "subscription_item",
@@ -3855,6 +3908,7 @@
           "aggregate_usage": null,
           "interval": "month",
           "interval_count": 1,
+          "meter": null,
           "usage_type": "licensed",
           "trial_period_days": null
         },
@@ -3868,38 +3922,6 @@
       "quantity": 1,
       "subscription": "sub_1OPoulJN5vQBdWExmDmopkQy",
       "tax_rates": [],
-      "discounts": [
-        {
-          "checkout_session": null,
-          "coupon": {
-            "amount_off": null,
-            "created": 1028554472,
-            "currency": null,
-            "duration": "forever",
-            "duration_in_months": null,
-            "id": "obj_123",
-            "livemode": true,
-            "max_redemptions": null,
-            "metadata": null,
-            "name": null,
-            "object": "coupon",
-            "percent_off": null,
-            "redeem_by": null,
-            "times_redeemed": 990066668,
-            "valid": true
-          },
-          "customer": null,
-          "end": null,
-          "id": "obj_123",
-          "invoice": null,
-          "invoice_item": null,
-          "object": "discount",
-          "promotion_code": null,
-          "start": 109757538,
-          "subscription": null,
-          "subscription_item": null
-        }
-      ],
       "plan": {
         "active": true,
         "aggregate_usage": null,
@@ -3967,22 +3989,17 @@
           "default_payment_method": null,
           "default_tax_rates": [],
           "description": null,
+          "discounts": [],
           "end_date": 1735229763,
           "invoice_settings": null,
           "items": [
             {
               "billing_thresholds": null,
+              "discounts": [],
               "metadata": {},
               "price": "price_1OPouiJN5vQBdWExAQaqTooZ",
               "quantity": 1,
               "tax_rates": [],
-              "discounts": [
-                {
-                  "coupon": null,
-                  "discount": null,
-                  "promotion_code": null
-                }
-              ],
               "plan": {
                 "active": true,
                 "aggregate_usage": null,
@@ -4011,14 +4028,7 @@
           "proration_behavior": "create_prorations",
           "start_date": 1703780163,
           "transfer_data": null,
-          "trial_end": null,
-          "discounts": [
-            {
-              "coupon": null,
-              "discount": null,
-              "promotion_code": null
-            }
-          ]
+          "trial_end": null
         }
       ],
       "released_at": 1234567890,
@@ -4049,6 +4059,16 @@
       "id": "taxcalc_1OPouwJN5vQBdWExxLiHCl2k",
       "livemode": false,
       "object": "tax.calculation",
+      "ship_from_details": {
+        "address": {
+          "city": null,
+          "country": "US",
+          "line1": null,
+          "line2": null,
+          "postal_code": "75001",
+          "state": "TX"
+        }
+      },
       "shipping_cost": {
         "amount": 300,
         "amount_tax": 0,
@@ -4083,9 +4103,7 @@
           "taxable_amount": 0
         }
       ],
-      "tax_date": 1234567890,
-      "line_items": null,
-      "ship_from_details": null
+      "tax_date": 1234567890
     },
     "tax.calculation_line_item": {
       "amount": 1499,
@@ -4097,8 +4115,7 @@
       "quantity": 1,
       "reference": "Pepperoni Pizza",
       "tax_behavior": "exclusive",
-      "tax_code": "txcd_40060003",
-      "tax_breakdown": null
+      "tax_code": "txcd_40060003"
     },
     "tax.registration": {
       "active_from": 1234567890,
@@ -4184,6 +4201,16 @@
       "object": "tax.transaction",
       "reference": "myOrder_123",
       "reversal": null,
+      "ship_from_details": {
+        "address": {
+          "city": null,
+          "country": "US",
+          "line1": null,
+          "line2": null,
+          "postal_code": "75001",
+          "state": "TX"
+        }
+      },
       "shipping_cost": {
         "amount": 300,
         "amount_tax": 0,
@@ -4191,8 +4218,7 @@
         "tax_code": "txcd_92010001"
       },
       "tax_date": 1234567890,
-      "type": "transaction",
-      "ship_from_details": null
+      "type": "transaction"
     },
     "tax.transaction_line_item": {
       "amount": 1499,
@@ -4491,8 +4517,7 @@
             "account_holder_name": "Jenny Rosen",
             "account_number_last4": "7890",
             "bank_name": "STRIPE TEST BANK",
-            "routing_number": "0000000001",
-            "account_number": null
+            "routing_number": "0000000001"
           },
           "supported_networks": [
             "ach",
@@ -4664,8 +4689,8 @@
         "posted_at": null,
         "returned_at": null
       },
-      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv",
-      "tracking_details": null
+      "tracking_details": null,
+      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv"
     },
     "treasury.outbound_transfer": {
       "amount": 10000,
@@ -4714,8 +4739,8 @@
         "posted_at": null,
         "returned_at": null
       },
-      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv",
-      "tracking_details": null
+      "tracking_details": null,
+      "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv"
     },
     "treasury.received_credit": {
       "amount": 1234,
@@ -4751,8 +4776,7 @@
         "issuing_authorization": null,
         "issuing_transaction": null,
         "source_flow": null,
-        "source_flow_type": null,
-        "source_flow_details": null
+        "source_flow_type": null
       },
       "livemode": false,
       "network": "ach",
@@ -4830,9 +4854,7 @@
       "status_transitions": {
         "posted_at": null,
         "void_at": null
-      },
-      "entries": null,
-      "flow_details": null
+      }
     },
     "treasury.transaction_entry": {
       "balance_impact": {
@@ -4850,8 +4872,7 @@
       "livemode": false,
       "object": "treasury.transaction_entry",
       "transaction": "trxn_1OPousJN5vQBdWExS2LKXVAv",
-      "type": "outbound_transfer",
-      "flow_details": null
+      "type": "outbound_transfer"
     },
     "usage_record": {
       "id": "mbur_1OPoumJN5vQBdWExO39fivTh",
@@ -4915,56 +4936,17 @@
       "id": "obj_123",
       "object": "price"
     },
-    "deleted_product_feature": {
-      "deleted": true,
-      "id": "obj_123",
-      "object": "product_feature"
-    },
-    "entitlements.active_entitlement": {
-      "feature": "feature",
-      "id": "obj_123",
+    "entitlements.active_entitlement_summary": {
+      "customer": "customer",
+      "entitlements": null,
       "livemode": true,
-      "lookup_key": "lookup_key",
-      "object": "entitlements.active_entitlement"
-    },
-    "entitlements.feature": {
-      "active": true,
-      "id": "obj_123",
-      "livemode": true,
-      "lookup_key": "lookup_key",
-      "metadata": {
-        "undefined": "metadata"
-      },
-      "name": "name",
-      "object": "entitlements.feature"
+      "object": "entitlements.active_entitlement_summary"
     },
     "financial_connections.account_ownership": {
       "created": 1028554472,
       "id": "obj_123",
       "object": "financial_connections.account_ownership",
       "owners": null
-    },
-    "product_feature": {
-      "entitlement_feature": {
-        "active": true,
-        "id": "obj_123",
-        "livemode": true,
-        "lookup_key": "lookup_key",
-        "metadata": {
-          "undefined": "metadata"
-        },
-        "name": "name",
-        "object": "entitlements.feature"
-      },
-      "id": "obj_123",
-      "livemode": true,
-      "object": "product_feature"
-    },
-    "entitlements.active_entitlement_summary": {
-      "customer": "customer",
-      "entitlements": null,
-      "livemode": true,
-      "object": "entitlements.active_entitlement_summary"
     }
   }
 }
