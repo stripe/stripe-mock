@@ -824,7 +824,7 @@
           "account_type": "checking",
           "bank_name": "STRIPE TEST BANK",
           "financial_connections_account": null,
-          "fingerprint": "wNV5OVqdoHL0ZwzF",
+          "fingerprint": "xqJPofsnGDaJjZc9",
           "last4": "6789",
           "networks": {
             "preferred": "ach",
@@ -1635,92 +1635,37 @@
             "url": "https://pakrym-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xT1hYY1VEMnFQN1F0SmVHfGZsX3Rlc3RfUzNDbHVhMWc0dEJuaWZVTFlQbXVSelhu00rmgafjqm"
           },
           {
-            "created": 1717188285,
+            "created": 1718654212,
             "expired": false,
             "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMcJdBM8hHlaKAcxR5oR07M",
+            "file": "file_1PSlcTBq3fL8ShmbUJgWF9Dv",
+            "id": "link_1PSlfcBq3fL8ShmbsOOT19Uc",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfRXVCeGRocW9SQTdHdXIxUU5ZcVBocEZy00ZzKsuY7F"
+            "url": "https://wguo-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUFNqUE1CcTNmTDhTaG1ifGZsX3Rlc3RfVjQyYWNPTWdVNnFidnRuMHJ5bUkyUjZ200a59AobHJ"
           },
           {
-            "created": 1717187391,
+            "created": 1718654018,
             "expired": false,
             "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
+            "file": "file_1PSlcTBq3fL8ShmbUJgWF9Dv",
+            "id": "link_1PSlcUBq3fL8ShmbgJRIyvpG",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
+            "url": "https://wguo-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUFNqUE1CcTNmTDhTaG1ifGZsX3Rlc3RfRUxTeFVlQzRIWHZRTUlEZ05NdExXMlo400KOxbbIYo"
           },
           {
-            "created": 1717187391,
+            "created": 1718654017,
             "expired": false,
             "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
+            "file": "file_1PSlcTBq3fL8ShmbUJgWF9Dv",
+            "id": "link_1PSlcTBq3fL8ShmbINqVmxCu",
             "livemode": false,
             "metadata": {},
             "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
-          },
-          {
-            "created": 1717187391,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
-          },
-          {
-            "created": 1717187391,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
-          },
-          {
-            "created": 1717187391,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
-          },
-          {
-            "created": 1717187391,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAc5ll9b9de",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfMnlhMnNTZWNJdEswU3l0cUh4eFJWVnha00Dy5Fp5uK"
-          },
-          {
-            "created": 1717187391,
-            "expired": false,
-            "expires_at": null,
-            "file": "file_1PMc5DBM8hHlaKAcdaC3SFCD",
-            "id": "link_1PMc5DBM8hHlaKAcQwaAId1K",
-            "livemode": false,
-            "metadata": {},
-            "object": "file_link",
-            "url": "https://kellyhuang-sv8q8w--upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUE1jNGxCTThoSGxhS0FjfGZsX3Rlc3RfNEdxUEdwZWtUVXAwdU82a1UyYXFBQkt400544mkQu0"
+            "url": "https://wguo-upload-mydev.dev.stripe.me/links/MDB8YWNjdF8xUFNqUE1CcTNmTDhTaG1ifGZsX3Rlc3RfMTZicGVwWDBHdVNHTlVIUXpuR1B4Mmda00xWIgICTI"
           }
         ],
         "has_more": false,
@@ -2937,6 +2882,14 @@
         }
       },
       "livemode": false,
+      "multibanco": {
+        "available": false,
+        "display_preference": {
+          "overridable": null,
+          "preference": "off",
+          "value": "off"
+        }
+      },
       "name": "Default",
       "object": "payment_method_configuration",
       "p24": {
@@ -3783,6 +3736,12 @@
       "discounts": [],
       "ended_at": 1234567890,
       "id": "sub_1OPouiJN5vQBdWExOgfg6t5C",
+      "invoice_settings": {
+        "account_tax_ids": null,
+        "issuer": {
+          "type": "account"
+        }
+      },
       "items": {
         "data": [
           {
@@ -3876,13 +3835,7 @@
           "missing_payment_method": "create_invoice"
         }
       },
-      "trial_start": 1234567890,
-      "invoice_settings": {
-        "account_tax_ids": null,
-        "issuer": {
-          "type": "account"
-        }
-      }
+      "trial_start": 1234567890
     },
     "subscription_item": {
       "billing_thresholds": null,
