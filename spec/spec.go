@@ -85,6 +85,9 @@ var supportedSchemaFields = []string{
 	"x-stripeOperations",
 	"x-stripeParam",
 	"x-stripeEvent",
+	// This isn't used in our SDK, but is additional metadata unncessary for
+	// stripe-mock.
+	"deprecated",
 
 	// This is currently a hint for the server-side so I haven't included it in
 	// Schema yet. If we do start validating responses that come out of
