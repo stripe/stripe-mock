@@ -85,7 +85,7 @@ var supportedSchemaFields = []string{
 	"x-stripeOperations",
 	"x-stripeParam",
 	"x-stripeEvent",
-	// This isn't used in our SDK, but is additional metadata unncessary for
+	// This isn't used in our SDK, but is additional metadata unnecessary for
 	// stripe-mock.
 	"deprecated",
 
