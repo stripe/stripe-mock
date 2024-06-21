@@ -2222,7 +2222,9 @@
           "result": "authenticated"
         }
       },
-      "wallet": null
+      "wallet": null,
+      "fleet": null,
+      "fuel": null
     },
     "issuing.card": {
       "brand": "Visa",
