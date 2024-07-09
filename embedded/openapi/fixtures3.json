@@ -1291,6 +1291,10 @@
         },
         "pricing_table": {
           "enabled": true
+        },
+        "payment_element": {
+          "enabled": true,
+          "features": null
         }
       },
       "created": 1234567890,
