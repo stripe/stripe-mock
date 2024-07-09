@@ -3807,7 +3807,8 @@
               "tiers_mode": null,
               "transform_usage": null,
               "trial_period_days": null,
-              "usage_type": "licensed"
+              "usage_type": "licensed",
+              "meter": null
             }
           }
         ],
@@ -3900,7 +3901,8 @@
         "tiers_mode": null,
         "transform_usage": null,
         "trial_period_days": null,
-        "usage_type": "licensed"
+        "usage_type": "licensed",
+        "meter": null
       }
     },
     "subscription_schedule": {
@@ -3978,7 +3980,8 @@
                 "tiers_mode": null,
                 "transform_usage": null,
                 "trial_period_days": null,
-                "usage_type": "licensed"
+                "usage_type": "licensed",
+                "meter": null
               }
             }
           ],
