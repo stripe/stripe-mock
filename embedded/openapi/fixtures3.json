@@ -851,7 +851,8 @@
         "name": "Jenny Rosen",
         "phone": null
       },
-      "use_stripe_sdk": true
+      "use_stripe_sdk": true,
+      "payment_method_options": null
     },
     "country_spec": {
       "default_currency": "usd",
