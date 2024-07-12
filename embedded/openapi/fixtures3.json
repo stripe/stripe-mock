@@ -834,7 +834,8 @@
           },
           "routing_number": "110000000",
           "status_details": {}
-        }
+        },
+        "customer": null
       },
       "return_url": "https://example.com/return",
       "setup_future_usage": "off_session",
