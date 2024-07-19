@@ -1,4 +1,4 @@
-# stripe-mock [![Build Status](https://travis-ci.org/stripe/stripe-mock.svg?branch=master)](https://travis-ci.org/stripe/stripe-mock)
+# stripe-mock [![Build Status](https://github.com/stripe/stripe-mock/actions/workflows/ci.yml/badge.svg)](https://github.com/stripe/stripe-mock/actions/workflows/ci.yml)
 
 stripe-mock is a mock HTTP server based on the real Stripe API. It accepts the
 same requests and parameters that the Stripe API accepts, and rejects requests
