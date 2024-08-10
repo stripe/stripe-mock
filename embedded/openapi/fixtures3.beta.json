@@ -3933,15 +3933,31 @@
     "scheduled_query_run": {
       "created": 1234567890,
       "data_load_time": 1234567890,
-      "error": "Could not display example response. Please contact support at https://support.stripe.com/contact/.",
-      "file": null,
-      "id": "",
+      "file": {
+        "created": 1721948551,
+        "expires_at": null,
+        "filename": "path",
+        "id": "file_1Pgag7B7WZ01zgkWJbdoNCXR",
+        "links": {
+          "data": [],
+          "has_more": false,
+          "object": "list",
+          "url": "/v1/file_links?file=file_1Pgag7B7WZ01zgkWJbdoNCXR"
+        },
+        "object": "file",
+        "purpose": "sigma_scheduled_query",
+        "size": 500,
+        "title": null,
+        "type": "csv",
+        "url": "https://sangeekp-15t6ai--upload-mydev.dev.stripe.me/v1/files/file_1Pgag7B7WZ01zgkWJbdoNCXR/contents"
+      },
+      "id": "sqr_1Pgc7AB7WZ01zgkWvpIic1Di",
       "livemode": false,
       "object": "scheduled_query_run",
       "result_available_until": 1234567890,
-      "sql": "",
-      "status": "",
-      "title": ""
+      "sql": "SELECT count(*) from charges",
+      "status": "completed",
+      "title": "Count all charges"
     },
     "setup_attempt": {
       "application": null,
