@@ -3880,23 +3880,40 @@
     },
     "reporting.report_run": {
       "created": 1234567890,
-      "error": "Could not display example response. Please contact support at https://support.stripe.com/contact/.",
-      "id": "",
-      "livemode": false,
+      "error": null,
+      "id": "frr_1P74ZtL3SJdCuX0fG9hWKYsk",
+      "livemode": true,
       "object": "reporting.report_run",
       "parameters": {
+        "interval_end": 1525132800,
+        "interval_start": 1522540800,
         "columns": [],
         "connected_account": "",
         "currency": "",
-        "interval_end": 0,
-        "interval_start": 0,
         "payout": "",
         "reporting_category": "",
         "timezone": ""
       },
       "report_type": "",
-      "result": null,
-      "status": "",
+      "result": {
+        "created": 1713483675,
+        "expires_at": 1745019675,
+        "filename": "file_1P74ZrL3SJdCuX0fvLdyvisV",
+        "id": "file_1P74ZrL3SJdCuX0fvLdyvisV",
+        "links": {
+          "data": [],
+          "has_more": false,
+          "object": "list",
+          "url": "/v1/file_links?file=file_1P74ZrL3SJdCuX0fvLdyvisV"
+        },
+        "object": "file",
+        "purpose": "finance_report_run",
+        "size": 16890,
+        "title": null,
+        "type": "csv",
+        "url": "https://chaves-upload-mydev.dev.stripe.me/v1/files/file_1P74ZrL3SJdCuX0fvLdyvisV/contents"
+      },
+      "status": "succeeded",
       "succeeded_at": 1234567890
     },
     "reporting.report_type": {
