@@ -1,6 +1,6 @@
 module github.com/stripe/stripe-mock
 
-go 1.19
+go 1.22.1
 
 require (
 	github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2 // indirect
