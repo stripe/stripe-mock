@@ -2468,7 +2468,8 @@
       "object": "issuing.settlement",
       "settlement_service": "international",
       "transaction_count": 2,
-      "transaction_volume": 3656
+      "transaction_volume": 3656,
+      "status": "complete"
     },
     "issuing.token": {
       "card": "ic_1Pgag5B7WZ01zgkWephORn8N",
