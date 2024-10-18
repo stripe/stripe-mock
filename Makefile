@@ -1,5 +1,6 @@
 GIT_COMMITSHA = $(shell git rev-parse HEAD)
 IMAGE_NAME = "stripe/stripe-mock"
+OPENAPI_BRANCH ?= master
 
 all: test vet lint check-gofmt build
 
@@ -30,6 +31,6 @@ docker-run:
 update-openapi-spec:
 	rm -f ./embedded/openapi/spec3.json
 	rm -f ./embedded/openapi/fixtures3.json
-	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json -P ./embedded/openapi
-	wget https://raw.githubusercontent.com/stripe/openapi/master/openapi/fixtures3.json -P ./embedded/openapi
+	wget https://raw.githubusercontent.com/stripe/openapi/$(OPENAPI_BRANCH)/openapi/spec3.json -P ./embedded/openapi
+	wget https://raw.githubusercontent.com/stripe/openapi/$(OPENAPI_BRANCH)/openapi/fixtures3.json -P ./embedded/openapi
 .PHONY: update-openapi-spec
