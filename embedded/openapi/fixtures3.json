@@ -1170,7 +1170,9 @@
                 "object": "tax_rate",
                 "percentage": 19,
                 "state": null,
-                "tax_type": "vat"
+                "tax_type": "vat",
+                "flat_amount": null,
+                "rate_type": null
               }
             ],
             "type": "invoice_line_item",
@@ -3021,6 +3023,9 @@
       "object": "payment_method_domain",
       "paypal": {
         "status": "active"
+      },
+      "amazon_pay": {
+        "status": "active"
       }
     },
     "payment_source": {
@@ -4085,7 +4090,9 @@
             "country": "US",
             "percentage_decimal": "9.875",
             "state": "CA",
-            "tax_type": "sales_tax"
+            "tax_type": "sales_tax",
+            "flat_amount": null,
+            "rate_type": null
           },
           "taxability_reason": "standard_rated",
           "taxable_amount": 1499
@@ -4097,7 +4104,9 @@
             "country": "US",
             "percentage_decimal": "0.0",
             "state": "CA",
-            "tax_type": "sales_tax"
+            "tax_type": "sales_tax",
+            "flat_amount": null,
+            "rate_type": null
           },
           "taxability_reason": "product_exempt",
           "taxable_amount": 0
@@ -4277,7 +4286,9 @@
       "object": "tax_rate",
       "percentage": 19,
       "state": null,
-      "tax_type": "vat"
+      "tax_type": "vat",
+      "flat_amount": null,
+      "rate_type": null
     },
     "terminal.configuration": {
       "bbpos_wisepos_e": {
@@ -5091,17 +5102,6 @@
       "test_clock": null,
       "updated": 234430277,
       "voided_at": null
-    },
-    "margin": {
-      "active": true,
-      "created": 1028554472,
-      "id": "obj_123",
-      "livemode": true,
-      "metadata": null,
-      "name": null,
-      "object": "margin",
-      "percent_off": 1487902325,
-      "updated": 234430277
     }
   }
 }
