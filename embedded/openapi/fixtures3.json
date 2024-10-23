@@ -578,7 +578,8 @@
           },
           "three_d_secure": null,
           "wallet": null,
-          "authorization_code": null
+          "authorization_code": null,
+          "amount_requested": null
         },
         "type": "card"
       },
@@ -1535,13 +1536,15 @@
         "shipping_documentation": null,
         "shipping_tracking_number": null,
         "uncategorized_file": null,
-        "uncategorized_text": null
+        "uncategorized_text": null,
+        "enhanced_evidence": {}
       },
       "evidence_details": {
         "due_by": 1723679999,
         "has_evidence": false,
         "past_due": false,
-        "submission_count": 0
+        "submission_count": 0,
+        "enhanced_eligibility": {}
       },
       "id": "dp_1Pgc71B7WZ01zgkWMevJiAUx",
       "is_charge_refundable": true,
@@ -1558,7 +1561,10 @@
         "type": "card"
       },
       "reason": "general",
-      "status": "warning_needs_response"
+      "status": "warning_needs_response",
+      "enhanced_eligibility_types": [
+        "visa_compelling_evidence_3"
+      ]
     },
     "entitlements.active_entitlement": {
       "feature": "feat_test_61QGU1MWyFMSP9YBZ41ClCIKljWvsTgu",
