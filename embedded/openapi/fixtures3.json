@@ -578,8 +578,7 @@
           },
           "three_d_secure": null,
           "wallet": null,
-          "authorization_code": null,
-          "amount_requested": null
+          "authorization_code": null
         },
         "type": "card"
       },
