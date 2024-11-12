@@ -141,13 +141,15 @@
         "account_management": {
           "enabled": false,
           "features": {
-            "external_account_collection": true
+            "external_account_collection": true,
+            "disable_stripe_user_authentication": true
           }
         },
         "account_onboarding": {
           "enabled": false,
           "features": {
-            "external_account_collection": true
+            "external_account_collection": true,
+            "disable_stripe_user_authentication": true
           }
         },
         "balances": {
@@ -156,7 +158,8 @@
             "edit_payout_schedule": false,
             "external_account_collection": true,
             "instant_payouts": false,
-            "standard_payouts": false
+            "standard_payouts": false,
+            "disable_stripe_user_authentication": true
           }
         },
         "documents": {
@@ -166,7 +169,8 @@
         "notification_banner": {
           "enabled": false,
           "features": {
-            "external_account_collection": true
+            "external_account_collection": true,
+            "disable_stripe_user_authentication": true
           }
         },
         "payment_details": {
@@ -193,7 +197,8 @@
             "edit_payout_schedule": false,
             "external_account_collection": true,
             "instant_payouts": false,
-            "standard_payouts": false
+            "standard_payouts": false,
+            "disable_stripe_user_authentication": true
           }
         },
         "payouts_list": {
@@ -673,7 +678,8 @@
       "total_details": null,
       "ui_mode": "hosted",
       "url": "https://checkout.stripe.com/pay/c/cs_test_a1YS1URlnyQCN5fUUduORoQ7Pw41PJqDWkIVQCpJPqkfIhd6tVY8XB1OLY",
-      "shipping_details": null
+      "shipping_details": null,
+      "adaptive_pricing": null
     },
     "climate.order": {
       "amount_fees": 300,
