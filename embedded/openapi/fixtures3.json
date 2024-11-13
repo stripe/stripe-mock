@@ -3230,7 +3230,8 @@
         "owner": false,
         "percent_ownership": null,
         "representative": false,
-        "title": null
+        "title": null,
+        "authorizer": null
       },
       "requirements": {
         "alternatives": [],
