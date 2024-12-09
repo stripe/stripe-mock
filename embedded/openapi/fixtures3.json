@@ -413,7 +413,14 @@
         "subscription_update": {
           "default_allowed_updates": [],
           "enabled": false,
-          "proration_behavior": "none"
+          "proration_behavior": "none",
+          "schedule_at_period_end": {
+            "conditions": [
+              {
+                "type": "decreasing_item_amount"
+              }
+            ]
+          }
         }
       },
       "id": "bpc_1Pgc70B7WZ01zgkWSnFO04Vt",
@@ -1968,7 +1975,8 @@
       "automatic_tax": {
         "enabled": false,
         "liability": null,
-        "status": null
+        "status": null,
+        "disabled_reason": null
       },
       "billing_reason": "manual",
       "charge": null,
@@ -2294,7 +2302,8 @@
           "result": "authenticated"
         }
       },
-      "wallet": null
+      "wallet": null,
+      "verified_by_fraud_challenge": null
     },
     "issuing.card": {
       "brand": "Visa",
@@ -3192,7 +3201,8 @@
       "source_type": "card",
       "statement_descriptor": null,
       "status": "in_transit",
-      "type": "bank_account"
+      "type": "bank_account",
+      "trace_id": null
     },
     "person": {
       "account": "acct_1PgafTB7WZ01zgkW",
@@ -3769,7 +3779,8 @@
       "application_fee_percent": null,
       "automatic_tax": {
         "enabled": false,
-        "liability": null
+        "liability": null,
+        "disabled_reason": null
       },
       "billing_cycle_anchor": 1234567890,
       "billing_cycle_anchor_config": null,
@@ -3971,7 +3982,8 @@
         "application_fee_percent": null,
         "automatic_tax": {
           "enabled": false,
-          "liability": null
+          "liability": null,
+          "disabled_reason": null
         },
         "billing_cycle_anchor": "automatic",
         "billing_thresholds": null,
