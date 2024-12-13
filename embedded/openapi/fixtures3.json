@@ -3201,8 +3201,7 @@
       "source_type": "card",
       "statement_descriptor": null,
       "status": "in_transit",
-      "type": "bank_account",
-      "trace_id": null
+      "type": "bank_account"
     },
     "person": {
       "account": "acct_1PgafTB7WZ01zgkW",
