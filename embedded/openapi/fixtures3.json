@@ -212,6 +212,40 @@
         "tax_settings": {
           "enabled": false,
           "features": {}
+        },
+        "financial_account": {
+          "enabled": true,
+          "features": {
+            "disable_stripe_user_authentication": true,
+            "external_account_collection": true,
+            "send_money": true,
+            "transfer_balance": true
+          }
+        },
+        "financial_account_transactions": {
+          "enabled": true,
+          "features": {
+            "card_spend_dispute_management": true
+          }
+        },
+        "issuing_card": {
+          "enabled": true,
+          "features": {
+            "card_management": true,
+            "card_spend_dispute_management": true,
+            "cardholder_management": true,
+            "spend_control_management": true
+          }
+        },
+        "issuing_cards_list": {
+          "enabled": true,
+          "features": {
+            "card_management": true,
+            "card_spend_dispute_management": true,
+            "cardholder_management": true,
+            "disable_stripe_user_authentication": true,
+            "spend_control_management": true
+          }
         }
       },
       "expires_at": 1234567890,
@@ -498,7 +532,8 @@
       "metadata": {},
       "name": "Jenny Rosen",
       "object": "card",
-      "tokenization_method": null
+      "tokenization_method": null,
+      "regulated_status": null
     },
     "cash_balance": {
       "available": {
@@ -590,7 +625,9 @@
           },
           "three_d_secure": null,
           "wallet": null,
-          "authorization_code": null
+          "authorization_code": null,
+          "regulated_status": null,
+          "network_transaction_id": null
         },
         "type": "card"
       },
@@ -1191,7 +1228,13 @@
             "type": "invoice_line_item",
             "unit_amount": null,
             "unit_amount_decimal": null,
-            "unit_amount_excluding_tax": "1190"
+            "unit_amount_excluding_tax": "1190",
+            "pretax_credit_amounts": [
+              {
+                "amount": 1413853096,
+                "type": "credit_balance_transaction"
+              }
+            ]
           },
           {
             "amount": 500,
@@ -1208,7 +1251,13 @@
             "type": "custom_line_item",
             "unit_amount": 500,
             "unit_amount_decimal": "500",
-            "unit_amount_excluding_tax": "500"
+            "unit_amount_excluding_tax": "500",
+            "pretax_credit_amounts": [
+              {
+                "amount": 1413853096,
+                "type": "credit_balance_transaction"
+              }
+            ]
           }
         ],
         "has_more": false,
@@ -1240,7 +1289,13 @@
       "total": 1690,
       "total_excluding_tax": null,
       "type": "pre_payment",
-      "voided_at": 1234567890
+      "voided_at": 1234567890,
+      "pretax_credit_amounts": [
+        {
+          "amount": 1413853096,
+          "type": "credit_balance_transaction"
+        }
+      ]
     },
     "credit_note_line_item": {
       "amount": 1000,
@@ -1258,7 +1313,13 @@
       "type": "invoice_line_item",
       "unit_amount": null,
       "unit_amount_decimal": null,
-      "unit_amount_excluding_tax": "1000"
+      "unit_amount_excluding_tax": "1000",
+      "pretax_credit_amounts": [
+        {
+          "amount": 1413853096,
+          "type": "credit_balance_transaction"
+        }
+      ]
     },
     "customer": {
       "address": null,
@@ -2062,7 +2123,8 @@
             "tax_rates": [],
             "type": "invoiceitem",
             "unit_amount_excluding_tax": "1000",
-            "plan": null
+            "plan": null,
+            "pretax_credit_amounts": null
           }
         ],
         "has_more": false,
@@ -2115,7 +2177,8 @@
       "total_tax_amounts": [],
       "transfer_data": null,
       "webhooks_delivered_at": 1234567890,
-      "automatically_finalizes_at": null
+      "automatically_finalizes_at": null,
+      "total_pretax_credit_amounts": null
     },
     "invoiceitem": {
       "amount": 1000,
@@ -2270,7 +2333,8 @@
         "postal_code": "94107",
         "state": "CA",
         "terminal_id": null,
-        "url": null
+        "url": null,
+        "tax_id": null
       },
       "metadata": {},
       "network_data": null,
@@ -2533,7 +2597,8 @@
         "postal_code": "94107",
         "state": "CA",
         "terminal_id": null,
-        "url": null
+        "url": null,
+        "tax_id": null
       },
       "metadata": {},
       "network_data": {
@@ -2627,7 +2692,8 @@
       "tax_rates": [],
       "type": "invoiceitem",
       "unit_amount_excluding_tax": "1000",
-      "plan": null
+      "plan": null,
+      "pretax_credit_amounts": null
     },
     "login_link": {
       "created": 1234567890,
@@ -2795,7 +2861,8 @@
         "three_d_secure_usage": {
           "supported": true
         },
-        "wallet": null
+        "wallet": null,
+        "regulated_status": null
       },
       "created": 1234567890,
       "customer": null,
@@ -4396,7 +4463,8 @@
           "preferred": null
         },
         "object": "card",
-        "tokenization_method": null
+        "tokenization_method": null,
+        "regulated_status": null
       },
       "client_ip": null,
       "created": 1234567890,
