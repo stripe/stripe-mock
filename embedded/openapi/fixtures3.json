@@ -723,7 +723,8 @@
       "ui_mode": "hosted",
       "url": "https://checkout.stripe.com/pay/c/cs_test_a1YS1URlnyQCN5fUUduORoQ7Pw41PJqDWkIVQCpJPqkfIhd6tVY8XB1OLY",
       "shipping_details": null,
-      "adaptive_pricing": null
+      "adaptive_pricing": null,
+      "discounts": null
     },
     "climate.order": {
       "amount_fees": 300,
