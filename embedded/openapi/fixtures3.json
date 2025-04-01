@@ -495,7 +495,9 @@
     },
     "subscription_cancel": {
      "retention": {
-      "coupon_offer": null,
+      "coupon_offer": {
+       "coupon": "coupon"
+      },
       "type": "coupon_offer"
      },
      "subscription": "subscription"
@@ -2406,7 +2408,12 @@
         "invoice_item": "invoice_item",
         "proration": true,
         "proration_details": {
-         "credited_items": null
+         "credited_items": {
+          "invoice": "invoice",
+          "invoice_line_items": [
+           "invoice_line_items"
+          ]
+         }
         },
         "subscription": null
        },
@@ -2414,7 +2421,12 @@
         "invoice_item": null,
         "proration": true,
         "proration_details": {
-         "credited_items": null
+         "credited_items": {
+          "invoice": "invoice",
+          "invoice_line_items": [
+           "invoice_line_items"
+          ]
+         }
         },
         "subscription": "subscription",
         "subscription_item": "subscription_item"
@@ -3151,7 +3163,12 @@
      "invoice_item": "invoice_item",
      "proration": true,
      "proration_details": {
-      "credited_items": null
+      "credited_items": {
+       "invoice": "invoice",
+       "invoice_line_items": [
+        "invoice_line_items"
+       ]
+      }
      },
      "subscription": null
     },
@@ -3159,7 +3176,12 @@
      "invoice_item": null,
      "proration": true,
      "proration_details": {
-      "credited_items": null
+      "credited_items": {
+       "invoice": "invoice",
+       "invoice_line_items": [
+        "invoice_line_items"
+       ]
+      }
      },
      "subscription": "subscription",
      "subscription_item": "subscription_item"
