@@ -1525,7 +1525,9 @@
             "transfer_reversal": null
           }
         }
-      ]
+      ],
+      "post_payment_amount": 1355257296,
+      "pre_payment_amount": 251024947
     },
     "credit_note_line_item": {
       "amount": 1000,
