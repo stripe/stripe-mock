@@ -3341,7 +3341,10 @@
         "description": null,
         "effective_date": null,
         "trial_period_days": null,
-        "metadata": null
+        "metadata": null,
+        "billing_mode": {
+          "type": "classic"
+        }
       },
       "subscription_schedule": null,
       "test_clock": null,
@@ -4007,6 +4010,9 @@
         "issuer": {
           "type": "account"
         }
+      },
+      "billing_mode": {
+        "type": "classic"
       }
     },
     "subscription_item": {
@@ -4250,7 +4256,10 @@
       "released_subscription": null,
       "status": "not_started",
       "subscription": null,
-      "test_clock": null
+      "test_clock": null,
+      "billing_mode": {
+        "type": "classic"
+      }
     },
     "tax_code": {
       "description": "Any tangible or physical good. For jurisdictions that impose a tax, the standard rate is applied.",
@@ -6825,7 +6834,10 @@
       "released_subscription": null,
       "status": "active",
       "subscription": null,
-      "test_clock": null
+      "test_clock": null,
+      "billing_mode": {
+        "type": "classic"
+      }
     },
     "tax.association": {
       "calculation": "calculation",
