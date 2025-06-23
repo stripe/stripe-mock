@@ -114,7 +114,8 @@
           "timezone": "Etc/UTC"
         },
         "invoices": {
-          "default_account_tax_ids": null
+          "default_account_tax_ids": null,
+          "hosted_payment_method_save": null
         },
         "payments": {
           "statement_descriptor": null,
@@ -3853,7 +3854,8 @@
           "timezone": "Etc/UTC"
         },
         "invoices": {
-          "default_account_tax_ids": null
+          "default_account_tax_ids": null,
+          "hosted_payment_method_save": null
         },
         "payments": {
           "statement_descriptor": null,
@@ -4183,7 +4185,10 @@
         "description": null,
         "effective_date": null,
         "metadata": null,
-        "trial_period_days": null
+        "trial_period_days": null,
+        "billing_mode": {
+          "type": "classic"
+        }
       },
       "subscription_schedule": null,
       "test_clock": null,
@@ -4788,6 +4793,9 @@
       "billing_thresholds": {
         "amount_gte": null,
         "reset_billing_cycle_anchor": null
+      },
+      "billing_mode": {
+        "type": "classic"
       }
     },
     "subscription_item": {
@@ -4988,7 +4996,10 @@
       "released_subscription": null,
       "status": "not_started",
       "subscription": null,
-      "test_clock": null
+      "test_clock": null,
+      "billing_mode": {
+        "type": "classic"
+      }
     },
     "tax.calculation": {
       "amount_total": 1947,
