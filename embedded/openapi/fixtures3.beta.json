@@ -7056,6 +7056,26 @@
       },
       "object": "terminal.reader_collected_data",
       "type": "magstripe"
+    },
+    "sigma.schema": {
+      "name": "name",
+      "object": "sigma.schema",
+      "tables": [
+        {
+          "columns": [
+            {
+              "comment": "comment",
+              "foreign_key": null,
+              "name": "name",
+              "primary_key": true,
+              "type": "type"
+            }
+          ],
+          "comment": "comment",
+          "name": "name",
+          "section": "section"
+        }
+      ]
     }
   }
 }
