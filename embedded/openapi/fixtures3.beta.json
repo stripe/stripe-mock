@@ -732,7 +732,8 @@
         "payment_method_save": null
       },
       "ui_mode": null,
-      "wallet_options": {}
+      "wallet_options": {},
+      "origin_context": null
     },
     "country_spec": {
       "default_currency": "usd",
