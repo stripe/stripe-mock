@@ -3465,7 +3465,6 @@
     "review": {
       "billing_zip": null,
       "charge": "ch_1Mcd6UJITzLVzkSmp1XIBHoW",
-      "closed_reason": null,
       "created": 1234567890,
       "id": "prv_1MlLiHJITzLVzkSmWOL5pISl",
       "ip_address": null,
@@ -3480,13 +3479,14 @@
       "object": "review",
       "open": true,
       "opened_reason": "rule",
-      "reason": "rule",
       "session": {
         "browser": null,
         "device": null,
         "platform": null,
         "version": null
-      }
+      },
+      "closed_reason": null,
+      "reason": "reason"
     },
     "scheduled_query_run": {
       "created": 1234567890,
