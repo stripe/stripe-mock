@@ -7077,6 +7077,18 @@
           "section": "section"
         }
       ]
+    },
+    "terminal.onboarding_link": {
+      "link_options": {
+        "apple_terms_and_conditions": {
+          "allow_relinking": null,
+          "merchant_display_name": "merchant_display_name"
+        }
+      },
+      "link_type": "apple_terms_and_conditions",
+      "object": "terminal.onboarding_link",
+      "on_behalf_of": null,
+      "redirect_url": "redirect_url"
     }
   }
 }
