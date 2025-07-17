@@ -7078,6 +7078,31 @@
         }
       ]
     },
+    "billing.meter_usage": {
+      "data": [
+        {
+          "bucket_end_time": 267894170,
+          "bucket_start_time": 1719055873,
+          "bucket_value": 209364700,
+          "dimensions": null,
+          "id": "obj_123",
+          "meter_id": null,
+          "object": "billing.meter_usage_row"
+        }
+      ],
+      "data_refreshed_at": 952047539,
+      "livemode": true,
+      "object": "billing.meter_usage"
+    },
+    "billing.meter_usage_row": {
+      "bucket_end_time": 267894170,
+      "bucket_start_time": 1719055873,
+      "bucket_value": 209364700,
+      "dimensions": null,
+      "id": "obj_123",
+      "meter_id": null,
+      "object": "billing.meter_usage_row"
+    },
     "terminal.onboarding_link": {
       "link_options": {
         "apple_terms_and_conditions": {
