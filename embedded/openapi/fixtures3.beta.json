@@ -651,7 +651,8 @@
           },
           "metadata": null,
           "rendering_options": {
-            "amount_tax_display": null
+            "amount_tax_display": null,
+            "template": null
           }
         }
       },
@@ -2796,7 +2797,8 @@
           },
           "metadata": null,
           "rendering_options": {
-            "amount_tax_display": null
+            "amount_tax_display": null,
+            "template": null
           }
         }
       },
