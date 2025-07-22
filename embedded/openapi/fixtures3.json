@@ -276,6 +276,14 @@
             "dispute_management": true,
             "refund_management": true
           }
+        },
+        "instant_payouts_promotion": {
+          "enabled": true,
+          "features": {
+            "disable_stripe_user_authentication": true,
+            "external_account_collection": true,
+            "instant_payouts": true
+          }
         }
       },
       "expires_at": 1234567890,
@@ -876,7 +884,8 @@
           },
           "metadata": null,
           "rendering_options": {
-            "amount_tax_display": null
+            "amount_tax_display": null,
+            "template": null
           }
         }
       },
@@ -950,7 +959,8 @@
       "permissions": {
         "update_shipping_details": null
       },
-      "wallet_options": {}
+      "wallet_options": {},
+      "origin_context": null
     },
     "climate.order": {
       "amount_fees": 300,
@@ -3367,7 +3377,8 @@
           },
           "metadata": null,
           "rendering_options": {
-            "amount_tax_display": null
+            "amount_tax_display": null,
+            "template": null
           }
         }
       },
@@ -4308,7 +4319,6 @@
     "review": {
       "billing_zip": null,
       "charge": "ch_1PgafuB7WZ01zgkWXYmPNZs8",
-      "closed_reason": null,
       "created": 1234567890,
       "id": "prv_1Pgc79B7WZ01zgkWT6khp5C3",
       "ip_address": null,
@@ -4323,13 +4333,14 @@
       "object": "review",
       "open": true,
       "opened_reason": "rule",
-      "reason": "rule",
       "session": {
         "browser": null,
         "device": null,
         "platform": null,
         "version": null
-      }
+      },
+      "closed_reason": null,
+      "reason": "reason"
     },
     "scheduled_query_run": {
       "created": 1234567890,
