@@ -1060,7 +1060,6 @@
       "object": "credit_note",
       "out_of_band_amount": null,
       "pdf": "https://rwashburne-manage-mydev.dev.stripe.me/credit_notes/acct_1MWlHDJITzLVzkSm/cnst_123456789/pdf?s=ap",
-      "reason": null,
       "shipping_cost": {
         "amount_subtotal": 1555417355,
         "amount_tax": 1424534716,
@@ -1104,7 +1103,8 @@
           }
         }
       ],
-      "total_taxes": null
+      "total_taxes": null,
+      "reason": null
     },
     "credit_note_line_item": {
       "amount": 1000,
@@ -7074,9 +7074,11 @@
           "bucket_end_time": 267894170,
           "bucket_start_time": 1719055873,
           "bucket_value": 209364700,
-          "dimensions": null,
+          "dimensions": {
+            "undefined": "dimensions"
+          },
           "id": "obj_123",
-          "meter_id": null,
+          "meter_id": "meter_id",
           "object": "billing.meter_usage_row"
         }
       ],
@@ -7088,9 +7090,11 @@
       "bucket_end_time": 267894170,
       "bucket_start_time": 1719055873,
       "bucket_value": 209364700,
-      "dimensions": null,
+      "dimensions": {
+        "undefined": "dimensions"
+      },
       "id": "obj_123",
-      "meter_id": null,
+      "meter_id": "meter_id",
       "object": "billing.meter_usage_row"
     },
     "terminal.onboarding_link": {
