@@ -5262,7 +5262,7 @@
       "customer": "customer",
       "livemode": true,
       "object": "billing.alert_triggered",
-      "value": 111972721
+      "value": "74648480.66666667"
     },
     "billing.credit_balance_summary": {
       "balances": [
