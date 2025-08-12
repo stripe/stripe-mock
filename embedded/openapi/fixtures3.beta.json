@@ -6205,7 +6205,6 @@
         "type": "type"
       },
       "payment_record": null,
-      "payment_reference": null,
       "reported_by": "stripe",
       "shipping_details": {
         "address": {
@@ -6218,6 +6217,22 @@
         },
         "name": null,
         "phone": null
+      },
+      "amount": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "amount_authorized": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "amount_refunded": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "application": null,
+      "processor_details": {
+        "type": "custom"
       }
     },
     "payment_intent_amount_details_line_item": {
@@ -6320,7 +6335,6 @@
         "payment_method": null,
         "type": "type"
       },
-      "payment_reference": null,
       "shipping_details": {
         "address": {
           "city": null,
@@ -6332,6 +6346,22 @@
         },
         "name": null,
         "phone": null
+      },
+      "amount": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "amount_authorized": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "amount_refunded": {
+        "currency": "currency",
+        "value": 111972721
+      },
+      "application": null,
+      "processor_details": {
+        "type": "custom"
       }
     },
     "privacy.redaction_job": {
