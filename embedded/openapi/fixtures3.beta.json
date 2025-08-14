@@ -5159,6 +5159,10 @@
             "external_account_collection": true,
             "instant_payouts": true
           }
+        },
+        "payout_details": {
+          "enabled": true,
+          "features": {}
         }
       },
       "expires_at": 833811170,
