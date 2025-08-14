@@ -5171,17 +5171,13 @@
       "object": "application"
     },
     "balance_settings": {
-      "debit_negative_balances": null,
       "object": "balance_settings",
-      "payouts": {
-        "schedule": {
-          "interval": null
-        },
-        "statement_descriptor": null,
-        "status": "disabled"
-      },
-      "settlement_timing": {
-        "delay_days": 1647351405
+      "payments": {
+        "debit_negative_balances": null,
+        "payouts": null,
+        "settlement_timing": {
+          "delay_days": 1647351405
+        }
       }
     },
     "billing.alert": {
