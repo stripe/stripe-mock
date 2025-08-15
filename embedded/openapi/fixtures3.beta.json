@@ -5178,7 +5178,13 @@
       "object": "balance_settings",
       "payments": {
         "debit_negative_balances": null,
-        "payouts": null,
+        "payouts": {
+          "schedule": {
+            "interval": null
+          },
+          "statement_descriptor": null,
+          "status": "disabled"
+        },
         "settlement_timing": {
           "delay_days": 1647351405
         }
