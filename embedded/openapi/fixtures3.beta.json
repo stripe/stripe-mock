@@ -3089,7 +3089,8 @@
       "trace_id": {
         "status": "status",
         "value": null
-      }
+      },
+      "payout_method": null
     },
     "person": {
       "account": "acct_1MWlHDJITzLVzkSm",
