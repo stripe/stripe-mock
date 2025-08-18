@@ -284,6 +284,18 @@
             "external_account_collection": true,
             "instant_payouts": true
           }
+        },
+        "payout_details": {
+          "enabled": true,
+          "features": {}
+        },
+        "balance_report": {
+          "enabled": true,
+          "features": {}
+        },
+        "payout_reconciliation_report": {
+          "enabled": true,
+          "features": {}
         }
       },
       "expires_at": 1234567890,
@@ -446,7 +458,7 @@
       "end_time": 1234567890,
       "id": "mtrusg_123",
       "livemode": false,
-      "meter": "mtr_123",
+      "meter": "mtr_test_61Q8nQMqIFK9fRQmr41CMAXJrFdZ5MnA",
       "object": "billing.meter_event_summary",
       "start_time": 1234567890
     },
@@ -505,7 +517,8 @@
       },
       "metadata": null,
       "object": "billing_portal.configuration",
-      "updated": 1234567890
+      "updated": 1234567890,
+      "name": null
     },
     "billing_portal.session": {
       "configuration": "bpc_1Pgc7HB7WZ01zgkWxH2EPWRX",
@@ -1512,7 +1525,6 @@
       "object": "credit_note",
       "out_of_band_amount": null,
       "pdf": "https://sangeekp-15t6ai--manage-mydev.dev.stripe.me/credit_notes/acct_1PgafTB7WZ01zgkW/cnst_123456789/pdf?s=ap",
-      "reason": null,
       "shipping_cost": {
         "amount_subtotal": 1555417355,
         "amount_tax": 1424534716,
@@ -1555,7 +1567,8 @@
         }
       ],
       "post_payment_amount": 1355257296,
-      "pre_payment_amount": 251024947
+      "pre_payment_amount": 251024947,
+      "reason": null
     },
     "credit_note_line_item": {
       "amount": 1000,
@@ -3318,7 +3331,8 @@
         }
       },
       "transfer_group": null,
-      "source": null
+      "source": null,
+      "excluded_payment_method_types": null
     },
     "payment_link": {
       "active": true,
@@ -3921,7 +3935,8 @@
       "trace_id": {
         "status": "status",
         "value": null
-      }
+      },
+      "payout_method": null
     },
     "person": {
       "account": "acct_1PgafTB7WZ01zgkW",
