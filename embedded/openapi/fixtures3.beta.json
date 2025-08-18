@@ -5189,9 +5189,7 @@
       "payments": {
         "debit_negative_balances": null,
         "payouts": {
-          "schedule": {
-            "interval": null
-          },
+          "schedule": null,
           "statement_descriptor": null,
           "status": "disabled"
         },
