@@ -6804,7 +6804,16 @@
                 }
               ],
               "price": "price",
-              "quantity": null
+              "quantity": null,
+              "metadata": null,
+              "period": {
+                "end": {
+                  "type": "min_item_period_end"
+                },
+                "start": {
+                  "type": "max_item_period_start"
+                }
+              }
             }
           ],
           "application_fee_percent": null,
