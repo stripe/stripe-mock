@@ -283,7 +283,8 @@
                 "type": "decreasing_item_amount"
               }
             ]
-          }
+          },
+          "trial_update_behavior": "end_trial"
         }
       },
       "id": "bpc_1MlLiHJITzLVzkSmmFpILKiF",
@@ -7124,35 +7125,6 @@
       "object": "terminal.reader_collected_data",
       "type": "magstripe"
     },
-    "billing.meter_usage": {
-      "data": [
-        {
-          "bucket_end_time": 267894170,
-          "bucket_start_time": 1719055873,
-          "bucket_value": 209364700,
-          "dimensions": {
-            "undefined": "dimensions"
-          },
-          "id": "obj_123",
-          "meter_id": "meter_id",
-          "object": "billing.meter_usage_row"
-        }
-      ],
-      "data_refreshed_at": 952047539,
-      "livemode": true,
-      "object": "billing.meter_usage"
-    },
-    "billing.meter_usage_row": {
-      "bucket_end_time": 267894170,
-      "bucket_start_time": 1719055873,
-      "bucket_value": 209364700,
-      "dimensions": {
-        "undefined": "dimensions"
-      },
-      "id": "obj_123",
-      "meter_id": "meter_id",
-      "object": "billing.meter_usage_row"
-    },
     "terminal.onboarding_link": {
       "link_options": {
         "apple_terms_and_conditions": {
@@ -7164,6 +7136,31 @@
       "object": "terminal.onboarding_link",
       "on_behalf_of": null,
       "redirect_url": "redirect_url"
+    },
+    "billing.analytics.meter_usage": {
+      "data": [
+        {
+          "bucket_end_time": 267894170,
+          "bucket_start_time": 1719055873,
+          "bucket_value": 209364700,
+          "dimensions": null,
+          "id": "obj_123",
+          "meter_id": null,
+          "object": "billing.analytics.meter_usage_row"
+        }
+      ],
+      "data_refreshed_at": 952047539,
+      "livemode": true,
+      "object": "billing.analytics.meter_usage"
+    },
+    "billing.analytics.meter_usage_row": {
+      "bucket_end_time": 267894170,
+      "bucket_start_time": 1719055873,
+      "bucket_value": 209364700,
+      "dimensions": null,
+      "id": "obj_123",
+      "meter_id": null,
+      "object": "billing.analytics.meter_usage_row"
     }
   }
 }
