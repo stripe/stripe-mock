@@ -635,7 +635,9 @@
         "name": null,
         "phone": null,
         "tax_exempt": "none",
-        "tax_ids": null
+        "tax_ids": null,
+        "business_name": null,
+        "individual_name": null
       },
       "customer_email": null,
       "expires_at": 1234567890,
@@ -713,7 +715,9 @@
             "state": null
           },
           "name": "name"
-        }
+        },
+        "business_name": null,
+        "individual_name": null
       },
       "currency_conversion": {
         "amount_subtotal": 1555417355,
@@ -7069,7 +7073,8 @@
     "tax.settings": {
       "defaults": {
         "tax_behavior": null,
-        "tax_code": null
+        "tax_code": null,
+        "provider": "stripe"
       },
       "head_office": {
         "address": {
