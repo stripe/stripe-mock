@@ -4023,7 +4023,7 @@
       },
       "billing_mode": {
         "type": "classic",
-        "flexible": null
+        "flexible": {}
       }
     },
     "subscription_item": {
@@ -4270,7 +4270,7 @@
       "test_clock": null,
       "billing_mode": {
         "type": "classic",
-        "flexible": null
+        "flexible": {}
       }
     },
     "tax_code": {
@@ -6911,7 +6911,7 @@
       "test_clock": null,
       "billing_mode": {
         "type": "classic",
-        "flexible": null
+        "flexible": {}
       }
     },
     "tax.association": {
