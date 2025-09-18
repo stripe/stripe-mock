@@ -3275,11 +3275,7 @@
         "minimum_amount": null,
         "minimum_amount_currency": null
       },
-      "times_redeemed": 0,
-      "promotion": {
-        "coupon": null,
-        "type": "coupon"
-      }
+      "times_redeemed": 0
     },
     "quote": {
       "amount_subtotal": 0,
