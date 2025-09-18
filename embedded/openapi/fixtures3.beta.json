@@ -7149,7 +7149,6 @@
       "object": "billing.analytics.meter_usage",
       "refreshed_at": 41145896,
       "rows": {
-        "object": "list",
         "has_more": false,
         "data": [
           {
@@ -7161,7 +7160,9 @@
             "starts_at": 2128381215,
             "value": 111972721
           }
-        ]
+        ],
+        "total": 110549828,
+        "url": "url"
       }
     },
     "billing.analytics.meter_usage_row": {
