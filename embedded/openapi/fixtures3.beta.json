@@ -2202,7 +2202,8 @@
           },
           "primary_account_identifier": null
         },
-        "personalization_design": null
+        "personalization_design": null,
+        "second_line": null
       },
       "cardholder": null,
       "created": 1234567890,
@@ -2418,7 +2419,8 @@
         },
         "primary_account_identifier": null
       },
-      "personalization_design": null
+      "personalization_design": null,
+      "second_line": null
     },
     "issuing.cardholder": {
       "billing": {
