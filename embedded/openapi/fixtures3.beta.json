@@ -1147,6 +1147,20 @@
       "description": null,
       "discount": {
         "checkout_session": null,
+        "customer": null,
+        "end": null,
+        "id": "obj_123",
+        "invoice": null,
+        "invoice_item": null,
+        "object": "discount",
+        "promotion_code": null,
+        "start": 109757538,
+        "subscription": null,
+        "subscription_item": null,
+        "source": {
+          "coupon": null,
+          "type": "coupon"
+        },
         "coupon": {
           "amount_off": null,
           "created": 1028554472,
@@ -1163,17 +1177,7 @@
           "redeem_by": null,
           "times_redeemed": 990066668,
           "valid": true
-        },
-        "customer": null,
-        "end": null,
-        "id": "obj_123",
-        "invoice": null,
-        "invoice_item": null,
-        "object": "discount",
-        "promotion_code": null,
-        "start": 109757538,
-        "subscription": null,
-        "subscription_item": null
+        }
       },
       "email": null,
       "id": "cus_NNNslJKODLsLoG",
@@ -1288,7 +1292,11 @@
       "invoice_item": null,
       "promotion_code": null,
       "subscription": null,
-      "subscription_item": null
+      "subscription_item": null,
+      "source": {
+        "coupon": null,
+        "type": "coupon"
+      }
     },
     "deleted_external_account": {
       "deleted": true,
@@ -1372,23 +1380,6 @@
     },
     "discount": {
       "checkout_session": null,
-      "coupon": {
-        "amount_off": null,
-        "created": 1678753650,
-        "currency": "usd",
-        "duration": "repeating",
-        "duration_in_months": 3,
-        "id": "Z4OV52SU",
-        "livemode": false,
-        "max_redemptions": null,
-        "metadata": {},
-        "name": "25.5% off",
-        "object": "coupon",
-        "percent_off": 25.5,
-        "redeem_by": null,
-        "times_redeemed": 0,
-        "valid": true
-      },
       "customer": "cus_NNNslJKODLsLoG",
       "end": 1234567890,
       "id": "di_1MlLiAJITzLVzkSmNzEFTVSb",
@@ -1398,7 +1389,28 @@
       "promotion_code": null,
       "start": 1234567890,
       "subscription": null,
-      "subscription_item": null
+      "subscription_item": null,
+      "source": {
+        "coupon": null,
+        "type": "coupon"
+      },
+      "coupon": {
+        "amount_off": null,
+        "created": 1028554472,
+        "currency": null,
+        "duration": "forever",
+        "duration_in_months": null,
+        "id": "obj_123",
+        "livemode": true,
+        "max_redemptions": null,
+        "metadata": null,
+        "name": null,
+        "object": "coupon",
+        "percent_off": null,
+        "redeem_by": null,
+        "times_redeemed": 990066668,
+        "valid": true
+      }
     },
     "dispute": {
       "amount": 1000,
@@ -3857,6 +3869,20 @@
             "discounts": [
               {
                 "checkout_session": null,
+                "customer": null,
+                "end": null,
+                "id": "obj_123",
+                "invoice": null,
+                "invoice_item": null,
+                "object": "discount",
+                "promotion_code": null,
+                "start": 109757538,
+                "subscription": null,
+                "subscription_item": null,
+                "source": {
+                  "coupon": null,
+                  "type": "coupon"
+                },
                 "coupon": {
                   "amount_off": null,
                   "created": 1028554472,
@@ -3873,17 +3899,7 @@
                   "redeem_by": null,
                   "times_redeemed": 990066668,
                   "valid": true
-                },
-                "customer": null,
-                "end": null,
-                "id": "obj_123",
-                "invoice": null,
-                "invoice_item": null,
-                "object": "discount",
-                "promotion_code": null,
-                "start": 109757538,
-                "subscription": null,
-                "subscription_item": null
+                }
               }
             ],
             "plan": {
@@ -3986,6 +4002,20 @@
       "discounts": [
         {
           "checkout_session": null,
+          "customer": null,
+          "end": null,
+          "id": "obj_123",
+          "invoice": null,
+          "invoice_item": null,
+          "object": "discount",
+          "promotion_code": null,
+          "start": 109757538,
+          "subscription": null,
+          "subscription_item": null,
+          "source": {
+            "coupon": null,
+            "type": "coupon"
+          },
           "coupon": {
             "amount_off": null,
             "created": 1028554472,
@@ -4002,17 +4032,7 @@
             "redeem_by": null,
             "times_redeemed": 990066668,
             "valid": true
-          },
-          "customer": null,
-          "end": null,
-          "id": "obj_123",
-          "invoice": null,
-          "invoice_item": null,
-          "object": "discount",
-          "promotion_code": null,
-          "start": 109757538,
-          "subscription": null,
-          "subscription_item": null
+          }
         }
       ],
       "invoice_settings": {
@@ -4076,6 +4096,20 @@
       "discounts": [
         {
           "checkout_session": null,
+          "customer": null,
+          "end": null,
+          "id": "obj_123",
+          "invoice": null,
+          "invoice_item": null,
+          "object": "discount",
+          "promotion_code": null,
+          "start": 109757538,
+          "subscription": null,
+          "subscription_item": null,
+          "source": {
+            "coupon": null,
+            "type": "coupon"
+          },
           "coupon": {
             "amount_off": null,
             "created": 1028554472,
@@ -4092,17 +4126,7 @@
             "redeem_by": null,
             "times_redeemed": 990066668,
             "valid": true
-          },
-          "customer": null,
-          "end": null,
-          "id": "obj_123",
-          "invoice": null,
-          "invoice_item": null,
-          "object": "discount",
-          "promotion_code": null,
-          "start": 109757538,
-          "subscription": null,
-          "subscription_item": null
+          }
         }
       ],
       "plan": {
@@ -6531,6 +6555,20 @@
       "discounts": [
         {
           "checkout_session": null,
+          "customer": null,
+          "end": null,
+          "id": "obj_123",
+          "invoice": null,
+          "invoice_item": null,
+          "object": "discount",
+          "promotion_code": null,
+          "start": 109757538,
+          "subscription": null,
+          "subscription_item": null,
+          "source": {
+            "coupon": null,
+            "type": "coupon"
+          },
           "coupon": {
             "amount_off": null,
             "created": 1028554472,
@@ -6547,17 +6585,7 @@
             "redeem_by": null,
             "times_redeemed": 990066668,
             "valid": true
-          },
-          "customer": null,
-          "end": null,
-          "id": "obj_123",
-          "invoice": null,
-          "invoice_item": null,
-          "object": "discount",
-          "promotion_code": null,
-          "start": 109757538,
-          "subscription": null,
-          "subscription_item": null
+          }
         }
       ],
       "due_date": null,
@@ -6587,6 +6615,20 @@
             "discounts": [
               {
                 "checkout_session": null,
+                "customer": null,
+                "end": null,
+                "id": "obj_123",
+                "invoice": null,
+                "invoice_item": null,
+                "object": "discount",
+                "promotion_code": null,
+                "start": 109757538,
+                "subscription": null,
+                "subscription_item": null,
+                "source": {
+                  "coupon": null,
+                  "type": "coupon"
+                },
                 "coupon": {
                   "amount_off": null,
                   "created": 1028554472,
@@ -6603,17 +6645,7 @@
                   "redeem_by": null,
                   "times_redeemed": 990066668,
                   "valid": true
-                },
-                "customer": null,
-                "end": null,
-                "id": "obj_123",
-                "invoice": null,
-                "invoice_item": null,
-                "object": "discount",
-                "promotion_code": null,
-                "start": 109757538,
-                "subscription": null,
-                "subscription_item": null
+                }
               }
             ],
             "id": "obj_123",
