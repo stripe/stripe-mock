@@ -2067,7 +2067,8 @@
       "pricing": {
         "type": "price_details",
         "unit_amount_decimal": null
-      }
+      },
+      "net_amount": null
     },
     "issuing.authorization": {
       "amount": 0,
@@ -4025,7 +4026,8 @@
         }
       },
       "billing_mode": {
-        "type": "classic"
+        "type": "classic",
+        "flexible": null
       }
     },
     "subscription_item": {
@@ -4271,7 +4273,8 @@
       "subscription": null,
       "test_clock": null,
       "billing_mode": {
-        "type": "classic"
+        "type": "classic",
+        "flexible": null
       }
     },
     "tax_code": {
@@ -6911,7 +6914,8 @@
       "subscription": null,
       "test_clock": null,
       "billing_mode": {
-        "type": "classic"
+        "type": "classic",
+        "flexible": null
       }
     },
     "tax.association": {
