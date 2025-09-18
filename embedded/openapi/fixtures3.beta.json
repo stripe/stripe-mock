@@ -7151,32 +7151,27 @@
     "billing.analytics.meter_usage": {
       "livemode": true,
       "object": "billing.analytics.meter_usage",
-      "refreshed_at": 41145896,
-      "rows": {
-        "has_more": false,
-        "data": [
-          {
-            "dimensions": null,
-            "ends_at": 1606329638,
-            "id": "obj_123",
-            "meter": null,
-            "object": "billing.analytics.meter_usage_row",
-            "starts_at": 2128381215,
-            "value": 111972721
-          }
-        ],
-        "total": 110549828,
-        "url": "url"
-      }
+      "data": [
+        {
+          "bucket_end_time": 267894170,
+          "bucket_start_time": 1719055873,
+          "bucket_value": 209364700,
+          "dimensions": null,
+          "id": "obj_123",
+          "meter_id": null,
+          "object": "billing.analytics.meter_usage_row"
+        }
+      ],
+      "data_refreshed_at": 952047539
     },
     "billing.analytics.meter_usage_row": {
       "dimensions": null,
       "id": "obj_123",
       "object": "billing.analytics.meter_usage_row",
-      "ends_at": 1606329638,
-      "meter": null,
-      "starts_at": 2128381215,
-      "value": 111972721
+      "bucket_end_time": 267894170,
+      "bucket_start_time": 1719055873,
+      "bucket_value": 209364700,
+      "meter_id": null
     }
   }
 }
