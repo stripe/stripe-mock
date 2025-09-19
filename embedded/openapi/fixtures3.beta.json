@@ -3933,7 +3933,8 @@
               },
               "trial_period_days": null,
               "usage_type": "licensed"
-            }
+            },
+            "billed_until": null
           }
         ],
         "has_more": false,
@@ -4052,7 +4053,19 @@
       "billing_mode": {
         "type": "classic",
         "flexible": {}
-      }
+      },
+      "billing_schedules": [
+        {
+          "applies_to": null,
+          "bill_until": {
+            "computed_timestamp": 2082605468,
+            "duration": null,
+            "timestamp": null,
+            "type": "duration"
+          },
+          "key": "key"
+        }
+      ]
     },
     "subscription_item": {
       "billing_thresholds": {
@@ -4160,7 +4173,8 @@
         },
         "trial_period_days": null,
         "usage_type": "licensed"
-      }
+      },
+      "billed_until": null
     },
     "subscription_schedule": {
       "application": null,
