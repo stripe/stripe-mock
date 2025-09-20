@@ -1164,23 +1164,6 @@
         "source": {
           "coupon": null,
           "type": "coupon"
-        },
-        "coupon": {
-          "amount_off": null,
-          "created": 1028554472,
-          "currency": null,
-          "duration": "forever",
-          "duration_in_months": null,
-          "id": "obj_123",
-          "livemode": true,
-          "max_redemptions": null,
-          "metadata": null,
-          "name": null,
-          "object": "coupon",
-          "percent_off": null,
-          "redeem_by": null,
-          "times_redeemed": 990066668,
-          "valid": true
         }
       },
       "email": null,
@@ -1265,27 +1248,6 @@
       "object": "customer"
     },
     "deleted_discount": {
-      "coupon": {
-        "amount_off": null,
-        "applies_to": {
-          "products": []
-        },
-        "created": 0,
-        "currency": null,
-        "currency_options": {},
-        "duration": "forever",
-        "duration_in_months": null,
-        "id": "",
-        "livemode": false,
-        "max_redemptions": null,
-        "metadata": null,
-        "name": null,
-        "object": "coupon",
-        "percent_off": null,
-        "redeem_by": null,
-        "times_redeemed": 0,
-        "valid": false
-      },
       "deleted": true,
       "id": "",
       "object": "discount",
@@ -1397,23 +1359,6 @@
       "source": {
         "coupon": null,
         "type": "coupon"
-      },
-      "coupon": {
-        "amount_off": null,
-        "created": 1028554472,
-        "currency": null,
-        "duration": "forever",
-        "duration_in_months": null,
-        "id": "obj_123",
-        "livemode": true,
-        "max_redemptions": null,
-        "metadata": null,
-        "name": null,
-        "object": "coupon",
-        "percent_off": null,
-        "redeem_by": null,
-        "times_redeemed": 990066668,
-        "valid": true
       }
     },
     "dispute": {
@@ -3261,23 +3206,6 @@
     "promotion_code": {
       "active": false,
       "code": "FALL20",
-      "coupon": {
-        "amount_off": null,
-        "created": 1678753650,
-        "currency": "usd",
-        "duration": "repeating",
-        "duration_in_months": 3,
-        "id": "Z4OV52SU",
-        "livemode": false,
-        "max_redemptions": null,
-        "metadata": {},
-        "name": "25.5% off",
-        "object": "coupon",
-        "percent_off": 25.5,
-        "redeem_by": null,
-        "times_redeemed": 0,
-        "valid": true
-      },
       "created": 1234567890,
       "customer": null,
       "expires_at": 1234567890,
@@ -3890,23 +3818,6 @@
                 "source": {
                   "coupon": null,
                   "type": "coupon"
-                },
-                "coupon": {
-                  "amount_off": null,
-                  "created": 1028554472,
-                  "currency": null,
-                  "duration": "forever",
-                  "duration_in_months": null,
-                  "id": "obj_123",
-                  "livemode": true,
-                  "max_redemptions": null,
-                  "metadata": null,
-                  "name": null,
-                  "object": "coupon",
-                  "percent_off": null,
-                  "redeem_by": null,
-                  "times_redeemed": 990066668,
-                  "valid": true
                 }
               }
             ],
@@ -4024,23 +3935,6 @@
           "source": {
             "coupon": null,
             "type": "coupon"
-          },
-          "coupon": {
-            "amount_off": null,
-            "created": 1028554472,
-            "currency": null,
-            "duration": "forever",
-            "duration_in_months": null,
-            "id": "obj_123",
-            "livemode": true,
-            "max_redemptions": null,
-            "metadata": null,
-            "name": null,
-            "object": "coupon",
-            "percent_off": null,
-            "redeem_by": null,
-            "times_redeemed": 990066668,
-            "valid": true
           }
         }
       ],
@@ -4133,23 +4027,6 @@
           "source": {
             "coupon": null,
             "type": "coupon"
-          },
-          "coupon": {
-            "amount_off": null,
-            "created": 1028554472,
-            "currency": null,
-            "duration": "forever",
-            "duration_in_months": null,
-            "id": "obj_123",
-            "livemode": true,
-            "max_redemptions": null,
-            "metadata": null,
-            "name": null,
-            "object": "coupon",
-            "percent_off": null,
-            "redeem_by": null,
-            "times_redeemed": 990066668,
-            "valid": true
           }
         }
       ],
@@ -6593,23 +6470,6 @@
           "source": {
             "coupon": null,
             "type": "coupon"
-          },
-          "coupon": {
-            "amount_off": null,
-            "created": 1028554472,
-            "currency": null,
-            "duration": "forever",
-            "duration_in_months": null,
-            "id": "obj_123",
-            "livemode": true,
-            "max_redemptions": null,
-            "metadata": null,
-            "name": null,
-            "object": "coupon",
-            "percent_off": null,
-            "redeem_by": null,
-            "times_redeemed": 990066668,
-            "valid": true
           }
         }
       ],
@@ -6653,23 +6513,6 @@
                 "source": {
                   "coupon": null,
                   "type": "coupon"
-                },
-                "coupon": {
-                  "amount_off": null,
-                  "created": 1028554472,
-                  "currency": null,
-                  "duration": "forever",
-                  "duration_in_months": null,
-                  "id": "obj_123",
-                  "livemode": true,
-                  "max_redemptions": null,
-                  "metadata": null,
-                  "name": null,
-                  "object": "coupon",
-                  "percent_off": null,
-                  "redeem_by": null,
-                  "times_redeemed": 990066668,
-                  "valid": true
                 }
               }
             ],
