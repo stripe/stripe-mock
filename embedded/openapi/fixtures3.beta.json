@@ -719,12 +719,6 @@
         "business_name": null,
         "individual_name": null
       },
-      "currency_conversion": {
-        "amount_subtotal": 1555417355,
-        "amount_total": 1117121693,
-        "fx_rate": "291452898",
-        "source_currency": "source_currency"
-      },
       "discounts": null,
       "payment_method_configuration_details": {
         "id": "obj_123",
@@ -740,7 +734,13 @@
       },
       "ui_mode": null,
       "wallet_options": {},
-      "origin_context": null
+      "origin_context": null,
+      "currency_conversion": {
+        "amount_subtotal": 1555417355,
+        "amount_total": 1117121693,
+        "fx_rate": "291452898",
+        "source_currency": "usd"
+      }
     },
     "country_spec": {
       "default_currency": "usd",
