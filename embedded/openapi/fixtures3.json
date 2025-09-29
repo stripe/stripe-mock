@@ -288,14 +288,6 @@
         "payout_details": {
           "enabled": true,
           "features": {}
-        },
-        "balance_report": {
-          "enabled": true,
-          "features": {}
-        },
-        "payout_reconciliation_report": {
-          "enabled": true,
-          "features": {}
         }
       },
       "expires_at": 1234567890,
