@@ -4292,7 +4292,8 @@
       "metadata": {},
       "object": "terminal.reader",
       "serial_number": "123-456-789",
-      "status": "online"
+      "status": "online",
+      "last_seen_at": null
     },
     "test_helpers.test_clock": {
       "created": 1234567890,
