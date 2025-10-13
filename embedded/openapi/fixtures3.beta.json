@@ -3554,7 +3554,8 @@
       "payment_method_configuration_details": {
         "id": "obj_123",
         "parent": null
-      }
+      },
+      "excluded_payment_method_types": null
     },
     "shipping_rate": {
       "active": true,
