@@ -1106,7 +1106,9 @@
             "source_transfer_reversal": null,
             "status": null,
             "transfer_reversal": null
-          }
+          },
+          "payment_record_refund": null,
+          "type": null
         }
       ],
       "total_taxes": null,
