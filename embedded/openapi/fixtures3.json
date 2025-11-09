@@ -476,7 +476,8 @@
           "enabled": true
         },
         "payment_method_update": {
-          "enabled": false
+          "enabled": false,
+          "payment_method_configuration": null
         },
         "subscription_cancel": {
           "cancellation_reason": {
@@ -2165,7 +2166,8 @@
         "last_attempted_at": 1981828143,
         "next_refresh_available_at": null,
         "status": "failed"
-      }
+      },
+      "account_numbers": null
     },
     "financial_connections.account_owner": {
       "email": "nobody+janesmith@stripe.com",
@@ -6452,6 +6454,18 @@
       },
       "unit_cost": 472784472,
       "unit_of_measure": null
+    },
+    "terminal.onboarding_link": {
+      "link_options": {
+        "apple_terms_and_conditions": {
+          "allow_relinking": null,
+          "merchant_display_name": "merchant_display_name"
+        }
+      },
+      "link_type": "apple_terms_and_conditions",
+      "object": "terminal.onboarding_link",
+      "on_behalf_of": null,
+      "redirect_url": "redirect_url"
     }
   }
 }

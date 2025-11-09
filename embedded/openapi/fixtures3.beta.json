@@ -262,7 +262,8 @@
           "enabled": true
         },
         "payment_method_update": {
-          "enabled": false
+          "enabled": false,
+          "payment_method_configuration": null
         },
         "subscription_cancel": {
           "cancellation_reason": {
@@ -1656,7 +1657,8 @@
         "last_attempted_at": 1981828143,
         "next_refresh_available_at": null,
         "status": "failed"
-      }
+      },
+      "account_numbers": null
     },
     "financial_connections.account_owner": {
       "email": "nobody+janesmith@stripe.com",
