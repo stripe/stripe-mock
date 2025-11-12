@@ -2172,7 +2172,11 @@
           "primary_account_identifier": null
         },
         "personalization_design": null,
-        "second_line": null
+        "second_line": null,
+        "latest_fraud_warning": {
+          "started_at": null,
+          "type": null
+        }
       },
       "cardholder": null,
       "created": 1234567890,
@@ -2389,7 +2393,11 @@
         "primary_account_identifier": null
       },
       "personalization_design": null,
-      "second_line": null
+      "second_line": null,
+      "latest_fraud_warning": {
+        "started_at": null,
+        "type": null
+      }
     },
     "issuing.cardholder": {
       "billing": {
@@ -6819,7 +6827,8 @@
       "calculation": "calculation",
       "id": "obj_123",
       "object": "tax.association",
-      "payment_intent": "payment_intent"
+      "payment_intent": "payment_intent",
+      "tax_transaction_attempts": null
     },
     "tax.calculation": {
       "amount_total": 1117121693,
