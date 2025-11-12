@@ -2717,7 +2717,11 @@
           },
           "primary_account_identifier": null
         },
-        "second_line": null
+        "second_line": null,
+        "latest_fraud_warning": {
+          "started_at": null,
+          "type": null
+        }
       },
       "cardholder": null,
       "created": 1234567890,
@@ -2937,7 +2941,11 @@
         },
         "primary_account_identifier": null
       },
-      "second_line": null
+      "second_line": null,
+      "latest_fraud_warning": {
+        "started_at": null,
+        "type": null
+      }
     },
     "issuing.cardholder": {
       "billing": {
@@ -6466,6 +6474,13 @@
       "object": "terminal.onboarding_link",
       "on_behalf_of": null,
       "redirect_url": "redirect_url"
+    },
+    "tax.association": {
+      "calculation": "calculation",
+      "id": "obj_123",
+      "object": "tax.association",
+      "payment_intent": "payment_intent",
+      "tax_transaction_attempts": null
     }
   }
 }
