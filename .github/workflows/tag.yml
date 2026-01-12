@@ -8,9 +8,14 @@ on:
       sha:
         description: "Commit SHA to tag. Defaults to latest."
         required: false
+
+permissions: {}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Code checkout
         uses: actions/checkout@v2
