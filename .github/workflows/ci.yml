@@ -1,11 +1,17 @@
 
 on: [push, pull_request]
 name: CI
+
+permissions: {}
+
 jobs:
   test:
     name: Test
 
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v2
