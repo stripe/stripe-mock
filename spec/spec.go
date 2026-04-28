@@ -94,6 +94,10 @@ var supportedSchemaFields = []string{
 	// Schema yet. If we do start validating responses that come out of
 	// stripe-mock, we may need to observe this as well.
 	"x-stripeBypassValidation",
+
+	// A stable identifier for schema elements, used for tracking across spec
+	// versions. Not needed by stripe-mock.
+	"x-stableId",
 }
 
 // Schema is a struct representing a JSON schema.
