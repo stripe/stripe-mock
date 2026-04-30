@@ -6,12 +6,16 @@ permissions: {}
 
 jobs:
   test:
-    name: Test
+    name: Test (Go ${{ matrix.go-version }})
 
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
+
+    strategy:
+      matrix:
+        go-version: ["1.25", "1.26"]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +25,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.22.1
+          go-version: ${{ matrix.go-version }}
       - name: test
         run: |
           go install golang.org/x/lint/golint@latest &&

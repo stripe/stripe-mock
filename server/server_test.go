@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/stripe/stripe-mock/embedded"
+	"go/version"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +13,8 @@ import (
 	"path"
 	"runtime"
 	"testing"
+
+	"github.com/stripe/stripe-mock/embedded"
 
 	assert "github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-mock/spec"
@@ -335,8 +337,15 @@ func TestDoubleSlashFixHandler(t *testing.T) {
 		// serve directly
 		httpMux.ServeHTTP(w, req)
 
-		// This is the default Go behavior (301)
-		assert.Equal(t, http.StatusMovedPermanently, w.Code)
+		// Go 1.26 changed this redirect from 301 to 307 to preserve the HTTP
+		// method. Both indicate the mux redirected rather than serving the request.
+		// see: https://go.dev/doc/go1.26#nethttppkgnethttp
+		if version.Compare(runtime.Version(), "go1.26") >= 0 {
+			assert.Equal(t, http.StatusTemporaryRedirect, w.Code)
+		} else {
+			assert.Equal(t, http.StatusMovedPermanently, w.Code)
+		}
+
 		assert.Equal(t, "", lastPath)
 	}
 }
