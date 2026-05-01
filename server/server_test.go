@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go/version"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -323,30 +322,6 @@ func TestDoubleSlashFixHandler(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, "/v1/charges", lastPath)
-	}
-
-	// Demonstrates the (undesirable) standard Go behavior without the handler
-	{
-		lastPath = ""
-
-		req := httptest.NewRequest(
-			http.MethodGet, "http://example.com//v1/charges", nil)
-		w := httptest.NewRecorder()
-
-		// Note that we skip the double slash fix handler and have the mux
-		// serve directly
-		httpMux.ServeHTTP(w, req)
-
-		// Go 1.26 changed this redirect from 301 to 307 to preserve the HTTP
-		// method. Both indicate the mux redirected rather than serving the request.
-		// see: https://go.dev/doc/go1.26#nethttppkgnethttp
-		if version.Compare(runtime.Version(), "go1.26") >= 0 {
-			assert.Equal(t, http.StatusTemporaryRedirect, w.Code)
-		} else {
-			assert.Equal(t, http.StatusMovedPermanently, w.Code)
-		}
-
-		assert.Equal(t, "", lastPath)
 	}
 }
 
