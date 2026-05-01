@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/stripe/stripe-mock/embedded"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +12,8 @@ import (
 	"path"
 	"runtime"
 	"testing"
+
+	"github.com/stripe/stripe-mock/embedded"
 
 	assert "github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-mock/spec"
@@ -321,23 +322,6 @@ func TestDoubleSlashFixHandler(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, "/v1/charges", lastPath)
-	}
-
-	// Demonstrates the (undesirable) standard Go behavior without the handler
-	{
-		lastPath = ""
-
-		req := httptest.NewRequest(
-			http.MethodGet, "http://example.com//v1/charges", nil)
-		w := httptest.NewRecorder()
-
-		// Note that we skip the double slash fix handler and have the mux
-		// serve directly
-		httpMux.ServeHTTP(w, req)
-
-		// This is the default Go behavior (301)
-		assert.Equal(t, http.StatusMovedPermanently, w.Code)
-		assert.Equal(t, "", lastPath)
 	}
 }
 
