@@ -2381,6 +2381,7 @@
       "account_tax_ids": null,
       "amount_due": 1000,
       "amount_paid": 0,
+      "amount_paid_off_stripe": 0,
       "amount_remaining": 1000,
       "amount_shipping": 0,
       "application": null,
