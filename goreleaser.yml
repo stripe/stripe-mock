@@ -20,7 +20,7 @@ builds:
       - arm64
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 
 archives:
   - format_overrides:
@@ -28,7 +28,7 @@ archives:
         format: zip
 
 brews:
-  - tap:
+  - repository:
       owner: stripe
       name: homebrew-stripe-mock
     homepage: "https://github.com/stripe/stripe-mock"
