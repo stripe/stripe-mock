@@ -505,7 +505,8 @@
           "amount_authorized": null,
           "authorization_code": null,
           "network_transaction_id": null,
-          "regulated_status": null
+          "regulated_status": null,
+          "transaction_link_id": null
         },
         "type": "card"
       },
@@ -4057,7 +4058,10 @@
         "account_tax_ids": null,
         "issuer": {
           "type": "account"
-        }
+        },
+        "custom_fields": null,
+        "description": null,
+        "footer": null
       },
       "billing_mode": {
         "type": "classic",
@@ -5454,7 +5458,8 @@
       "test_clock": null,
       "updated": 234430277,
       "voided_at": null,
-      "customer_account": null
+      "customer_account": null,
+      "priority": 50
     },
     "billing.meter": {
       "created": 1028554472,
