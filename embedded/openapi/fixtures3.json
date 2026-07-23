@@ -742,7 +742,8 @@
           },
           "authorization_code": null,
           "regulated_status": null,
-          "network_transaction_id": null
+          "network_transaction_id": null,
+          "transaction_link_id": null
         },
         "type": "card"
       },
@@ -4740,7 +4741,10 @@
         "account_tax_ids": null,
         "issuer": {
           "type": "self"
-        }
+        },
+        "custom_fields": null,
+        "description": null,
+        "footer": null
       },
       "items": {
         "data": [
@@ -6381,7 +6385,8 @@
       "test_clock": null,
       "updated": 234430277,
       "voided_at": null,
-      "customer_account": null
+      "customer_account": null,
+      "priority": 50
     },
     "invoice_payment": {
       "amount_paid": null,
