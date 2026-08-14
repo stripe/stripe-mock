@@ -44,7 +44,7 @@ jobs:
           app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
           private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
       - name: Create tag
-        uses: actions/github-script@211cb3fefb35a799baa5156f9321bb774fe56294 # v5.2.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |
