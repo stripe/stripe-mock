@@ -34,11 +34,16 @@ jobs:
           # alongside the Docker login and the GitHub App token below.
           cache: false
       # Fetch app token
-      - uses: tibdex/github-app-token@586e1a624db6a5a4ac2c53daeeded60c5e3d50fe # v1.5.2
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: gh-api-token
         with:
-          app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
-          private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
+          private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          # goreleaser pushes the Homebrew formula to stripe/homebrew-stripe-mock, so
+          # this token must reach more than the current repository. Setting owner with
+          # no repositories list scopes it to every repo in the installation, which is
+          # what the action this replaces did by default.
+          owner: ${{ github.repository_owner }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
