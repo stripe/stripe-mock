@@ -18,7 +18,7 @@ jobs:
       contents: read
     steps:
       - name: Code checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
         with:
           fetch-depth: 0
       - name: Set the commit SHA
@@ -38,13 +38,13 @@ jobs:
           echo "newTag=$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)" >> "$GITHUB_OUTPUT"
         env:
           TAG: ${{ github.event.inputs.tag }}
-      - uses: tibdex/github-app-token@v1.5.2
+      - uses: tibdex/github-app-token@586e1a624db6a5a4ac2c53daeeded60c5e3d50fe # v1.5.2
         id: gh-api-token
         with:
           app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
           private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
       - name: Create tag
-        uses: actions/github-script@v5
+        uses: actions/github-script@211cb3fefb35a799baa5156f9321bb774fe56294 # v5.2.0
         with:
           github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |

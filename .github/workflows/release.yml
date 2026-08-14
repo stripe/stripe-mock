@@ -12,7 +12,7 @@ jobs:
       contents: read
     steps:
       - name: Code checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           submodules: recursive
@@ -23,9 +23,9 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version: stable
           # This job publishes signed release binaries and Docker images. Restoring a
@@ -34,13 +34,13 @@ jobs:
           # alongside the Docker login and the GitHub App token below.
           cache: false
       # Fetch app token
-      - uses: tibdex/github-app-token@v1.5.2
+      - uses: tibdex/github-app-token@586e1a624db6a5a4ac2c53daeeded60c5e3d50fe # v1.5.2
         id: gh-api-token
         with:
           app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
           private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
         with:
           version: ~v2.16.0
           args: release -f goreleaser.yml --clean
