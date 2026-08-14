@@ -49,12 +49,15 @@ jobs:
           permission-contents: write
       - name: Create tag
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          NEW_TAG: ${{ steps.tag.outputs.newTag }}
+          COMMIT_SHA: ${{ steps.sha.outputs.commitSha }}
         with:
           github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.tag.outputs.newTag }}',
-              sha: '${{ steps.sha.outputs.commitSha }}'
+              ref: `refs/tags/${process.env.NEW_TAG}`,
+              sha: process.env.COMMIT_SHA
             })
