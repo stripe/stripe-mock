@@ -39,11 +39,11 @@ jobs:
         with:
           app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
           private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
-          # goreleaser pushes the Homebrew formula to stripe/homebrew-stripe-mock, so
-          # this token must reach more than the current repository. Setting owner with
-          # no repositories list scopes it to every repo in the installation, which is
-          # what the action this replaces did by default.
-          owner: ${{ github.repository_owner }}
+          # goreleaser publishes the release here and pushes the Homebrew formula to
+          # stripe/homebrew-stripe-mock, so the token needs exactly those two repos and
+          # nothing else. owner is omitted because it defaults to this repo's owner.
+          repositories: stripe-mock,homebrew-stripe-mock
+          permission-contents: write
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:

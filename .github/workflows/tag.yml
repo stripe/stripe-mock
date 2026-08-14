@@ -43,6 +43,9 @@ jobs:
         with:
           app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
           private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          # The token's only use is creating a tag ref in this repository. Scope
+          # defaults to the current repository when owner and repositories are unset.
+          permission-contents: write
       - name: Create tag
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
