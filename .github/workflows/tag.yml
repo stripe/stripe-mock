@@ -55,7 +55,7 @@ jobs:
         with:
           github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |
-            github.rest.git.createRef({
+            await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/${process.env.NEW_TAG}`,
