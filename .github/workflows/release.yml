@@ -29,10 +29,9 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: stable
-          # This job publishes signed release binaries and Docker images. Restoring a
-          # build cache that lower-privilege workflows can write (ci.yml runs on every
-          # push with no branch filter) would let poisoned cache contents execute
-          # alongside the Docker login and the GitHub App token below.
+          # Restoring a build cache that lower-privilege workflows can write
+          # would let poisoned cache contents execute alongside the Docker
+          # login and the GitHub App token below.
           cache: false
       # Fetch app token
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
