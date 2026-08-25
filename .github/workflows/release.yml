@@ -51,7 +51,12 @@ jobs:
           args: release -f goreleaser.yml --clean
         env:
           GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
-      - uses: stripe/openapi/actions/notify-release@325f3b157f7250f2a5d228b870d77bb63fc7e54c # v2407
+      # Tracks master on purpose, unlike every third-party action here. This is our
+      # own action, and master is how openapi ships an action change to all of its
+      # consumers at once; a hash pin would turn each openapi edit into one PR per
+      # consuming repo. The narrow zizmor exception that permits it, scoped to the
+      # stripe namespace only, lives in .github/zizmor.yml.
+      - uses: stripe/openapi/actions/notify-release@master
         if: always()
         with:
           bot_token: ${{ secrets.SLACK_BOT_TOKEN }}
