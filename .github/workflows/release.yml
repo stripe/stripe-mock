@@ -28,6 +28,10 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: stable
+          # Restoring a build cache that lower-privilege workflows can write
+          # would let poisoned cache contents execute alongside the Docker
+          # login and the GitHub App token below.
+          cache: false
       # Fetch app token
       - uses: tibdex/github-app-token@v1.5.2
         id: gh-api-token
