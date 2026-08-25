@@ -12,10 +12,11 @@ jobs:
       contents: read
     steps:
       - name: Code checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           submodules: recursive
+          persist-credentials: false
       - name: Docker Login
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -23,9 +24,9 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: stable
           # Restoring a build cache that lower-privilege workflows can write
@@ -33,18 +34,28 @@ jobs:
           # login and the GitHub App token below.
           cache: false
       # Fetch app token
-      - uses: tibdex/github-app-token@v1.5.2
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: gh-api-token
         with:
-          app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
-          private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
+          private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          # goreleaser publishes the release here and pushes the Homebrew formula to
+          # stripe/homebrew-stripe-mock, so the token needs exactly those two repos and
+          # nothing else. owner is omitted because it defaults to this repo's owner.
+          repositories: stripe-mock,homebrew-stripe-mock
+          permission-contents: write
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           version: ~v2.16.0
           args: release -f goreleaser.yml --clean
         env:
           GITHUB_TOKEN: ${{ steps.gh-api-token.outputs.token }}
+      # Tracks master on purpose, unlike every third-party action here. This is our
+      # own action, and master is how openapi ships an action change to all of its
+      # consumers at once; a hash pin would turn each openapi edit into one PR per
+      # consuming repo. The narrow zizmor exception that permits it, scoped to the
+      # stripe namespace only, lives in .github/zizmor.yml.
       - uses: stripe/openapi/actions/notify-release@master
         if: always()
         with:

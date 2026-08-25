@@ -18,9 +18,10 @@ jobs:
       contents: read
     steps:
       - name: Code checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Set the commit SHA
         id: sha
         run: echo "commitSha=$(if [ -z "$SHA" ]; then echo $GITHUB_SHA; else echo $SHA; fi)" >> "$GITHUB_OUTPUT"
@@ -38,19 +39,25 @@ jobs:
           echo "newTag=$(if [ -z "$TAG" ]; then echo $new_tag; else echo $TAG; fi)" >> "$GITHUB_OUTPUT"
         env:
           TAG: ${{ github.event.inputs.tag }}
-      - uses: tibdex/github-app-token@v1.5.2
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: gh-api-token
         with:
-          app_id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
-          private_key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          app-id: ${{ secrets.GH_APP_STRIPE_OPENAPI_APP_ID }}
+          private-key: ${{ secrets.GH_APP_STRIPE_OPENAPI_PRIVATE_KEY }}
+          # The token's only use is creating a tag ref in this repository. Scope
+          # defaults to the current repository when owner and repositories are unset.
+          permission-contents: write
       - name: Create tag
-        uses: actions/github-script@v5
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          NEW_TAG: ${{ steps.tag.outputs.newTag }}
+          COMMIT_SHA: ${{ steps.sha.outputs.commitSha }}
         with:
           github-token: ${{ steps.gh-api-token.outputs.token }}
           script: |
-            github.rest.git.createRef({
+            await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.tag.outputs.newTag }}',
-              sha: '${{ steps.sha.outputs.commitSha }}'
+              ref: `refs/tags/${process.env.NEW_TAG}`,
+              sha: process.env.COMMIT_SHA
             })
