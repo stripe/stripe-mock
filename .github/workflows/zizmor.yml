@@ -23,7 +23,7 @@ jobs:
           # Mutually exclusive with advanced-security. Reports findings as inline
           # annotations on the pull request instead of in the security tab.
           annotations: true
-          # The threshold Stripe's own workflow scanning uses. Gating here rather than
+          # The threshold these findings were reported at. Gating here rather than
           # at zizmor's default keeps a newly added low or medium audit from turning
           # this repo red without anyone having changed a workflow.
           min-severity: high
