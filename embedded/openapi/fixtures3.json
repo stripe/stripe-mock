@@ -192,7 +192,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": false,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payments": {
@@ -201,7 +202,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": false,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payouts": {
@@ -266,7 +268,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payment_disputes": {
@@ -274,7 +277,8 @@
           "features": {
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "instant_payouts_promotion": {
@@ -296,6 +300,12 @@
         "payout_reconciliation_report": {
           "enabled": true,
           "features": {}
+        },
+        "payment_method_settings": {
+          "enabled": true,
+          "features": {
+            "disable_stripe_user_authentication": true
+          }
         }
       },
       "expires_at": 1234567890,
@@ -490,7 +500,8 @@
         "subscription_cancel": {
           "cancellation_reason": {
             "enabled": false,
-            "options": []
+            "options": [],
+            "feedback_options": null
           },
           "enabled": false,
           "mode": "at_period_end",
@@ -559,7 +570,8 @@
           ],
           "subscription": "subscription"
         },
-        "type": "subscription_update"
+        "type": "subscription_update",
+        "customer_update": {}
       },
       "id": "bps_1Pgc7HB7WZ01zgkWNs8s9Auh",
       "livemode": true,
@@ -1208,7 +1220,8 @@
         "name": "Jenny Rosen",
         "phone": null
       },
-      "use_stripe_sdk": true
+      "use_stripe_sdk": true,
+      "metadata": null
     },
     "country_spec": {
       "default_currency": "usd",
@@ -1566,22 +1579,7 @@
       "refunds": [
         {
           "amount_refunded": 1387154914,
-          "refund": {
-            "amount": 1413853096,
-            "balance_transaction": null,
-            "charge": null,
-            "created": 1028554472,
-            "currency": "currency",
-            "id": "obj_123",
-            "metadata": null,
-            "object": "refund",
-            "payment_intent": null,
-            "reason": null,
-            "receipt_number": null,
-            "source_transfer_reversal": null,
-            "status": null,
-            "transfer_reversal": null
-          },
+          "refund": "refund",
           "payment_record_refund": {
             "payment_record": "payment_record",
             "refund_group": "refund_group"
@@ -1751,6 +1749,12 @@
             "payment_method_save": null,
             "payment_method_save_allow_redisplay_override": null
           }
+        },
+        "customer_portal": {
+          "enabled": true
+        },
+        "active_entitlements": {
+          "enabled": true
         }
       },
       "created": 1234567890,
@@ -1956,7 +1960,8 @@
         "card": {
           "brand": "visa",
           "case_type": "inquiry",
-          "network_reason_code": "10.4"
+          "network_reason_code": "10.4",
+          "network": "visa"
         },
         "type": "card"
       },
@@ -2382,7 +2387,6 @@
       "account_tax_ids": null,
       "amount_due": 1000,
       "amount_paid": 0,
-      "amount_paid_off_stripe": 0,
       "amount_remaining": 1000,
       "amount_shipping": 0,
       "application": null,
@@ -2531,7 +2535,8 @@
           "pix": {
             "amount_includes_iof": null
           },
-          "upi": {}
+          "upi": {},
+          "billie": {}
         },
         "payment_method_types": null
       },
@@ -2738,7 +2743,8 @@
           "status": null,
           "tracking_number": null,
           "tracking_url": null,
-          "type": "bulk"
+          "type": "bulk",
+          "business_name": null
         },
         "spending_controls": {
           "allowed_categories": null,
@@ -2972,7 +2978,8 @@
         "status": null,
         "tracking_number": null,
         "tracking_url": null,
-        "type": "bulk"
+        "type": "bulk",
+        "business_name": null
       },
       "spending_controls": {
         "allowed_categories": null,
@@ -3396,7 +3403,8 @@
       "customer_account": null,
       "managed_payments": {
         "enabled": true
-      }
+      },
+      "allowed_payment_method_types": null
     },
     "payment_link": {
       "active": true,
@@ -4258,7 +4266,10 @@
         "days_until_due": null,
         "issuer": {
           "type": "self"
-        }
+        },
+        "custom_fields": null,
+        "description": null,
+        "footer": null
       },
       "livemode": false,
       "metadata": {},
@@ -4353,7 +4364,10 @@
       "receipt_number": null,
       "source_transfer_reversal": null,
       "status": "succeeded",
-      "transfer_reversal": null
+      "transfer_reversal": null,
+      "customer": null,
+      "customer_account": null,
+      "payment_method": null
     },
     "reporting.report_run": {
       "created": 1234567890,
@@ -4535,7 +4549,8 @@
       "single_use_mandate": null,
       "status": "requires_payment_method",
       "usage": "off_session",
-      "excluded_payment_method_types": null
+      "excluded_payment_method_types": null,
+      "allowed_payment_method_types": null
     },
     "shipping_rate": {
       "active": true,
@@ -4723,7 +4738,8 @@
       "cancellation_details": {
         "comment": null,
         "feedback": null,
-        "reason": null
+        "reason": null,
+        "feedback_option": null
       },
       "collection_method": "charge_automatically",
       "created": 1234567890,
@@ -4854,7 +4870,8 @@
           "us_bank_account": {},
           "payto": {},
           "pix": {},
-          "upi": {}
+          "upi": {},
+          "billie": {}
         },
         "payment_method_types": null,
         "save_default_payment_method": null
@@ -4889,7 +4906,8 @@
         "subscription_items": null,
         "trial_end": null,
         "trial_from_plan": null,
-        "metadata": null
+        "metadata": null,
+        "cancel_at_period_end": null
       },
       "schedule": null,
       "start_date": 1234567890,
@@ -5039,7 +5057,10 @@
           "days_until_due": null,
           "issuer": {
             "type": "self"
-          }
+          },
+          "custom_fields": null,
+          "description": null,
+          "footer": null
         },
         "on_behalf_of": null,
         "transfer_data": {
@@ -5076,7 +5097,10 @@
             "days_until_due": null,
             "issuer": {
               "type": "account"
-            }
+            },
+            "custom_fields": null,
+            "description": null,
+            "footer": null
           },
           "items": [
             {
@@ -5575,7 +5599,8 @@
       },
       "statement_descriptor": null,
       "status": "pending",
-      "transfer_group": null
+      "transfer_group": null,
+      "initiated_by": null
     },
     "transfer": {
       "amount": 1100,
@@ -6692,6 +6717,24 @@
       "released_at": 213824117,
       "reserve_hold": null,
       "reserve_plan": null
+    },
+    "financial_connections.authorization": {
+      "object": "financial_connections.authorization",
+      "id": "obj_123",
+      "institution_name": "institution_name",
+      "livemode": true,
+      "status": "active",
+      "status_details": {}
+    },
+    "billing.feedback_option": {
+      "object": "billing.feedback_option",
+      "description": "description",
+      "id": "obj_123",
+      "livemode": true,
+      "status": "active",
+      "status_transitions": {
+        "deactivated_at": null
+      }
     },
     "terminal.refund": {
       "object": "terminal.refund"
