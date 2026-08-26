@@ -269,7 +269,8 @@
         "subscription_cancel": {
           "cancellation_reason": {
             "enabled": false,
-            "options": []
+            "options": [],
+            "feedback_options": null
           },
           "enabled": false,
           "mode": "at_period_end",
@@ -338,7 +339,8 @@
           ],
           "subscription": "subscription"
         },
-        "type": "subscription_update"
+        "type": "subscription_update",
+        "customer_update": {}
       },
       "id": "bps_1MlLiHJITzLVzkSm8ZH6SnN2",
       "livemode": true,
@@ -1104,22 +1106,7 @@
       "refunds": [
         {
           "amount_refunded": 1387154914,
-          "refund": {
-            "amount": 1413853096,
-            "balance_transaction": null,
-            "charge": null,
-            "created": 1028554472,
-            "currency": "currency",
-            "id": "obj_123",
-            "metadata": null,
-            "object": "refund",
-            "payment_intent": null,
-            "reason": null,
-            "receipt_number": null,
-            "source_transfer_reversal": null,
-            "status": null,
-            "transfer_reversal": null
-          },
+          "refund": "refund",
           "payment_record_refund": {
             "payment_record": "payment_record",
             "refund_group": "refund_group"
@@ -1974,7 +1961,8 @@
           "pix": {
             "amount_includes_iof": null
           },
-          "upi": {}
+          "upi": {},
+          "billie": {}
         },
         "payment_method_types": null
       },
@@ -2182,7 +2170,8 @@
           "status": null,
           "tracking_number": null,
           "tracking_url": null,
-          "type": "bulk"
+          "type": "bulk",
+          "business_name": null
         },
         "spending_controls": {
           "allowed_categories": null,
@@ -2413,7 +2402,8 @@
         "status": null,
         "tracking_number": null,
         "tracking_url": null,
-        "type": "bulk"
+        "type": "bulk",
+        "business_name": null
       },
       "spending_controls": {
         "allowed_categories": null,
@@ -2781,7 +2771,8 @@
       "customer_account": null,
       "managed_payments": {
         "enabled": true
-      }
+      },
+      "allowed_payment_method_types": null
     },
     "payment_link": {
       "active": true,
@@ -3369,7 +3360,10 @@
         "days_until_due": null,
         "issuer": {
           "type": "account"
-        }
+        },
+        "custom_fields": null,
+        "description": null,
+        "footer": null
       },
       "livemode": false,
       "metadata": {},
@@ -3458,7 +3452,10 @@
       "receipt_number": null,
       "source_transfer_reversal": null,
       "status": "succeeded",
-      "transfer_reversal": null
+      "transfer_reversal": null,
+      "customer": null,
+      "customer_account": null,
+      "payment_method": null
     },
     "reporting.report_run": {
       "created": 1234567890,
@@ -3645,7 +3642,8 @@
         "id": "obj_123",
         "parent": null
       },
-      "excluded_payment_method_types": null
+      "excluded_payment_method_types": null,
+      "allowed_payment_method_types": null
     },
     "shipping_rate": {
       "active": true,
@@ -3831,7 +3829,8 @@
       "cancellation_details": {
         "comment": null,
         "feedback": null,
-        "reason": null
+        "reason": null,
+        "feedback_option": null
       },
       "collection_method": "charge_automatically",
       "created": 1234567890,
@@ -3972,7 +3971,8 @@
           "us_bank_account": {},
           "payto": {},
           "pix": {},
-          "upi": {}
+          "upi": {},
+          "billie": {}
         },
         "payment_method_types": null,
         "save_default_payment_method": null
@@ -4007,7 +4007,8 @@
         "subscription_items": null,
         "trial_end": null,
         "trial_from_plan": null,
-        "metadata": null
+        "metadata": null,
+        "cancel_at_period_end": null
       },
       "schedule": null,
       "start_date": 1234567890,
@@ -4212,7 +4213,10 @@
           "days_until_due": null,
           "issuer": {
             "type": "account"
-          }
+          },
+          "custom_fields": null,
+          "description": null,
+          "footer": null
         },
         "on_behalf_of": null,
         "transfer_data": {
@@ -4248,7 +4252,10 @@
             "days_until_due": null,
             "issuer": {
               "type": "account"
-            }
+            },
+            "custom_fields": null,
+            "description": null,
+            "footer": null
           },
           "items": [
             {
@@ -4535,7 +4542,8 @@
       },
       "statement_descriptor": null,
       "status": "pending",
-      "transfer_group": null
+      "transfer_group": null,
+      "initiated_by": null
     },
     "transfer": {
       "amount": 1100,
@@ -5122,7 +5130,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "documents": {
@@ -5176,7 +5185,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payment_disputes": {
@@ -5184,7 +5194,8 @@
           "features": {
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payments": {
@@ -5193,7 +5204,8 @@
             "capture_payments": true,
             "destination_on_behalf_of_charge_management": true,
             "dispute_management": true,
-            "refund_management": true
+            "refund_management": true,
+            "smart_disputes_management": true
           }
         },
         "payouts": {
@@ -5237,6 +5249,12 @@
         "payout_reconciliation_report": {
           "enabled": true,
           "features": {}
+        },
+        "payment_method_settings": {
+          "enabled": true,
+          "features": {
+            "disable_stripe_user_authentication": true
+          }
         }
       },
       "expires_at": 833811170,
@@ -5747,7 +5765,8 @@
         "name": "name",
         "phone": null
       },
-      "use_stripe_sdk": true
+      "use_stripe_sdk": true,
+      "metadata": null
     },
     "customer_session": {
       "client_secret": "client_secret",
@@ -6755,7 +6774,8 @@
           "pix": {
             "amount_includes_iof": null
           },
-          "upi": {}
+          "upi": {},
+          "billie": {}
         },
         "payment_method_types": null
       },
@@ -6839,7 +6859,10 @@
           "days_until_due": null,
           "issuer": {
             "type": "account"
-          }
+          },
+          "custom_fields": null,
+          "description": null,
+          "footer": null
         },
         "on_behalf_of": null,
         "transfer_data": {
@@ -6903,7 +6926,10 @@
             "days_until_due": null,
             "issuer": {
               "type": "account"
-            }
+            },
+            "custom_fields": null,
+            "description": null,
+            "footer": null
           },
           "items": [
             {
@@ -7318,7 +7344,8 @@
       "description": null,
       "id": "obj_123",
       "object": "tax.location",
-      "type": "performance"
+      "type": "performance",
+      "livemode": true
     },
     "product_catalog.trial_offer": {
       "duration": {
@@ -7358,7 +7385,7 @@
           "phone": null,
           "tax_id": null
         },
-        "type": "bancontact"
+        "type": "affirm"
       },
       "shared_metadata": null,
       "usage_details": {
@@ -7386,6 +7413,10 @@
         "type": "use_stripe_sdk",
         "use_stripe_sdk": {
           "value": "value"
+        },
+        "redirect_to_url": {
+          "return_url": "return_url",
+          "url": "url"
         }
       },
       "object": "shared_payment.issued_token",
@@ -7407,6 +7438,17 @@
         "currency": "usd",
         "expires_at": null,
         "max_amount": 803901331
+      },
+      "use_stripe_sdk": null
+    },
+    "billing.feedback_option": {
+      "object": "billing.feedback_option",
+      "description": "description",
+      "id": "obj_123",
+      "livemode": true,
+      "status": "active",
+      "status_transitions": {
+        "deactivated_at": null
       }
     },
     "terminal.refund": {
