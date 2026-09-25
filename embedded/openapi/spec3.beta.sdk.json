@@ -11930,10 +11930,51 @@
       },
       "card_mandate_payment_method_details": {
         "description": "",
-        "properties": {},
+        "properties": {
+          "india": {
+            "$ref": "#/components/schemas/card_mandate_payment_method_details_india"
+          }
+        },
         "title": "card_mandate_payment_method_details",
         "type": "object",
-        "x-expandableFields": []
+        "x-expandableFields": [
+          "india"
+        ],
+        "x-stripeMostCommon": [
+          "india"
+        ]
+      },
+      "card_mandate_payment_method_details_india": {
+        "description": "",
+        "properties": {
+          "inactive_reason": {
+            "description": "The reason why the mandate has an `inactive` status. This field is only populated if the mandate is inactive.",
+            "enum": [
+              "canceled",
+              "card_not_supported",
+              "currency_not_supported",
+              "expired",
+              "issuer_not_supported",
+              "processing_error",
+              "undetermined"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "inactive_reason"
+        ],
+        "title": "card_mandate_payment_method_details_india",
+        "type": "object",
+        "x-expandableFields": [],
+        "x-stripeMostCommon": [
+          "inactive_reason"
+        ],
+        "x-stripeResource": {
+          "class_name": "India",
+          "in_package": ""
+        }
       },
       "cash_balance": {
         "description": "A customer's `Cash balance` represents real funds. Customers can add funds to their cash balance by sending a bank transfer. These funds can be used for payment and can eventually be paid out to your bank account.",
@@ -115684,6 +115725,7 @@
                       "balances",
                       "capital_financing",
                       "capital_financing_application",
+                      "capital_financing_manual_payment",
                       "capital_financing_promotion",
                       "capital_overview",
                       "check_scanning",
@@ -270282,6 +270324,13 @@
                       "radar_good_outcomes",
                       "rate",
                       "rate_card_ids",
+                      "recipient_action_filter",
+                      "recipient_network_business_profile_id",
+                      "recipient_payout_method_types",
+                      "recipient_primary_payout_method_card_brand",
+                      "recipient_primary_payout_method_last_4",
+                      "recipient_primary_payout_method_type",
+                      "recipient_primary_payout_method_wallet_type",
                       "recognition_end",
                       "recognition_start",
                       "recon_party_name",
