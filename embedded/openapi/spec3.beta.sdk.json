@@ -4024,7 +4024,7 @@
         "description": "",
         "properties": {
           "advice_code": {
-            "description": "For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines#retrying-issuer-declines) if they provide one.",
+            "description": "For card errors resulting from a card issuer decline, a short string indicating [how to proceed with an error](https://docs.stripe.com/declines/card#retrying-issuer-declines) if they provide one.",
             "maxLength": 5000,
             "type": "string"
           },
@@ -4819,7 +4819,7 @@
             "type": "string"
           },
           "approval_required": {
-            "description": "Whether the installer must authorize pending permissions, content security policy entries, or endpoints. For private apps, `approval_required` stays `false`. Install a new version from the Dashboard to grant its permissions.",
+            "description": "Whether the installer must authorize pending permissions, content security policy entries, or endpoints. For private apps, `approval_required` stays `false`; creating or reauthorizing the install through the API installs the newest completed upload and grants its permissions.",
             "type": "boolean"
           },
           "auth_code": {
@@ -13220,7 +13220,7 @@
             "nullable": true
           },
           "custom_fields": {
-            "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.",
+            "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.",
             "items": {
               "$ref": "#/components/schemas/payment_pages_checkout_session_custom_fields"
             },
@@ -36998,7 +36998,7 @@
                   "value": "subscription_canceled"
                 },
                 {
-                  "description": "The subscription associated with the invoice paused collections.",
+                  "description": "The subscription associated with the invoice had `pause_collection` set.",
                   "value": "subscription_paused"
                 },
                 {
@@ -57559,7 +57559,7 @@
               "kind": "open",
               "values": [
                 {
-                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                   "value": "installment"
                 },
                 {
@@ -58341,7 +58341,7 @@
             "type": "string"
           },
           "custom_fields": {
-            "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.",
+            "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.",
             "items": {
               "$ref": "#/components/schemas/payment_links_resource_custom_fields"
             },
@@ -63344,7 +63344,7 @@
               "kind": "open",
               "values": [
                 {
-                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                   "value": "installment"
                 },
                 {
@@ -90295,7 +90295,7 @@
               "kind": "open",
               "values": [
                 {
-                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                   "value": "installment"
                 },
                 {
@@ -95088,7 +95088,7 @@
             "type": "integer"
           },
           "status": {
-            "description": "Possible values are `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, or `paused`. \n\nFor `collection_method=charge_automatically` a subscription moves into `incomplete` if the initial payment attempt fails. A subscription in this status can only have metadata and default_source updated. Once the first invoice is paid, the subscription moves into an `active` status. If the first invoice is not paid within 23 hours, the subscription transitions to `incomplete_expired`. This is a terminal status, the open invoice will be voided and no further invoices will be generated. \n\nA subscription that is currently in a trial period is `trialing` and moves to `active` when the trial period is over. \n\nA subscription can only enter a `paused` status [when a trial ends without a payment method](https://docs.stripe.com/billing/subscriptions/trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://docs.stripe.com/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged. \n\nIf subscription `collection_method=charge_automatically`, it becomes `past_due` when payment is required but cannot be paid (due to failed payment or awaiting additional user actions). Once Stripe has exhausted all payment retry attempts, the subscription will become `canceled` or `unpaid` (depending on your subscriptions settings). \n\nIf subscription `collection_method=send_invoice` it becomes `past_due` when its invoice is not paid by the due date, and `canceled` or `unpaid` if it is still not paid by an additional deadline after that. Note that when a subscription has a status of `unpaid`, no subsequent invoices will be attempted (invoices will be created, but then immediately automatically closed). After receiving updated payment information from a customer, you may choose to reopen and pay their closed invoices.",
+            "description": "Possible values are `incomplete`, `incomplete_expired`, `trialing`, `active`, `past_due`, `canceled`, `unpaid`, or `paused`. \n\nFor `collection_method=charge_automatically` a subscription moves into `incomplete` if the initial payment attempt fails. A subscription in this status can only have metadata and default_source updated. Once the first invoice is paid, the subscription moves into an `active` status. If the first invoice is not paid within 23 hours, the subscription transitions to `incomplete_expired`. This is a terminal status, the open invoice will be voided and no further invoices will be generated. \n\nA subscription that is currently in a trial period is `trialing` and moves to `active` when the trial period is over. \n\nA subscription can only enter a `paused` status [when a trial ends without a payment method](https://docs.stripe.com/billing/subscriptions/trials/free-trials#create-free-trials-without-payment). A `paused` subscription doesn't generate invoices and can be resumed after your customer adds their payment method. The `paused` status is different from [pausing collection](https://docs.stripe.com/billing/subscriptions/pause-payment), which still generates invoices and leaves the subscription's status unchanged. \n\nIf subscription `collection_method=charge_automatically`, it becomes `past_due` when payment is required but cannot be paid (due to failed payment or awaiting additional user actions). Once Stripe has exhausted all payment retry attempts, the subscription will become `canceled` or `unpaid` (depending on your subscriptions settings). \n\nIf subscription `collection_method=send_invoice` it becomes `past_due` when its invoice is not paid by the due date, and `canceled` or `unpaid` if it is still not paid by an additional deadline after that. Note that when a subscription has a status of `unpaid`, no subsequent invoices will be attempted (invoices will be created, but then immediately automatically closed). After receiving updated payment information from a customer, you may choose to reopen and pay their closed invoices.",
             "enum": [
               "active",
               "canceled",
@@ -98275,6 +98275,8 @@
           "type": {
             "description": "The reason that the subscription was paused.",
             "enum": [
+              "final_payment_failure",
+              "first_payment_failure",
               "pause_requested",
               "system",
               "trial_end_without_payment_method"
@@ -98283,6 +98285,14 @@
             "x-stripeEnum": {
               "kind": "open",
               "values": [
+                {
+                  "description": "Indicates the subscription was paused because the final payment attempt failed.",
+                  "value": "final_payment_failure"
+                },
+                {
+                  "description": "Indicates the subscription was paused because the first payment attempt failed.",
+                  "value": "first_payment_failure"
+                },
                 {
                   "description": "Indicates the subscription was paused using an API request.",
                   "value": "pause_requested"
@@ -98656,7 +98666,7 @@
             "type": "integer"
           },
           "trial_from_plan": {
-            "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.",
+            "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.",
             "nullable": true,
             "type": "boolean"
           }
@@ -99837,7 +99847,7 @@
             "type": "string"
           },
           "status": {
-            "description": "The status of the Tax `Settings`.",
+            "description": "Whether these settings have the information Stripe Tax needs to calculate tax. It doesn't reflect whether your integration is ready to collect tax.",
             "enum": [
               "active",
               "pending"
@@ -128204,7 +128214,7 @@
         "x-stableId": "list_app_installs"
       },
       "post": {
-        "description": "<p>Creates an app install. An account installs its own private app with its own key; public and testing installs are made from the Dashboard. An app developer or embedding platform acting on a connected account through <code>Stripe-Account</code> installs or reinstalls its app there. Creating an install for a private app that is already installed at the channel’s current version with nothing pending returns the existing install.</p>",
+        "description": "<p>Creates an app install. An account installs its own private app with its own key; public and testing installs are made from the Dashboard. An app developer or embedding platform acting on a connected account through <code>Stripe-Account</code> installs or reinstalls its app there. For a private app, creating an install installs the newest completed upload; when that version is already installed with nothing pending, the existing install is returned.</p>",
         "operationId": "PostAppsInstalls",
         "requestBody": {
           "content": {
@@ -128385,7 +128395,7 @@
         "x-stableId": "retrieve_app_install"
       },
       "post": {
-        "description": "<p>Reauthorizes an app install. The installer grants the permissions, content security policy entries, and endpoints that the latest published version of the app requests. An account reauthorizes its own installs on any channel with its own key; app developers and embedding platforms reauthorize installs on connected accounts through <code>Stripe-Account</code>. For private apps, install a new version from the Dashboard to grant its permissions.</p>",
+        "description": "<p>Reauthorizes an app install. The installer grants the permissions, content security policy entries, and endpoints that the version being installed requests. An account reauthorizes its own installs on any channel with its own key; app developers and embedding platforms reauthorize installs on connected accounts through <code>Stripe-Account</code>. For private apps, the version being installed is the newest completed upload.</p>",
         "operationId": "PostAppsInstallsId",
         "parameters": [
           {
@@ -144761,7 +144771,7 @@
                     "type": "string"
                   },
                   "custom_fields": {
-                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.",
+                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.",
                     "items": {
                       "properties": {
                         "dropdown": {
@@ -144927,7 +144937,7 @@
                     "type": "array"
                   },
                   "custom_text": {
-                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.",
+                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `elements`.",
                     "properties": {
                       "after_submit": {
                         "anyOf": [
@@ -146569,7 +146579,7 @@
                             "x-stripeBypassValidation": true
                           },
                           "restrictions": {
-                            "description": "Restrictions to apply to the card payment method. For example, you can block specific card brands. You can't set this parameter if `ui_mode` is `custom`.",
+                            "description": "Restrictions to apply to the card payment method. For example, you can block specific card brands. You can't set this parameter if `ui_mode` is `elements`.",
                             "properties": {
                               "brands_blocked": {
                                 "description": "The card brands to block. If a customer enters or selects a card belonging to a blocked brand, they can't complete the payment.",
@@ -148080,7 +148090,7 @@
                     ]
                   },
                   "permissions": {
-                    "description": "This property is used to set up permissions for various actions (e.g., update) on the CheckoutSession object. Can only be set when creating `embedded` or `custom` sessions.\n\nFor specific permissions, please refer to their dedicated subsections, such as `permissions.update_shipping_details`.",
+                    "description": "This property is used to set up permissions for various actions (for example, update) on the CheckoutSession object. Can only be set when creating `embedded_page` or `elements` sessions.\n\nFor specific permissions, please refer to their dedicated subsections, such as `permissions.update_shipping_details`.",
                     "properties": {
                       "update": {
                         "description": "Permissions for updating the Checkout Session.",
@@ -149011,7 +149021,7 @@
                         "type": "boolean"
                       },
                       "required": {
-                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `custom`.",
+                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `elements`.",
                         "enum": [
                           "if_supported",
                           "never"
@@ -149284,7 +149294,7 @@
                     ]
                   },
                   "collected_information": {
-                    "description": "Information about the customer collected within the Checkout Session. Can only be set when updating `embedded` or `custom` sessions.",
+                    "description": "Information about the customer collected within the Checkout Session. Can only be set when updating `embedded_page` or `elements` sessions.",
                     "properties": {
                       "shipping_details": {
                         "description": "The shipping details to apply to this Session.",
@@ -207384,7 +207394,7 @@
                                   "kind": "open",
                                   "values": [
                                     {
-                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                       "value": "installment"
                                     },
                                     {
@@ -212325,6 +212335,7 @@
                       "us_bank_account",
                       "vipps",
                       "wechat_pay",
+                      "wero",
                       "zip"
                     ]
                   },
@@ -218794,7 +218805,7 @@
                                   "kind": "open",
                                   "values": [
                                     {
-                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                       "value": "installment"
                                     },
                                     {
@@ -223735,6 +223746,7 @@
                       "us_bank_account",
                       "vipps",
                       "wechat_pay",
+                      "wero",
                       "zip"
                     ]
                   },
@@ -233911,7 +233923,7 @@
                                   "kind": "open",
                                   "values": [
                                     {
-                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                      "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                       "value": "installment"
                                     },
                                     {
@@ -238852,6 +238864,7 @@
                       "us_bank_account",
                       "vipps",
                       "wechat_pay",
+                      "wero",
                       "zip"
                     ]
                   },
@@ -240759,7 +240772,7 @@
                     "type": "string"
                   },
                   "custom_fields": {
-                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`.",
+                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`.",
                     "items": {
                       "properties": {
                         "dropdown": {
@@ -240925,7 +240938,7 @@
                     "type": "array"
                   },
                   "custom_text": {
-                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.",
+                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `elements`.",
                     "properties": {
                       "after_submit": {
                         "anyOf": [
@@ -242216,7 +242229,7 @@
                         "type": "boolean"
                       },
                       "required": {
-                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `custom`.",
+                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `elements`.",
                         "enum": [
                           "if_supported",
                           "never"
@@ -242856,10 +242869,10 @@
                         "type": "string"
                       }
                     ],
-                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `custom`."
+                    "description": "Collect additional information from your customer using custom fields. Up to 3 fields are supported. You can't set this parameter if `ui_mode` is `elements`."
                   },
                   "custom_text": {
-                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `custom`.",
+                    "description": "Display additional text for your customers using custom text. You can't set this parameter if `ui_mode` is `elements`.",
                     "properties": {
                       "after_submit": {
                         "anyOf": [
@@ -244167,7 +244180,7 @@
                         "type": "boolean"
                       },
                       "required": {
-                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `custom`.",
+                        "description": "Describes whether a tax ID is required during checkout. Defaults to `never`. You can't set this parameter if `ui_mode` is `elements`.",
                         "enum": [
                           "if_supported",
                           "never"
@@ -252212,7 +252225,7 @@
                         "type": "string"
                       },
                       "email": {
-                        "description": "The customer's phone number.",
+                        "description": "The customer's email address.",
                         "type": "string"
                       },
                       "name": {
@@ -253435,7 +253448,7 @@
                         "type": "string"
                       },
                       "email": {
-                        "description": "The customer's phone number.",
+                        "description": "The customer's email address.",
                         "type": "string"
                       },
                       "name": {
@@ -254778,7 +254791,7 @@
                     "type": "array"
                   },
                   "id": {
-                    "description": "An identifier randomly generated by Stripe. Used to identify this plan when subscribing a customer. You can optionally override this ID, but the ID must be unique across all plans in your Stripe account. You can, however, use the same plan ID in both live and test modes.",
+                    "description": "An identifier randomly generated by Stripe. Used to identify this plan when subscribing a customer. You can optionally override this ID, but the ID must be unique across all plans in your Stripe account. You can use the same plan ID in live mode and in your sandboxes.",
                     "maxLength": 5000,
                     "type": "string"
                   },
@@ -266591,7 +266604,7 @@
                                 "type": "string"
                               }
                             },
-                            "title": "money_movement_card_additional_data_api_params",
+                            "title": "money_movement_card_additional_data",
                             "type": "object",
                             "x-stripeMostCommon": [
                               "customer_presence",
@@ -266665,7 +266678,7 @@
                                     "type": "string"
                                   }
                                 },
-                                "title": "address_api_params",
+                                "title": "address",
                                 "type": "object",
                                 "x-stripeMostCommon": [
                                   "city",
@@ -266690,7 +266703,7 @@
                                 "type": "string"
                               }
                             },
-                            "title": "billing_details_api_params",
+                            "title": "billing_details",
                             "type": "object",
                             "x-stripeMostCommon": [
                               "address",
@@ -266752,7 +266765,7 @@
                                 "type": "string"
                               }
                             },
-                            "title": "address_api_params",
+                            "title": "address",
                             "type": "object",
                             "x-stripeMostCommon": [
                               "city",
@@ -266773,7 +266786,7 @@
                             "type": "string"
                           }
                         },
-                        "title": "shipping_details_api_params",
+                        "title": "shipping_details",
                         "type": "object",
                         "x-stripeMostCommon": [
                           "address",
@@ -270420,6 +270433,7 @@
                       "taxable",
                       "tds_result",
                       "tds_triggered",
+                      "tds_type",
                       "template_override",
                       "tenant_filters",
                       "tenant_filters_by_meter",
@@ -274134,7 +274148,7 @@
                               "kind": "open",
                               "values": [
                                 {
-                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                   "value": "installment"
                                 },
                                 {
@@ -276938,7 +276952,7 @@
                               "kind": "open",
                               "values": [
                                 {
-                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                   "value": "installment"
                                 },
                                 {
@@ -279696,7 +279710,7 @@
                               "kind": "open",
                               "values": [
                                 {
-                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments.",
+                                  "description": "Use `installment` if the payment method will be used for future off-session installment payments that you manage. This is distinct from [`payment_method_options.card.installments`](/api/payment_intents/create#create_payment_intent-payment_method_options-card-installments), which is used for issuer installments like [Mexico installments](/payments/meses-sin-intereses/accept-a-payment) and [Japan installments](/payments/jp-installments/accept-a-payment).",
                                   "value": "installment"
                                 },
                                 {
@@ -281877,7 +281891,7 @@
     },
     "/v1/sigma/scheduled_query_runs/{scheduled_query_run}": {
       "get": {
-        "description": "<p>Retrieves the details of an scheduled query run.</p>",
+        "description": "<p>Retrieves the details of a scheduled query run.</p>",
         "operationId": "GetSigmaScheduledQueryRunsScheduledQueryRun",
         "parameters": [
           {
@@ -285326,7 +285340,7 @@
                                       "description": "Controls whether to collect metered usage accrued up to the pause date.",
                                       "properties": {
                                         "type": {
-                                          "description": "Determines whether to collect metered usage accrued up to the pause date.",
+                                          "description": "Determines whether to collect metered usage accrued up to the pause date. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.",
                                           "enum": [
                                             "none",
                                             "pause_at"
@@ -285357,7 +285371,7 @@
                                       "description": "Controls how unused time on subscription items is credited when pausing.",
                                       "properties": {
                                         "type": {
-                                          "description": "Determines which point in the billing period unused time is credited from.",
+                                          "description": "Determines which point in the billing period unused time is credited from. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.",
                                           "enum": [
                                             "item_current_period_start",
                                             "none",
@@ -285398,7 +285412,7 @@
                                   ]
                                 },
                                 "invoicing_behavior": {
-                                  "description": "Determines whether to generate an invoice for outstanding amounts when pausing.",
+                                  "description": "Determines whether to generate an invoice for outstanding amounts when pausing. When adding a pause schedule, defaults to `pending_invoice_item`. On updates, the existing value is preserved if not provided.",
                                   "enum": [
                                     "invoice",
                                     "pending_invoice_item"
@@ -285518,7 +285532,7 @@
                               "description": "Settings controlling how the subscription resumes.",
                               "properties": {
                                 "billing_cycle_anchor": {
-                                  "description": "Controls the billing cycle anchor when the subscription resumes.",
+                                  "description": "Controls the billing cycle anchor when the subscription resumes. When adding a pause schedule, defaults to `resume_at`. On updates, the existing value is preserved if not provided.",
                                   "enum": [
                                     "resume_at",
                                     "unchanged"
@@ -285539,7 +285553,7 @@
                                   }
                                 },
                                 "payment_behavior": {
-                                  "description": "Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. The default is `resume_on_payment_success`.",
+                                  "description": "Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. When adding a pause schedule, defaults to `resume_on_payment_success`. On updates, the existing value is preserved if not provided.",
                                   "enum": [
                                     "resume_on_payment_attempt",
                                     "resume_on_payment_success"
@@ -285560,7 +285574,7 @@
                                   }
                                 },
                                 "proration_behavior": {
-                                  "description": "Determines how to handle prorations when the subscription resumes. The default is `create_prorations`.",
+                                  "description": "Determines how to handle prorations when the subscription resumes. When adding a pause schedule, defaults to `create_prorations`. On updates, the existing value is preserved if not provided.",
                                   "enum": [
                                     "always_invoice",
                                     "create_prorations",
@@ -287320,7 +287334,7 @@
                                           "description": "Controls whether to collect metered usage accrued up to the pause date.",
                                           "properties": {
                                             "type": {
-                                              "description": "Determines whether to collect metered usage accrued up to the pause date.",
+                                              "description": "Determines whether to collect metered usage accrued up to the pause date. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.",
                                               "enum": [
                                                 "none",
                                                 "pause_at"
@@ -287351,7 +287365,7 @@
                                           "description": "Controls how unused time on subscription items is credited when pausing.",
                                           "properties": {
                                             "type": {
-                                              "description": "Determines which point in the billing period unused time is credited from.",
+                                              "description": "Determines which point in the billing period unused time is credited from. When adding a pause schedule, defaults to `pause_at`. On updates, the existing value is preserved if not provided.",
                                               "enum": [
                                                 "item_current_period_start",
                                                 "none",
@@ -287392,7 +287406,7 @@
                                       ]
                                     },
                                     "invoicing_behavior": {
-                                      "description": "Determines whether to generate an invoice for outstanding amounts when pausing.",
+                                      "description": "Determines whether to generate an invoice for outstanding amounts when pausing. When adding a pause schedule, defaults to `pending_invoice_item`. On updates, the existing value is preserved if not provided.",
                                       "enum": [
                                         "invoice",
                                         "pending_invoice_item"
@@ -287510,7 +287524,7 @@
                                       "description": "Settings controlling how the subscription resumes.",
                                       "properties": {
                                         "billing_cycle_anchor": {
-                                          "description": "Controls the billing cycle anchor when the subscription resumes.",
+                                          "description": "Controls the billing cycle anchor when the subscription resumes. When adding a pause schedule, defaults to `resume_at`. On updates, the existing value is preserved if not provided.",
                                           "enum": [
                                             "resume_at",
                                             "unchanged"
@@ -287531,7 +287545,7 @@
                                           }
                                         },
                                         "payment_behavior": {
-                                          "description": "Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. The default is `resume_on_payment_success`.",
+                                          "description": "Controls whether Stripe attempts payment on the resumption invoice and how payment affects the subscription's status. When adding a pause schedule, defaults to `resume_on_payment_success`. On updates, the existing value is preserved if not provided.",
                                           "enum": [
                                             "resume_on_payment_attempt",
                                             "resume_on_payment_success"
@@ -287552,7 +287566,7 @@
                                           }
                                         },
                                         "proration_behavior": {
-                                          "description": "Determines how to handle prorations when the subscription resumes. The default is `create_prorations`.",
+                                          "description": "Determines how to handle prorations when the subscription resumes. When adding a pause schedule, defaults to `create_prorations`. On updates, the existing value is preserved if not provided.",
                                           "enum": [
                                             "always_invoice",
                                             "create_prorations",
@@ -292780,14 +292794,14 @@
                         "type": "integer"
                       }
                     ],
-                    "description": "Unix timestamp representing the end of the trial period the customer will get before being charged for the first time. If set, trial_end will override the default trial period of the plan the customer is being subscribed to. The special value `now` can be provided to end the customer's trial immediately. Can be at most two years from `billing_cycle_anchor`. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more."
+                    "description": "Unix timestamp representing the end of the trial period the customer will get before being charged for the first time. If set, trial_end will override the default trial period of the plan the customer is being subscribed to. The special value `now` can be provided to end the customer's trial immediately. Can be at most two years from `billing_cycle_anchor`. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more."
                   },
                   "trial_from_plan": {
-                    "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.",
+                    "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.",
                     "type": "boolean"
                   },
                   "trial_period_days": {
-                    "description": "Integer representing the number of trial period days before the customer is charged for the first time. This will always overwrite any trials that might apply via a subscribed plan. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.",
+                    "description": "Integer representing the number of trial period days before the customer is charged for the first time. This will always overwrite any trials that might apply via a subscribed plan. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.",
                     "type": "integer"
                   },
                   "trial_settings": {
@@ -295606,7 +295620,7 @@
                     "description": "Unix timestamp representing the end of the trial period the customer will get before being charged for the first time. This will always overwrite any trials that might apply via a subscribed plan. If set, `trial_end` will override the default trial period of the plan the customer is being subscribed to. The `billing_cycle_anchor` will be updated to the `trial_end` value. The special value `now` can be provided to end the customer's trial immediately. Can be at most two years from `billing_cycle_anchor`."
                   },
                   "trial_from_plan": {
-                    "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials) to learn more.",
+                    "description": "Indicates if a plan's `trial_period_days` should be applied to the subscription. Setting `trial_end` per subscription is preferred, and this defaults to `false`. Setting this flag to `true` together with `trial_end` is not allowed. See [Using trial periods on subscriptions](https://docs.stripe.com/billing/subscriptions/trials/free-trials) to learn more.",
                     "type": "boolean"
                   },
                   "trial_settings": {
@@ -302212,7 +302226,7 @@
         "x-stableId": "retrieve_tax_settings"
       },
       "post": {
-        "description": "<p>Updates Tax <code>Settings</code> parameters used in tax calculations. All parameters are editable but none can be removed once set.</p>",
+        "description": "<p>Updates Tax <code>Settings</code> parameters used in tax calculations. All parameters are editable but none can be removed once set. Check the returned Tax <code>Settings</code> object and validate that its status is <code>active</code>.</p>",
         "operationId": "PostTaxSettings",
         "requestBody": {
           "content": {
@@ -302934,6 +302948,7 @@
                   "description": "",
                   "properties": {
                     "data": {
+                      "description": "Details about each object.",
                       "items": {
                         "$ref": "#/components/schemas/tax_code"
                       },
@@ -304607,7 +304622,7 @@
                       {
                         "properties": {
                           "enabled": {
-                            "description": "Determines whether to allow the reader to connect to a cellular network. Defaults to false.",
+                            "description": "Determines whether to allow the reader to connect to a cellular network.",
                             "type": "boolean"
                           }
                         },
@@ -304647,7 +304662,7 @@
                       {
                         "properties": {
                           "enabled": {
-                            "description": "Determines whether to allow transactions to be collected while reader is offline. Defaults to false.",
+                            "description": "Determines whether to allow transactions to be collected while reader is offline.",
                             "type": "boolean"
                           }
                         },
@@ -306033,7 +306048,7 @@
                       {
                         "properties": {
                           "enabled": {
-                            "description": "Determines whether to allow the reader to connect to a cellular network. Defaults to false.",
+                            "description": "Determines whether to allow the reader to connect to a cellular network.",
                             "type": "boolean"
                           }
                         },
@@ -306073,7 +306088,7 @@
                       {
                         "properties": {
                           "enabled": {
-                            "description": "Determines whether to allow transactions to be collected while reader is offline. Defaults to false.",
+                            "description": "Determines whether to allow transactions to be collected while reader is offline.",
                             "type": "boolean"
                           }
                         },
@@ -322016,7 +322031,7 @@
                     ]
                   },
                   "source": {
-                    "description": "The ID of a source to transfer funds from. For most users, this should be left unspecified which will use the bank account that was set up in the dashboard for the specified currency. In test mode, this can be a test bank token (see [Testing Top-ups](https://docs.stripe.com/connect/testing#testing-top-ups)).",
+                    "description": "The ID of a source to transfer funds from. For most users, this should be left unspecified which will use the bank account that was set up in the dashboard for the specified currency. While testing, this can be a test bank token (see [Testing Top-ups](https://docs.stripe.com/connect/testing#testing-top-ups)).",
                     "maxLength": 5000,
                     "type": "string"
                   },
