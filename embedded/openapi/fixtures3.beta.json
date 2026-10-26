@@ -290,6 +290,18 @@
           },
           "trial_update_behavior": "end_trial",
           "billing_cycle_anchor": null
+        },
+        "subscription_pause": {
+          "duration": {
+            "interval_options": [
+              {
+                "interval": "month",
+                "interval_count": 797691627
+              }
+            ],
+            "type": "indefinite"
+          },
+          "enabled": true
         }
       },
       "id": "bpc_1MlLiHJITzLVzkSmmFpILKiF",
@@ -341,7 +353,10 @@
           "subscription": "subscription"
         },
         "type": "subscription_update",
-        "customer_update": {}
+        "customer_update": {},
+        "subscription_pause": {
+          "subscription": "subscription"
+        }
       },
       "id": "bps_1MlLiHJITzLVzkSm8ZH6SnN2",
       "livemode": true,
@@ -1419,7 +1434,8 @@
         "has_evidence": false,
         "past_due": false,
         "submission_count": 0,
-        "enhanced_eligibility": {}
+        "enhanced_eligibility": {},
+        "submission_method": "not_submitted"
       },
       "id": "dp_1MlLi1JITzLVzkSmdqrdx0Ir",
       "is_charge_refundable": true,
@@ -1431,7 +1447,8 @@
       "status": "warning_needs_response",
       "enhanced_eligibility_types": [
         "visa_compelling_evidence_3"
-      ]
+      ],
+      "intended_submission_method": null
     },
     "ephemeral_key": {
       "created": 1234567890,
@@ -2870,7 +2887,11 @@
         "invoice_settings": {
           "issuer": {
             "type": "account"
-          }
+          },
+          "account_tax_ids": null,
+          "custom_fields": null,
+          "description": null,
+          "footer": null
         },
         "metadata": {
           "undefined": "metadata"
@@ -4349,7 +4370,41 @@
         "type": "classic",
         "flexible": {}
       },
-      "customer_account": null
+      "customer_account": null,
+      "pause_schedules": [
+        {
+          "key": "key",
+          "pause": {
+            "pause_at": 1273691932,
+            "settings": {
+              "bill_for": {
+                "outstanding_usage_through": {
+                  "type": "none"
+                },
+                "unused_time_from": {
+                  "type": "item_current_period_start"
+                }
+              },
+              "invoicing_behavior": "pending_invoice_item",
+              "type": "subscription"
+            },
+            "status": {
+              "type": "error"
+            }
+          },
+          "resume": {
+            "resume_at": 1819075195,
+            "settings": {
+              "billing_cycle_anchor": "resume_at",
+              "payment_behavior": "resume_on_payment_success",
+              "proration_behavior": "create_prorations"
+            },
+            "status": {
+              "type": "error"
+            }
+          }
+        }
+      ]
     },
     "tax_code": {
       "description": "Any tangible or physical good. For jurisdictions that impose a tax, the standard rate is applied.",
@@ -5278,6 +5333,18 @@
           "features": {
             "disable_stripe_user_authentication": true
           }
+        },
+        "terminal_hardware_orders": {
+          "enabled": true,
+          "features": {}
+        },
+        "terminal_hardware_shop": {
+          "enabled": true,
+          "features": {}
+        },
+        "reporting_chart": {
+          "enabled": true,
+          "features": {}
         }
       },
       "expires_at": 833811170,
@@ -7018,7 +7085,41 @@
         "type": "classic",
         "flexible": {}
       },
-      "customer_account": null
+      "customer_account": null,
+      "pause_schedules": [
+        {
+          "key": "key",
+          "pause": {
+            "pause_at": 1273691932,
+            "settings": {
+              "bill_for": {
+                "outstanding_usage_through": {
+                  "type": "none"
+                },
+                "unused_time_from": {
+                  "type": "item_current_period_start"
+                }
+              },
+              "invoicing_behavior": "pending_invoice_item",
+              "type": "subscription"
+            },
+            "status": {
+              "type": "error"
+            }
+          },
+          "resume": {
+            "resume_at": 1819075195,
+            "settings": {
+              "billing_cycle_anchor": "resume_at",
+              "payment_behavior": "resume_on_payment_success",
+              "proration_behavior": "create_prorations"
+            },
+            "status": {
+              "type": "error"
+            }
+          }
+        }
+      ]
     },
     "tax.association": {
       "calculation": "calculation",
@@ -7581,6 +7682,42 @@
           "evaluated_at": 403283463,
           "risk_level": "low"
         }
+      }
+    },
+    "payment_plan": {
+      "object": "payment_plan",
+      "collects_on": [
+        {
+          "invoice_details": {
+            "invoice": "invoice"
+          },
+          "type": "type"
+        }
+      ],
+      "created": 1028554472,
+      "id": "obj_123",
+      "installments": [
+        {
+          "amount_due": 1424549491,
+          "amount_forgiven": 210451365,
+          "amount_paid": 1211022765,
+          "currency": "usd",
+          "description": "description",
+          "status": "status"
+        }
+      ],
+      "livemode": true,
+      "metadata": null,
+      "schedule": {
+        "amounts_due": {
+          "amounts": [
+            {
+              "description": "description",
+              "type": "type"
+            }
+          ]
+        },
+        "type": "type"
       }
     },
     "terminal.refund": {
