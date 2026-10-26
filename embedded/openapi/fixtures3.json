@@ -307,6 +307,18 @@
           "features": {
             "disable_stripe_user_authentication": true
           }
+        },
+        "terminal_hardware_orders": {
+          "enabled": true,
+          "features": {}
+        },
+        "terminal_hardware_shop": {
+          "enabled": true,
+          "features": {}
+        },
+        "reporting_chart": {
+          "enabled": true,
+          "features": {}
         }
       },
       "expires_at": 1234567890,
@@ -521,6 +533,18 @@
           },
           "trial_update_behavior": "end_trial",
           "billing_cycle_anchor": null
+        },
+        "subscription_pause": {
+          "duration": {
+            "interval_options": [
+              {
+                "interval": "month",
+                "interval_count": 797691627
+              }
+            ],
+            "type": "indefinite"
+          },
+          "enabled": true
         }
       },
       "id": "bpc_1Pgc70B7WZ01zgkWSnFO04Vt",
@@ -572,7 +596,10 @@
           "subscription": "subscription"
         },
         "type": "subscription_update",
-        "customer_update": {}
+        "customer_update": {},
+        "subscription_pause": {
+          "subscription": "subscription"
+        }
       },
       "id": "bps_1Pgc7HB7WZ01zgkWNs8s9Auh",
       "livemode": true,
@@ -1951,7 +1978,8 @@
         "has_evidence": false,
         "past_due": false,
         "submission_count": 0,
-        "enhanced_eligibility": {}
+        "enhanced_eligibility": {},
+        "submission_method": "not_submitted"
       },
       "id": "dp_1Pgc71B7WZ01zgkWMevJiAUx",
       "is_charge_refundable": true,
@@ -1972,7 +2000,8 @@
       "status": "warning_needs_response",
       "enhanced_eligibility_types": [
         "visa_compelling_evidence_3"
-      ]
+      ],
+      "intended_submission_method": null
     },
     "entitlements.active_entitlement": {
       "feature": "feat_test_61QGU1MWyFMSP9YBZ41ClCIKljWvsTgu",
@@ -3511,7 +3540,11 @@
         "invoice_settings": {
           "issuer": {
             "type": "account"
-          }
+          },
+          "account_tax_ids": null,
+          "custom_fields": null,
+          "description": null,
+          "footer": null
         },
         "metadata": {
           "undefined": "metadata"
@@ -5186,7 +5219,41 @@
         "type": "classic",
         "flexible": {}
       },
-      "customer_account": null
+      "customer_account": null,
+      "pause_schedules": [
+        {
+          "key": "key",
+          "pause": {
+            "pause_at": 1273691932,
+            "settings": {
+              "bill_for": {
+                "outstanding_usage_through": {
+                  "type": "none"
+                },
+                "unused_time_from": {
+                  "type": "item_current_period_start"
+                }
+              },
+              "invoicing_behavior": "pending_invoice_item",
+              "type": "subscription"
+            },
+            "status": {
+              "type": "error"
+            }
+          },
+          "resume": {
+            "resume_at": 1819075195,
+            "settings": {
+              "billing_cycle_anchor": "resume_at",
+              "payment_behavior": "resume_on_payment_success",
+              "proration_behavior": "create_prorations"
+            },
+            "status": {
+              "type": "error"
+            }
+          }
+        }
+      ]
     },
     "tax.calculation": {
       "amount_total": 1947,
